@@ -1,0 +1,160 @@
+.projects {
+    padding: 4rem 1rem;
+    background-color: #f9fafb;
+}
+
+.projects-container {
+    max-width: 80rem;
+    margin: 0 auto;
+}
+
+.projects-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.projects-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+}
+
+.projects-description {
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 48rem;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+.project-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: all 0.3s;
+    transform: scale(1);
+}
+
+.project-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.project-image-container {
+    position: relative;
+    height: 16rem;
+}
+
+.project-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.project-card:hover .project-image {
+    transform: scale(1.05);
+}
+
+.project-status {
+    /* Status badge positioning removed */
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+}
+
+.status-badge.completed {
+    background-color: #10b981;
+}
+
+.status-badge.in-progress {
+    background-color: #f59e0b;
+}
+
+.status-badge.planned {
+    background-color: #3b82f6;
+}
+
+.status-badge.on-hold {
+    background-color: #6b7280;
+}
+
+.project-content {
+    padding: 1.5rem;
+}
+
+.project-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.project-button {
+    width: 100%;
+    background-color: white;
+    color: #0284c7;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    border: 2px solid #0284c7;
+    transition: all 0.3s;
+    transform: scale(1);
+}
+
+.project-button:hover {
+    background-color: #f9fafb;
+    transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (min-width: 640px) {
+    .projects {
+        padding: 4rem 1.5rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .projects-title {
+        font-size: 3rem;
+    }
+
+    .projects-description {
+        font-size: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .projects {
+        padding: 4rem 2rem;
+    }
+
+    .projects-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
+}
+
+@media (min-width: 1280px) {
+    .projects-title {
+        font-size: 3.5rem;
+    }
+
+    .projects-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+    }
+}
