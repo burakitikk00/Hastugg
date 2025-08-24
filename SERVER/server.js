@@ -16,7 +16,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const adminRoutes = require('./routes/adminRoutes');
+const publicRoutes = require('./routes/publicRoutes');
+
 app.use('/api/admin', adminRoutes);
+app.use('/api', publicRoutes);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

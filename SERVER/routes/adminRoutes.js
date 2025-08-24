@@ -7,6 +7,41 @@ const { sql, poolPromise } = require('./dbConfig');
 const verifyToken = require('./middleware/authMiddleware');
 const { upload, deleteImage, deleteMultipleImages, cleanupUnusedImages } = require('../upload');
 
+// Hero verilerini kaydet/güncelle
+router.post('/hero', verifyToken, async (req, res) => {
+    try {
+        const { title, subtitle } = req.body;
+        
+        if (!title || !subtitle) {
+            return res.status(400).json({ message: 'title ve subtitle zorunludur.' });
+        }
+
+        const pool = await poolPromise;
+        
+        // Hero tablosunda kayıt var mı kontrol et
+        const existingHero = await pool.request().query('SELECT TOP 1 * FROM Hero');
+        
+        if (existingHero.recordset.length > 0) {
+            // Mevcut kaydı güncelle
+            await pool.request()
+                .input('title', sql.NVarChar, title)
+                .input('subtitle', sql.NVarChar, subtitle)
+                .query('UPDATE Hero SET title = @title, subtitle = @subtitle WHERE id = 1');
+        } else {
+            // Yeni kayıt ekle
+            await pool.request()
+                .input('title', sql.NVarChar, title)
+                .input('subtitle', sql.NVarChar, subtitle)
+                .query('INSERT INTO Hero (title, subtitle) VALUES (@title, @subtitle)');
+        }
+
+        res.status(200).json({ message: 'Hero verileri başarıyla kaydedildi' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Sunucu hatası');
+    }
+});
+
 router.post("/register", async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -129,44 +164,15 @@ router.post('/add-project', verifyToken, upload.array('images', 10), async (req,
         res.status(500).send('Sunucu hatası');
     }
 });
-router.get('/get-projects', async (req, res) => {
-    try {
-        const pool = await poolPromise;
 
-        // Projeleri ve görselleri ayrı ayrı çekiyoruz ve sunucu tarafında birleştiriyoruz
-        const projectsResult = await pool.request().query('SELECT * FROM Projects');
-        const imagesResult = await pool.request().query('SELECT * FROM Images');
-        const servicesResult = await pool.request().query('SELECT id, service, description, url FROM Services');
-
-        const projectIdToImages = new Map();
-        for (const img of imagesResult.recordset) {
-            if (!projectIdToImages.has(img.projectid)) projectIdToImages.set(img.projectid, []);
-            projectIdToImages.get(img.projectid).push(img.imageURL);
-        }
-
-        const serviceIdToService = new Map();
-        for (const s of servicesResult.recordset) {
-            serviceIdToService.set(s.id, s);
-        }
-
-        const combined = projectsResult.recordset.map(p => ({
-            ...p,
-            images: projectIdToImages.get(p.id) || [],
-            service: serviceIdToService.get(p.service_id) || null
-        }));
-
-        res.status(200).json(combined);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Sunucu hatası');
-    }
-});
 
 // Hizmet (Services) CRUD
-router.get('/services', async (req, res) => {
+
+// Services verilerini getir
+router.get('/services', verifyToken, async (req, res) => {
     try {
         const pool = await poolPromise;
-        const result = await pool.request().query('SELECT id, service, description, url FROM Services');
+        const result = await pool.request().query('SELECT id, service, description, url FROM Services ORDER BY id');
         res.status(200).json(result.recordset);
     } catch (error) {
         console.error(error);
@@ -174,20 +180,40 @@ router.get('/services', async (req, res) => {
     }
 });
 
-router.post('/add-services', verifyToken, async (req, res) => {
+// Services verilerini kaydet/güncelle (tüm services array'ini alır)
+router.post('/services', verifyToken, async (req, res) => {
+    let transaction;
     try {
-        const { service, description, url } = req.body;
-        if (!service || !description || !url) {
-            return res.status(400).json({ message: 'service, description ve url zorunludur.' });
+        const { title, subtitle, description, services } = req.body;
+        
+        if (!title || !subtitle || !description || !services || !Array.isArray(services)) {
+            return res.status(400).json({ message: 'title, subtitle, description ve services array zorunludur.' });
         }
+
+        console.log('Gelen services data:', JSON.stringify(services, null, 2));
+
         const pool = await poolPromise;
-        await pool.request()
-            .input('service', sql.VarChar, service)
-            .input('description', sql.NVarChar, description)
-            .input('url', sql.VarChar, url)
-            .query('INSERT INTO Services (service, description, url) VALUES (@service, @description, @url)');
-        res.status(201).json({ message: 'Hizmet eklendi' });
+        transaction = new sql.Transaction(pool);
+        await transaction.begin();
+
+        // Önce tüm mevcut services'leri sil
+        await new sql.Request(transaction).query('DELETE FROM Services');
+
+        // Yeni services'leri ekle
+        for (const service of services) {
+            console.log(`Service ekleniyor: ${service.service}, URL: ${service.url}`);
+            
+            await new sql.Request(transaction)
+                .input('service', sql.VarChar, service.service)
+                .input('description', sql.NVarChar, service.description)
+                .input('url', sql.VarChar, service.url || null)
+                .query('INSERT INTO Services (service, description, url) VALUES (@service, @description, @url)');
+        }
+
+        await transaction.commit();
+        res.status(200).json({ message: 'Services verileri başarıyla kaydedildi' });
     } catch (error) {
+        if (transaction) { try { await transaction.rollback(); } catch (e) { } }
         console.error(error);
         res.status(500).send('Sunucu hatası');
     }
@@ -355,17 +381,7 @@ router.put('/contact', verifyToken, async (req, res) => {
         res.status(500).send('Sunucu hatası');
     }
 });
-// normal kullanıcıların görüntüelemesi için get 
-router.get('/contact', async (req, res) => {
-    try {
-        const pool = await poolPromise;
-        const result = await pool.request().query('SELECT * FROM Contact');
-        res.status(200).json(result.recordset);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Sunucu hatası');
-    }
-});
+
 
 // Görsel yükleme endpoint'i (tek başına)
 router.post('/upload-image', verifyToken, upload.single('image'), async (req, res) => {

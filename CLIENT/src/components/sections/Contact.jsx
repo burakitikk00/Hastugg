@@ -1,26 +1,61 @@
 import { motion } from 'framer-motion'
 import { FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa'
+import { useState, useEffect } from 'react'
+import publicService from '../../services/publicService'
 import './Contact.css'
 
 const Contact = () => {
-    const contactInfo = [
+    const [contactInfo, setContactInfo] = useState([
         {
             icon: FaMapMarkerAlt,
             title: 'Adres',
-            info: 'Adres Bilgisi Caddesi .1234 Sokak .',
-            subInfo: 'Ankara/Türkiye'
+            info: 'Yükleniyor...',
+            subInfo: ''
         },
         {
             icon: FaPhone,
             title: 'Telefon',
-            info: '0216 555 55 000'
+            info: 'Yükleniyor...'
         },
         {
             icon: FaEnvelope,
             title: 'E-posta',
-            info: 'bilgi@hastugg.com'
+            info: 'Yükleniyor...'
         }
-    ]
+    ])
+
+    useEffect(() => {
+        const fetchContactInfo = async () => {
+            try {
+                const data = await publicService.getContact()
+                if (data && data.length > 0) {
+                    const contact = data[0] // İlk contact kaydını al
+                    setContactInfo([
+                        {
+                            icon: FaMapMarkerAlt,
+                            title: 'Adres',
+                            info: contact.address || 'Adres bilgisi bulunamadı',
+                            subInfo: ''
+                        },
+                        {
+                            icon: FaPhone,
+                            title: 'Telefon',
+                            info: contact.phone || 'Telefon bilgisi bulunamadı'
+                        },
+                        {
+                            icon: FaEnvelope,
+                            title: 'E-posta',
+                            info: contact.email || 'E-posta bilgisi bulunamadı'
+                        }
+                    ])
+                }
+            } catch (error) {
+                console.error('Contact bilgileri getirilemedi:', error)
+            }
+        }
+
+        fetchContactInfo()
+    }, [])
 
     const workingHours = [
         'P.Tesi - Cuma: 10:00 - 18:00',

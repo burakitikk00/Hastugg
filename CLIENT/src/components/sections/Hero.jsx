@@ -1,26 +1,85 @@
 import { motion } from 'framer-motion'
 import { FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa'
+import { useState, useEffect } from 'react'
+import publicService from '../../services/publicService'
 import './Hero.css'
 
 const Hero = () => {
-    const contactInfo = [
+    const [heroData, setHeroData] = useState({
+        title: 'Siz İsteyin, Biz İnşa Edelim',
+        subtitle: 'Profesyonel ekibimizle isteğinizi birebir yerine getiriyoruz. Hemen teklif alabilirsiniz.'
+    });
+
+    const [contactInfo, setContactInfo] = useState([
         {
             icon: FaMapMarkerAlt,
             title: 'Lokasyon',
-            info: 'Adres Bilgisi Caddesi .1234 Sokak .',
-            subInfo: 'Ankara/Türkiye'
+            info: 'Yükleniyor...',
+            subInfo: ''
         },
         {
             icon: FaPhone,
             title: 'Telefon',
-            info: '0216 555 55 000'
+            info: 'Yükleniyor...'
         },
         {
             icon: FaEnvelope,
             title: 'E-Posta',
-            info: 'bilgi@hastugg.com'
+            info: 'Yükleniyor...'
         }
-    ]
+    ])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // LocalStorage'dan hero verilerini yükle
+                const savedHero = localStorage.getItem('heroData');
+                if (savedHero) {
+                    const parsedHero = JSON.parse(savedHero);
+                    setHeroData(parsedHero);
+                }
+
+                // Contact bilgilerini getir
+                const contactResponse = await publicService.getContact();
+                if (contactResponse && contactResponse.length > 0) {
+                    const contact = contactResponse[0];
+                    setContactInfo([
+                        {
+                            icon: FaMapMarkerAlt,
+                            title: 'Lokasyon',
+                            info: contact.address || 'Adres bilgisi bulunamadı',
+                            subInfo: ''
+                        },
+                        {
+                            icon: FaPhone,
+                            title: 'Telefon',
+                            info: contact.phone || 'Telefon bilgisi bulunamadı'
+                        },
+                        {
+                            icon: FaEnvelope,
+                            title: 'E-Posta',
+                            info: contact.email || 'E-posta bilgisi bulunamadı'
+                        }
+                    ])
+                }
+            } catch (error) {
+                console.error('Veriler getirilemedi:', error)
+            }
+        }
+
+        fetchData()
+
+        // LocalStorage'dan gelen güncellemeleri dinle
+        const handleHeroUpdate = (event) => {
+            setHeroData(event.detail);
+        };
+
+        window.addEventListener('heroDataUpdated', handleHeroUpdate);
+
+        return () => {
+            window.removeEventListener('heroDataUpdated', handleHeroUpdate);
+        };
+    }, [])
 
     const scrollToSection = (sectionId) => {
         const element = document.getElementById(sectionId)
@@ -43,10 +102,10 @@ const Hero = () => {
                     className="hero-text"
                 >
                     <h1 className="hero-title">
-                        Siz İsteyin, Biz İnşa Edelim
+                        {heroData.title}
                     </h1>
                     <p className="hero-description">
-                        Profesyonel ekibimizle isteğinizi birebir yerine getiriyoruz. Hemen teklif alabilirsiniz.
+                        {heroData.subtitle}
                     </p>
                     <div className="hero-buttons">
                         <button
