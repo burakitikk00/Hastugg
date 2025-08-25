@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa'
+import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaInstagram, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa'
 import { useState, useEffect } from 'react'
 import publicService from '../../services/publicService'
 import './Contact.css'
@@ -48,6 +48,12 @@ const Contact = () => {
                             info: contact.email || 'E-posta bilgisi bulunamadı'
                         }
                     ])
+                    setSocialLinks({
+                        facebook: contact.facebook || '',
+                        twitter: contact.twitter || '',
+                        instagram: contact.instagram || '',
+                        linkedin: contact.linkedin || ''
+                    })
                 }
             } catch (error) {
                 console.error('Contact bilgileri getirilemedi:', error)
@@ -57,11 +63,22 @@ const Contact = () => {
         fetchContactInfo()
     }, [])
 
-    const workingHours = [
+    const [workingHours, setWorkingHours] = useState([
         'P.Tesi - Cuma: 10:00 - 18:00',
         'C.Tesi: 10:00 - 15:00',
         'Pazar: Kapalı'
-    ]
+    ])
+
+    // Admin tarafından localStorage'a yazılan çalışma saatlerini oku
+    useEffect(() => {
+        const hours = localStorage.getItem('workingHours');
+        if (hours && typeof hours === 'string') {
+            const lines = hours.split(/\r?\n/).filter(l => l.trim().length > 0);
+            if (lines.length > 0) setWorkingHours(lines);
+        }
+    }, [])
+
+    const [socialLinks, setSocialLinks] = useState({ facebook: '', twitter: '', instagram: '', linkedin: '' })
 
     return (
         <section id="contact" className="contact">
@@ -146,6 +163,21 @@ const Contact = () => {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                            {/* Sosyal Linkler: sadece link varsa göster */}
+                            <div className="social-links" style={{ marginTop: '12px', display: 'flex', gap: '20px', fontSize: '2rem', justifyContent: 'flex-end' }}>
+                                {socialLinks.facebook && (
+                                    <a href={socialLinks.facebook} target="_blank" rel="noreferrer" className="social-link"><FaFacebook /></a>
+                                )}
+                                {socialLinks.twitter && (
+                                    <a href={socialLinks.twitter} target="_blank" rel="noreferrer" className="social-link"><FaTwitter /></a>
+                                )}
+                                {socialLinks.instagram && (
+                                    <a href={socialLinks.instagram} target="_blank" rel="noreferrer" className="social-link"><FaInstagram /></a>
+                                )}
+                                {socialLinks.linkedin && (
+                                    <a href={socialLinks.linkedin} target="_blank" rel="noreferrer" className="social-link"><FaLinkedin /></a>
+                                )}
                             </div>
                         </div>
 

@@ -5,6 +5,26 @@ class AdminService {
     this.baseURL = API_BASE_URL;
   }
 
+  // İletişim bilgilerini kaydet/güncelle
+  async saveContact(contactData) {
+    try {
+      const response = await fetch(`${this.baseURL}/contact`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(contactData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Token'ı header'lara ekle
   getHeaders() {
     const token = localStorage.getItem('adminToken');

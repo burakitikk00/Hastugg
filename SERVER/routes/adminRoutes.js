@@ -360,21 +360,97 @@ router.put('/contact', verifyToken, async (req, res) => {
     let transaction;
     try {
         // İstekten güncellenecek verileri al
-        const { id, address, phone, email } = req.body;
+        const { id, address, phone, email, facebook, twitter, instagram, linkedin } = req.body;
         const pool = await poolPromise;
         transaction = new sql.Transaction(pool);
         await transaction.begin();
 
-        // Contact tablosunda ilgili satırı güncelle
-        await new sql.Request(transaction)
-            .input('id', sql.Int, id)
-            .input('address', sql.VarChar, address)
-            .input('phone', sql.VarChar, phone)
-            .input('email', sql.VarChar, email)
-            .query('UPDATE Contact SET address=@address, phone=@phone, email=@email WHERE id=@id');
+        // Eğer id verilmemişse ilk satırı güncelle
+        let targetId = id;
+        if (!targetId) {
+            const existing = await new sql.Request(transaction)
+                .query('SELECT TOP 1 id FROM Contact ORDER BY id');
+            if (existing.recordset.length > 0) {
+                targetId = existing.recordset[0].id;
+            }
+        }
+
+        if (targetId) {
+            await new sql.Request(transaction)
+                .input('id', sql.Int, targetId)
+                .input('address', sql.NVarChar, address)
+                .input('phone', sql.NVarChar, phone)
+                .input('email', sql.NVarChar, email)
+                .input('facebook', sql.NVarChar, facebook || null)
+                .input('twitter', sql.NVarChar, twitter || null)
+                .input('instagram', sql.NVarChar, instagram || null)
+                .input('linkedin', sql.NVarChar, linkedin || null)
+                .query('UPDATE Contact SET address=@address, phone=@phone, email=@email, facebook=@facebook, twitter=@twitter, instagram=@instagram, linkedin=@linkedin WHERE id=@id');
+        } else {
+            await new sql.Request(transaction)
+                .input('address', sql.NVarChar, address)
+                .input('phone', sql.NVarChar, phone)
+                .input('email', sql.NVarChar, email)
+                .input('facebook', sql.NVarChar, facebook || null)
+                .input('twitter', sql.NVarChar, twitter || null)
+                .input('instagram', sql.NVarChar, instagram || null)
+                .input('linkedin', sql.NVarChar, linkedin || null)
+                .query('INSERT INTO Contact (address, phone, email, facebook, twitter, instagram, linkedin) VALUES (@address, @phone, @email, @facebook, @twitter, @instagram, @linkedin)');
+        }
 
         await transaction.commit();
         res.status(200).json({ message: 'İletişim bilgileri güncellendi' });
+    } catch (error) {
+        if (transaction) { try { await transaction.rollback(); } catch (e) { } }
+        console.error(error);
+        res.status(500).send('Sunucu hatası');
+    }
+});
+
+// Aynı işlemi POST ile de destekle
+router.post('/contact', verifyToken, async (req, res) => {
+    // PUT ile aynı mantık
+    let transaction;
+    try {
+        const { id, address, phone, email, facebook, twitter, instagram, linkedin } = req.body;
+        const pool = await poolPromise;
+        transaction = new sql.Transaction(pool);
+        await transaction.begin();
+
+        let targetId = id;
+        if (!targetId) {
+            const existing = await new sql.Request(transaction)
+                .query('SELECT TOP 1 id FROM Contact ORDER BY id');
+            if (existing.recordset.length > 0) {
+                targetId = existing.recordset[0].id;
+            }
+        }
+
+        if (targetId) {
+            await new sql.Request(transaction)
+                .input('id', sql.Int, targetId)
+                .input('address', sql.NVarChar, address)
+                .input('phone', sql.NVarChar, phone)
+                .input('email', sql.NVarChar, email)
+                .input('facebook', sql.NVarChar, facebook || null)
+                .input('twitter', sql.NVarChar, twitter || null)
+                .input('instagram', sql.NVarChar, instagram || null)
+                .input('linkedin', sql.NVarChar, linkedin || null)
+                .query('UPDATE Contact SET address=@address, phone=@phone, email=@email, facebook=@facebook, twitter=@twitter, instagram=@instagram, linkedin=@linkedin WHERE id=@id');
+        } else {
+            await new sql.Request(transaction)
+                .input('address', sql.NVarChar, address)
+                .input('phone', sql.NVarChar, phone)
+                .input('email', sql.NVarChar, email)
+                .input('facebook', sql.NVarChar, facebook || null)
+                .input('twitter', sql.NVarChar, twitter || null)
+                .input('instagram', sql.NVarChar, instagram || null)
+                .input('linkedin', sql.NVarChar, linkedin || null)
+                .query('INSERT INTO Contact (address, phone, email, facebook, twitter, instagram, linkedin) VALUES (@address, @phone, @email, @facebook, @twitter, @instagram, @linkedin)');
+        }
+
+        await transaction.commit();
+        res.status(200).json({ message: 'İletişim bilgileri başarıyla kaydedildi' });
     } catch (error) {
         if (transaction) { try { await transaction.rollback(); } catch (e) { } }
         console.error(error);

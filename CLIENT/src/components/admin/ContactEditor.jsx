@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import FormButtons from './FormButtons';
+import { FaInstagram, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa'
+
 
 const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -18,12 +20,29 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // Telefonu "x xxx xxx xx xx" formatına çevir
+  const formatPhone = (value) => {
+    const digits = (value || '').replace(/\D/g, '').slice(0, 11);
+    const parts = [];
+    if (digits.length > 0) parts.push(digits.slice(0, 1));
+    if (digits.length > 1) parts.push(digits.slice(1, 4));
+    if (digits.length > 4) parts.push(digits.slice(4, 7));
+    if (digits.length > 7) parts.push(digits.slice(7, 9));
+    if (digits.length > 9) parts.push(digits.slice(9, 11));
+    return parts.join(' ');
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    if (name === 'phone') {
+      const formatted = formatPhone(value);
+      setFormData(prev => ({ ...prev, phone: formatted }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSocialLinkChange = (platform, value) => {
@@ -41,7 +60,8 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
     setIsLoading(true);
     
     try {
-      await onSave(formData);
+      const payload = { ...formData, phone: formatPhone(formData.phone) };
+      await onSave(payload);
     } catch (error) {
       console.error('Contact kaydedilirken hata:', error);
     } finally {
@@ -86,8 +106,10 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
               value={formData.phone}
               onChange={handleChange}
               required
+              inputMode="numeric"
+              maxLength={14}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="+90 555 123 45 67"
+              placeholder="5 555 555 55 55"
             />
           </div>
 
@@ -106,20 +128,21 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
               placeholder="info@example.com"
             />
           </div>
+          
 
           <div>
             <label htmlFor="workingHours" className="block text-sm font-medium text-gray-700 mb-2">
               Çalışma Saatleri *
             </label>
-            <input
-              type="text"
+            <textarea
               id="workingHours"
               name="workingHours"
+              rows={4}
               value={formData.workingHours}
               onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Pazartesi - Cuma: 09:00 - 18:00"
+              placeholder={`P.tesi - Cuma: 10:00 - 18:00\nC.tesi: 10:00 - 15:00\nPazar: Kapalı`}
             />
           </div>
         </div>
@@ -192,7 +215,7 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
             placeholder="https://www.google.com/maps/embed?pb=..."
           />
           <p className="text-xs text-gray-500 mt-1">
-            Google Maps'ten "Haritayı paylaş" > "Haritayı yerleştir" seçeneğinden alabilirsiniz
+            Google Maps'ten "Haritayı paylaş"  "Haritayı yerleştir" seçeneğinden alabilirsiniz
           </p>
         </div>
 

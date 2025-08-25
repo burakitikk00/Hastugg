@@ -2,14 +2,31 @@ import { motion } from 'framer-motion'
 import { FaInstagram, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa'
 import hastugLogo from '../../assets/hastuglogo.png'
 import './Footer.css'
+import { useEffect, useState } from 'react'
+import publicService from '../../services/publicService'
 
 const Footer = () => {
-  const socialLinks = [
-    { icon: FaInstagram, href: '#' },
-    { icon: FaFacebook, href: '#' },
-    { icon: FaTwitter, href: '#' },
-    { icon: FaLinkedin, href: '#' }
-  ]
+  const [contact, setContact] = useState({ address: '', phone: '', email: '' })
+  const [socialLinks, setSocialLinks] = useState({ instagram: '', facebook: '', twitter: '', linkedin: '' })
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await publicService.getContact()
+        if (data && data.length > 0) {
+          const c = data[0]
+          setContact({ address: c.address || '', phone: c.phone || '', email: c.email || '' })
+          setSocialLinks({
+            instagram: c.instagram || '',
+            facebook: c.facebook || '',
+            twitter: c.twitter || '',
+            linkedin: c.linkedin || ''
+          })
+        }
+      } catch (e) { }
+    }
+    load()
+  }, [])
 
   const quickLinks = [
     { name: 'Hakkımızda', id: 'about' },
@@ -50,17 +67,18 @@ const Footer = () => {
               Siz İsteyin, Biz İnşa Edelim. Profesyonel ekibimizle kaliteli projeler.
             </p>
             <div className="social-links">
-              {socialLinks.map((social, index) => (
-                <a
-                  key={index}
-                  href={social.href}
-                  className="social-link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <social.icon size={20} />
-                </a>
-              ))}
+              {socialLinks.instagram && (
+                <a href={socialLinks.instagram} className="social-link" target="_blank" rel="noopener noreferrer"><FaInstagram size={20} /></a>
+              )}
+              {socialLinks.facebook && (
+                <a href={socialLinks.facebook} className="social-link" target="_blank" rel="noopener noreferrer"><FaFacebook size={20} /></a>
+              )}
+              {socialLinks.twitter && (
+                <a href={socialLinks.twitter} className="social-link" target="_blank" rel="noopener noreferrer"><FaTwitter size={20} /></a>
+              )}
+              {socialLinks.linkedin && (
+                <a href={socialLinks.linkedin} className="social-link" target="_blank" rel="noopener noreferrer"><FaLinkedin size={20} /></a>
+              )}
             </div>
           </div>
 
@@ -99,9 +117,9 @@ const Footer = () => {
           <div className="footer-section">
             <h4 className="footer-title">İLETİŞİM</h4>
             <div className="footer-contact">
-              <p>Adres Bilgisi Caddesi .1234 Sokak .<br />Ankara/Türkiye</p>
-              <p>0216 555 55 000</p>
-              <p>bilgi@hastugg.com</p>
+              {contact.address && (<p>{contact.address}</p>)}
+              {contact.phone && (<p>{contact.phone}</p>)}
+              {contact.email && (<p>{contact.email}</p>)}
             </div>
           </div>
         </div>
