@@ -6,8 +6,9 @@ const Sidebar = ({ onLogout }) => {
 
   const menuItems = [
     { path: '/admin/page-content', label: 'Sayfa İçerikleri', icon: '📝' },
-    { path: '/admin/projects', label: 'Projeler', icon: '💼' },
     { path: '/admin/services', label: 'Hizmetler', icon: '🔧' },
+    { path: '/admin/team', label: 'Ekip', icon: '👥' },
+    { path: '/admin/projects', label: 'Projeler', icon: '💼' },
     { path: '/admin/contact', label: 'İletişim', icon: '📞' },
   ];
 

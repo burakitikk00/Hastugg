@@ -1,23 +1,15 @@
 import { useState, useEffect } from 'react';
 import HeroEditor from './HeroEditor';
 import AboutEditor from './AboutEditor';
-import ServicesEditor from './ServicesEditor';
-import TeamEditor from './TeamEditor';
-import ContactEditor from './ContactEditor';
-import adminService from '../../services/adminService';
 
 const PageContentManager = () => {
   const [activeSection, setActiveSection] = useState('hero');
   const [isLoading, setIsLoading] = useState(false);
   const [aboutData, setAboutData] = useState(null);
-  const [servicesData, setServicesData] = useState(null);
 
   const sections = [
     { id: 'hero', label: 'Hero Section', component: HeroEditor },
-    { id: 'about', label: 'Hakkımızda', component: AboutEditor },
-    { id: 'services', label: 'Hizmetler', component: ServicesEditor },
-    { id: 'team', label: 'Ekip', component: TeamEditor },
-    { id: 'contact', label: 'İletişim', component: ContactEditor }
+    { id: 'about', label: 'Hakkımızda', component: AboutEditor }
   ];
 
   useEffect(() => {
@@ -31,32 +23,6 @@ const PageContentManager = () => {
         console.error('About verisi parse edilemedi:', error);
       }
     }
-
-    // Services verilerini API'den yükle
-    const loadServicesData = async () => {
-      try {
-        const services = await adminService.getServices();
-        if (services && services.length > 0) {
-          // Services verilerini ServicesEditor formatına dönüştür
-          const formattedData = {
-            title: 'HİZMETLERİMİZ',
-            subtitle: 'Konutlar ve Sektörler İçin Yüksek Kaliteli İnşaat Çözümleri!',
-            description: 'Profesyonel inşaat ve yapı hizmetleri',
-            services: services.map(service => ({
-              id: service.id,
-              service: service.service,
-              description: service.description,
-              url: service.url
-            }))
-          };
-          setServicesData(formattedData);
-        }
-      } catch (error) {
-        console.error('Services verileri yüklenirken hata:', error);
-      }
-    };
-
-    loadServicesData();
   }, []);
 
   const handleSave = async (sectionData) => {
@@ -66,10 +32,6 @@ const PageContentManager = () => {
         // About verilerini localStorage'a kaydet
         localStorage.setItem('aboutData', JSON.stringify(sectionData));
         setAboutData(sectionData);
-      } else if (activeSection === 'services') {
-        // Services verilerini API'ye kaydet
-        await adminService.saveServices(sectionData);
-        setServicesData(sectionData);
       }
       
       // Başarılı kayıt sonrası işlemler
@@ -94,13 +56,13 @@ const PageContentManager = () => {
       {/* Page Header */}
       <div className="bg-white rounded-lg shadow p-6">
         <h1 className="text-2xl font-bold text-gray-900">Sayfa İçerik Yönetimi</h1>
-        <p className="text-gray-600 mt-2">Ana sayfa tüm bölümlerini buradan düzenleyebilirsiniz</p>
+        <p className="text-gray-600 mt-2">Hero ve Hakkımızda bölümlerini buradan düzenleyebilirsiniz</p>
       </div>
 
       {/* Section Navigation */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Bölüm Seçin</h3>
+          <h3 className="text-lg font-medium text-gray-900">Sayfa Bölümleri</h3>
         </div>
         <div className="p-6">
           <div className="flex flex-wrap gap-3">
@@ -125,7 +87,6 @@ const PageContentManager = () => {
       {ActiveComponent && (
         <ActiveComponent
           aboutData={activeSection === 'about' ? aboutData : null}
-          servicesData={activeSection === 'services' ? servicesData : null}
           onSave={handleSave}
           onCancel={handleCancel}
           isLoading={isLoading}

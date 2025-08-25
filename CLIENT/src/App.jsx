@@ -3,6 +3,9 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import ServicesPage from './pages/admin/ServicesPage';
+import TeamPage from './pages/admin/TeamPage';
+import ContactPage from './pages/admin/ContactPage';
 import MainApp from './MainApp';
 import './App.css';
 
@@ -18,6 +21,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/services" 
+            element={
+              <ProtectedRoute>
+                <ServicesPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/team" 
+            element={
+              <ProtectedRoute>
+                <TeamPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/contact" 
+            element={
+              <ProtectedRoute>
+                <ContactPage />
               </ProtectedRoute>
             } 
           />

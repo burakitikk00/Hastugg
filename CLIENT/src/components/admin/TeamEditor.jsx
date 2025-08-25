@@ -3,9 +3,6 @@ import FormButtons from './FormButtons';
 
 const TeamEditor = ({ teamData = null, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
-    title: teamData?.title || 'Ekibimiz',
-    subtitle: teamData?.subtitle || 'Kimler Çalışıyor?',
-    description: teamData?.description || 'Profesyonel ekibimizle tanışın',
     members: teamData?.members || [
       {
         id: 1,
@@ -91,57 +88,6 @@ const TeamEditor = ({ teamData = null, onSave, onCancel }) => {
       </div>
       
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        {/* Ana Başlık */}
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-            Ana Başlık *
-          </label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ana başlık girin"
-          />
-        </div>
-
-        {/* Alt Başlık */}
-        <div>
-          <label htmlFor="subtitle" className="block text-sm font-medium text-gray-700 mb-2">
-            Alt Başlık *
-          </label>
-          <input
-            type="text"
-            id="subtitle"
-            name="subtitle"
-            value={formData.subtitle}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Alt başlık girin"
-          />
-        </div>
-
-        {/* Açıklama */}
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-            Açıklama *
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ekip açıklamasını girin"
-          />
-        </div>
-
         {/* Ekip Üyeleri */}
         <div>
           <div className="flex items-center justify-between mb-4">
