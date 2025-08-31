@@ -1,6 +1,6 @@
 # Dependencies
 node_modules/
-
+dbconfig.js
 # Environment variables
 giris.env
 .env

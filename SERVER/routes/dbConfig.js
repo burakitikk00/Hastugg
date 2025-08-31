@@ -1,10 +1,11 @@
 const sql = require('mssql');
+require('dotenv').config();
 
 const config = {
-    user: 'LinaButik', // SQL Server kullanıcı adı
-    password: 'adminlina', // SQL Server şifresi
-    server: 'DESKTOP-8IUA2EP', // SQL Server adresi
-    database: 'dbHastug', // Veritabanı adı
+    user: process.env.DB_USER, // SQL Server kullanıcı adı
+    password: process.env.DB_PASSWORD, // SQL Server şifresi
+    server: process.env.DB_SERVER, // SQL Server adresi
+    database: process.env.DB_DATABASE, // Veritabanı adı
     options: {
         encrypt: false, // Windows için false
         trustServerCertificate: true, // SSL sertifikası doğrulamasını atla

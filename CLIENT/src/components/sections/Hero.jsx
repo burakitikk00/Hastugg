@@ -101,9 +101,9 @@ const Hero = () => {
                     transition={{ duration: 0.8 }}
                     className="hero-text"
                 >
-                    <h1 className="hero-title">
+                    <h3 className="hero-title">
                         {heroData.title}
-                    </h1>
+                    </h3>
                     <p className="hero-description">
                         {heroData.subtitle}
                     </p>
