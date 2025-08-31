@@ -8,6 +8,7 @@ const Services = () => {
     const [selectedService, setSelectedService] = useState(null)
     const [showServiceProjects, setShowServiceProjects] = useState(false)
     const [services, setServices] = useState([])
+    const [allProjects, setAllProjects] = useState([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -49,65 +50,49 @@ const Services = () => {
         fetchServices()
     }, [])
 
-    // Örnek proje verileri - gerçek uygulamada API'den gelecek
-    const getProjectsForService = (serviceTitle) => {
-        const projects = {
-            'Mimari ve Yapı Projeleri': [
-                {
-                    title: 'Modern Villa Projesi',
-                    description: 'İstanbul\'da 500m² alan üzerine kurulu modern villa tasarımı. Açık plan, geniş pencereler ve sürdürülebilir malzeme kullanımı ile öne çıkan proje.',
-                    status: 'Completed',
-                    images: [
-                        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800',
-                        'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800',
-                        'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800'
-                    ]
-                },
-                {
-                    title: 'Ofis Binası Renovasyonu',
-                    description: 'Eski ofis binasının modern iş yerine dönüştürülmesi. Enerji verimliliği ve çalışan konforu ön planda tutularak yapılan yenileme.',
-                    status: 'In Progress',
-                    images: [
-                        'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800',
-                        'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800'
-                    ]
-                }
-            ],
-            'Saha Uygulama ve Takip': [
-                {
-                    title: 'Rezidans Projesi Uygulama',
-                    description: '200 dairelik rezidans projesinin saha uygulama takibi. Kalite kontrol, zaman yönetimi ve maliyet optimizasyonu ile başarıyla tamamlandı.',
-                    status: 'Completed',
-                    images: [
-                        'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800',
-                        'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800'
-                    ]
-                }
-            ],
-            'Dış Cephe ve İzolasyon': [
-                {
-                    title: 'Mantolama Uygulaması',
-                    description: 'Eski binada enerji tasarrufu için mantolama uygulaması. Isı yalıtımı ve dış cephe yenileme ile bina performansı artırıldı.',
-                    status: 'Completed',
-                    images: [
-                        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800',
-                        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800'
-                    ]
-                }
-            ],
-            'Peyzaj Tasarımı': [
-                {
-                    title: 'Site Peyzaj Projesi',
-                    description: 'Büyük site için kapsamlı peyzaj tasarımı. Yeşil alanlar, yürüyüş yolları ve dinlenme alanları ile yaşanabilir çevre oluşturuldu.',
-                    status: 'In Progress',
-                    images: [
-                        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800',
-                        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800'
-                    ]
-                }
-            ]
+    // Tüm projeleri çek
+    useEffect(() => {
+        const fetchAllProjects = async () => {
+            try {
+                const projectsData = await publicService.getProjects()
+                console.log('Tüm projeler yüklendi:', projectsData)
+                setAllProjects(projectsData)
+            } catch (error) {
+                console.error('Projeler yüklenirken hata:', error)
+            }
         }
-        return projects[serviceTitle] || []
+
+        fetchAllProjects()
+    }, [])
+
+    // Hizmete göre projeleri filtrele
+    const getProjectsForService = (serviceTitle) => {
+        console.log('Filtreleme için hizmet:', serviceTitle)
+        console.log('Mevcut projeler:', allProjects)
+        
+        // service_ids alanına göre filtreleme yap
+        const filteredProjects = allProjects.filter(project => {
+            if (!project.service_ids) return false
+            
+            try {
+                const serviceIds = JSON.parse(project.service_ids)
+                // Hizmet adına göre eşleştirme yap
+                const matchingService = services.find(service => 
+                    service.service === serviceTitle
+                )
+                
+                if (matchingService && serviceIds.includes(matchingService.id)) {
+                    return true
+                }
+            } catch (error) {
+                console.error('service_ids parse hatası:', error)
+            }
+            
+            return false
+        })
+        
+        console.log('Filtrelenmiş projeler:', filteredProjects)
+        return filteredProjects
     }
 
     const handleServiceClick = (service) => {
@@ -118,6 +103,28 @@ const Services = () => {
     const handleCloseModal = () => {
         setShowServiceProjects(false)
         setSelectedService(null)
+    }
+
+    // Status çevirisi için fonksiyon
+    const getStatusText = (status) => {
+        switch (status) {
+            case 'Completed':
+            case 'completed':
+                return 'Tamamlandı'
+            case 'In Progress':
+            case 'in_progress':
+            case 'inprogress':
+                return 'Devam Ediyor'
+            case 'Planned':
+            case 'planned':
+                return 'Planlandı'
+            case 'On Hold':
+            case 'on_hold':
+            case 'onhold':
+                return 'Beklemede'
+            default:
+                return status
+        }
     }
 
     if (loading) {
@@ -214,6 +221,7 @@ const Services = () => {
                 onClose={handleCloseModal}
                 service={selectedService}
                 projects={selectedService ? getProjectsForService(selectedService.service) : []}
+                getStatusText={getStatusText}
             />
         </>
     )

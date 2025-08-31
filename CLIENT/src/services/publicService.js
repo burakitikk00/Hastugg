@@ -1,8 +1,17 @@
 const API_BASE_URL = 'http://localhost:5000/api';
+const SERVER_BASE_URL = 'http://localhost:5000';
 
 class PublicService {
   constructor() {
     this.baseURL = API_BASE_URL;
+    this.serverURL = SERVER_BASE_URL;
+  }
+
+  // Görsel URL'ini tam URL'ye dönüştür
+  getImageURL(imagePath) {
+    if (!imagePath) return '/api/placeholder/400/300';
+    if (imagePath.startsWith('http')) return imagePath; // Zaten tam URL
+    return `${this.serverURL}${imagePath}`;
   }
 
   // Hero verilerini getir (herkes erişebilir)
@@ -77,6 +86,26 @@ class PublicService {
 
       if (!response.ok) {
         throw new Error('Hizmetler getirilemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Team üyelerini getir (herkes erişebilir)
+  async getTeam() {
+    try {
+      const response = await fetch(`${this.baseURL}/team`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Team üyeleri getirilemedi');
       }
 
       return await response.json();

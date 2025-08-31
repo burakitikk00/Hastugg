@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import publicService from '../services/publicService'
 import './ProjectDetailModal.css'
 
-const ProjectDetailModal = ({ isOpen, onClose, project, onBackToProjects }) => {
+const ProjectDetailModal = ({ isOpen, onClose, project, onBackToProjects, getStatusText }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
     if (!project) return null
@@ -58,8 +59,8 @@ const ProjectDetailModal = ({ isOpen, onClose, project, onBackToProjects }) => {
                                 <h2 className="project-title">{project.title}</h2>
                                 <p className="project-description">{project.description}</p>
                                 <div className="project-status">
-                                    <span className={`status-badge ${project.status.toLowerCase()}`}>
-                                        {project.status}
+                                    <span className={`status-badge ${(project.status || '').toLowerCase().replace(' ', '_')}`}>
+                                        {getStatusText ? getStatusText(project.status) : project.status}
                                     </span>
                                 </div>
                             </div>
@@ -76,9 +77,13 @@ const ProjectDetailModal = ({ isOpen, onClose, project, onBackToProjects }) => {
 
                                 <div className="image-container">
                                     <img
-                                        src={project.images[currentImageIndex]}
+                                        src={publicService.getImageURL(project.images[currentImageIndex])}
                                         alt={`${project.title} - Resim ${currentImageIndex + 1}`}
                                         className="project-image"
+                                        onError={(e) => {
+                                            console.log('Modal görsel yüklenemedi:', project.images[currentImageIndex])
+                                            e.target.src = '/api/placeholder/400/300'
+                                        }}
                                     />
                                 </div>
 

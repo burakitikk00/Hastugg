@@ -6,6 +6,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import ServicesPage from './pages/admin/ServicesPage';
 import TeamPage from './pages/admin/TeamPage';
 import ContactPage from './pages/admin/ContactPage';
+import ProjectsPage from './pages/admin/ProjectsPage';
 import MainApp from './MainApp';
 import './App.css';
 
@@ -45,6 +46,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ContactPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/projects" 
+            element={
+              <ProtectedRoute>
+                <ProjectsPage />
               </ProtectedRoute>
             } 
           />

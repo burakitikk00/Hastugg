@@ -182,6 +182,348 @@ class AdminService {
       return false;
     }
   }
+
+  // PROJE YÖNETİMİ METHODLARİ
+
+  // Projeleri listele
+  async getProjects() {
+    try {
+      const response = await fetch(`${this.baseURL}/projects`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Belirli bir projenin detaylarını getir
+  async getProject(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/projects/${id}`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Yeni proje ekle (görseller ile birlikte)
+  async addProject(projectData, images) {
+    try {
+      const formData = new FormData();
+      
+      // Proje verilerini form data'ya ekle
+      Object.keys(projectData).forEach(key => {
+        if (projectData[key] !== undefined && projectData[key] !== null) {
+          formData.append(key, projectData[key]);
+        }
+      });
+
+      // Görselleri form data'ya ekle
+      if (images && images.length > 0) {
+        images.forEach(image => {
+          formData.append('images', image);
+        });
+      }
+
+      const response = await fetch(`${this.baseURL}/add-project`, {
+        method: 'POST',
+        headers: {
+          'Authorization': this.getHeaders().Authorization
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Proje güncelle (SADECE proje bilgileri, görseller ayrı)
+  async updateProject(id, projectData) {
+    try {
+      const response = await fetch(`${this.baseURL}/projects/${id}`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(projectData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Proje sil
+  async deleteProject(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/projects/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Projeye yeni görseller ekle
+  async addProjectImages(projectId, images, setAsMain = false) {
+    try {
+      const formData = new FormData();
+      
+      if (setAsMain) {
+        formData.append('setAsMain', 'true');
+      }
+
+      images.forEach(image => {
+        formData.append('images', image);
+      });
+
+      const response = await fetch(`${this.baseURL}/projects/${projectId}/images`, {
+        method: 'POST',
+        headers: {
+          'Authorization': this.getHeaders().Authorization
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Projenin belirli bir görselini sil
+  async deleteProjectImage(projectId, imageURL) {
+    try {
+      const response = await fetch(`${this.baseURL}/projects/${projectId}/images`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ imageURL })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Ana görsel ayarla
+  async setMainImage(projectId, imageURL) {
+    try {
+      const response = await fetch(`${this.baseURL}/projects/${projectId}/main-image`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ imageURL })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // TEAM YÖNETİMİ METHODLARİ
+
+  // Team üyelerini listele
+  async getTeam() {
+    try {
+      const response = await fetch(`${this.baseURL}/team`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Team üyesi ekle
+  async addTeamMember(memberData, imageFile = null) {
+    try {
+      console.log('=== ADDTEAMMEMBER BAŞLADI ===');
+      console.log('Gelen veriler:', { memberData, imageFile });
+      
+      const formData = new FormData();
+      
+      // Üye verilerini form data'ya ekle
+      Object.keys(memberData).forEach(key => {
+        if (memberData[key] !== undefined && memberData[key] !== null) {
+          formData.append(key, memberData[key]);
+          console.log(`FormData'ya eklenen: ${key} = ${memberData[key]}`);
+        }
+      });
+
+      // Resim varsa ekle
+      if (imageFile) {
+        formData.append('image', imageFile);
+        console.log('Resim dosyası eklendi:', imageFile.name);
+      }
+
+      const url = `${this.baseURL}/team`;
+      console.log('API URL:', url);
+      console.log('Authorization header:', this.getHeaders().Authorization);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': this.getHeaders().Authorization
+        },
+        body: formData
+      });
+
+      console.log('API yanıtı alındı:');
+      console.log('- Status:', response.status);
+      console.log('- Status Text:', response.statusText);
+      console.log('- Headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API hatası detayı:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('API başarılı yanıt:', result);
+      console.log('=== ADDTEAMMEMBER BAŞARILI ===');
+      return result;
+    } catch (error) {
+      console.error('=== ADDTEAMMEMBER HATASI ===');
+      console.error('Hata detayı:', error);
+      console.error('Hata mesajı:', error.message);
+      console.error('Hata stack:', error.stack);
+      throw error;
+    }
+  }
+
+  // Team üyesi güncelle
+  async updateTeamMember(id, memberData, imageFile = null) {
+    try {
+      const formData = new FormData();
+      
+      // Üye verilerini form data'ya ekle
+      Object.keys(memberData).forEach(key => {
+        if (memberData[key] !== undefined && memberData[key] !== null) {
+          formData.append(key, memberData[key]);
+        }
+      });
+
+      // Resim varsa ekle
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      const response = await fetch(`${this.baseURL}/team/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': this.getHeaders().Authorization
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Team üyesi sil
+  async deleteTeamMember(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/team/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Team üyesi resmi sil
+  async deleteTeamMemberImage(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/team/${id}/image`, {
+        method: 'DELETE',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default new AdminService();

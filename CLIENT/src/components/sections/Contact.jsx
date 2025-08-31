@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaInstagram, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa'
+import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaInstagram, FaFacebook, FaTwitter, FaLinkedin, FaMap } from 'react-icons/fa'
 import { useState, useEffect } from 'react'
 import publicService from '../../services/publicService'
 import './Contact.css'
@@ -23,6 +23,67 @@ const Contact = () => {
             info: 'Yükleniyor...'
         }
     ])
+
+
+
+    // Form state'i
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        message: ''
+    })
+
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitStatus, setSubmitStatus] = useState(null) // 'success' | 'error' | null
+
+    // Form input değişikliklerini handle et
+    const handleInputChange = (e) => {
+        const { name, value } = e.target
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }))
+    }
+
+    // Form submit işlemi
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setIsSubmitting(true)
+        setSubmitStatus(null)
+
+        try {
+            // Backend'e gönder (nodemailer ile)
+            const response = await fetch('http://localhost:5000/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+
+            if (response.ok) {
+                setSubmitStatus('success')
+                setFormData({
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    phone: '',
+                    message: ''
+                })
+            } else {
+                const errorData = await response.json()
+                console.error('Backend hatası:', errorData)
+                setSubmitStatus('error')
+            }
+        } catch (error) {
+            console.error('Form gönderimi hatası:', error)
+            setSubmitStatus('error')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
 
     useEffect(() => {
         const fetchContactInfo = async () => {
@@ -54,6 +115,7 @@ const Contact = () => {
                         instagram: contact.instagram || '',
                         linkedin: contact.linkedin || ''
                     })
+
                 }
             } catch (error) {
                 console.error('Contact bilgileri getirilemedi:', error)
@@ -79,6 +141,8 @@ const Contact = () => {
     }, [])
 
     const [socialLinks, setSocialLinks] = useState({ facebook: '', twitter: '', instagram: '', linkedin: '' })
+
+
 
     return (
         <section id="contact" className="contact">
@@ -108,36 +172,73 @@ const Contact = () => {
                         className="contact-form-container"
                     >
                         <h3 className="form-title">İLETİŞİM FORMU</h3>
-                        <form className="contact-form">
+                        <form className="contact-form" onSubmit={handleSubmit}>
                             <div className="form-row">
                                 <input
                                     type="text"
+                                    name="firstName"
+                                    value={formData.firstName}
+                                    onChange={handleInputChange}
                                     placeholder="Adınız"
                                     className="form-input"
+                                    required
                                 />
                                 <input
                                     type="text"
+                                    name="lastName"
+                                    value={formData.lastName}
+                                    onChange={handleInputChange}
                                     placeholder="Soyadınız"
                                     className="form-input"
+                                    required
                                 />
                             </div>
                             <input
                                 type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
                                 placeholder="E-posta Adresiniz"
                                 className="form-input"
+                                required
                             />
                             <input
                                 type="tel"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleInputChange}
                                 placeholder="Telefon Numaranız"
                                 className="form-input"
+                                required
                             />
                             <textarea
+                                name="message"
+                                value={formData.message}
+                                onChange={handleInputChange}
                                 placeholder="Proje Detaylarınız"
                                 rows="4"
                                 className="form-textarea"
+                                required
                             ></textarea>
-                            <button type="submit" className="form-submit">
-                                İLETİŞİM FORMU
+                            
+                            {/* Status mesajları */}
+                            {submitStatus === 'success' && (
+                                <div className="success-message">
+                                    Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağız.
+                                </div>
+                            )}
+                            {submitStatus === 'error' && (
+                                <div className="error-message">
+                                    Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.
+                                </div>
+                            )}
+                            
+                            <button 
+                                type="submit" 
+                                className="form-submit"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'GÖNDERİLİYOR...' : 'İLETİŞİM FORMU'}
                             </button>
                         </form>
                     </motion.div>
@@ -164,6 +265,31 @@ const Contact = () => {
                                     </div>
                                 ))}
                             </div>
+
+                            {/* Harita Bölümü */}
+                            <div className="map-section" style={{ marginTop: '20px' }}>
+                                <div 
+                                    className="map-container"
+                                    style={{
+                                        border: '2px solid #e5e7eb',
+                                        borderRadius: '8px',
+                                        overflow: 'hidden',
+                                        height: '300px',
+                                        background: '#f9fafb'
+                                    }}
+                                >
+                                    <iframe
+                                        src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d96367.57945231683!2d29.056833771775768!3d40.99271593126424!3m2!1i1024!2i768!4f13.1!5e0!3m2!1str!2str!4v1756399286094!5m2!1str!2str"
+                                        width="100%"
+                                        height="100%"
+                                        style={{ border: 0 }}
+                                        allowFullScreen=""
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                    ></iframe>
+                                </div>
+                            </div>
+
                             {/* Sosyal Linkler: sadece link varsa göster */}
                             <div className="social-links" style={{ marginTop: '12px', display: 'flex', gap: '20px', fontSize: '2rem', justifyContent: 'flex-end' }}>
                                 {socialLinks.facebook && (
@@ -192,6 +318,8 @@ const Contact = () => {
                     </motion.div>
                 </div>
             </div>
+
+
         </section>
     )
 }

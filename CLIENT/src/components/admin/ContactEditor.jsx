@@ -9,13 +9,13 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
     phone: contactData?.phone || '+90 555 123 45 67',
     email: contactData?.email || 'info@hastugg.com',
     workingHours: contactData?.workingHours || 'Pazartesi - Cuma: 09:00 - 18:00',
-    socialLinks: contactData?.socialLinks || {
-      facebook: '',
-      twitter: '',
-      instagram: '',
-      linkedin: ''
+    socialLinks: {
+      facebook: contactData?.socialLinks?.facebook || '',
+      twitter: contactData?.socialLinks?.twitter || '',
+      instagram: contactData?.socialLinks?.instagram || '',
+      linkedin: contactData?.socialLinks?.linkedin || '',
+      mapEmbedUrl: contactData?.socialLinks?.mapEmbedUrl || ''
     },
-    mapEmbedUrl: contactData?.mapEmbedUrl || ''
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -209,8 +209,8 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
             type="url"
             id="mapEmbedUrl"
             name="mapEmbedUrl"
-            value={formData.mapEmbedUrl}
-            onChange={handleChange}
+            value={formData.socialLinks.mapEmbedUrl}
+            onChange={(e) => handleSocialLinkChange('mapEmbedUrl', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="https://www.google.com/maps/embed?pb=..."
           />

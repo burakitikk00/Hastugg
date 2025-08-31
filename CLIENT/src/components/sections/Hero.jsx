@@ -136,9 +136,10 @@ const Hero = () => {
                                 transition={{ duration: 0.6, delay: index * 0.1 }}
                                 className="contact-item"
                             >
-                                <item.icon className="contact-icon" />
+                                
                                 <div className="contact-text">
                                     <p className="contact-title">{item.title}</p>
+                                    <item.icon className="contact-icon" />
                                     <p className="contact-info">{item.info}</p>
                                     {item.subInfo && <p className="contact-sub-info">{item.subInfo}</p>}
                                 </div>

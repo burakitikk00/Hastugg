@@ -137,6 +137,8 @@
     font-size: 1.25rem;
     flex-shrink: 0;
     margin-top: -2.4rem;
+    display:inline-flex;
+    
 }
 
 .contact-text {

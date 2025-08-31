@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ProjectDetailModal from './ProjectDetailModal'
+import publicService from '../services/publicService'
 import './ServiceProjectsModal.css'
 
-const ServiceProjectsModal = ({ isOpen, onClose, service, projects }) => {
+const ServiceProjectsModal = ({ isOpen, onClose, service, projects, getStatusText }) => {
     const [selectedProject, setSelectedProject] = useState(null)
     const [showProjectDetail, setShowProjectDetail] = useState(false)
 
@@ -45,7 +46,7 @@ const ServiceProjectsModal = ({ isOpen, onClose, service, projects }) => {
                         >
                             {/* Header */}
                             <div className="modal-header">
-                                <h2 className="modal-title">{service.title} Projeleri</h2>
+                                <h2 className="modal-title">{service.service} Projeleri</h2>
                                 <button 
                                     className="close-button"
                                     onClick={onClose}
@@ -60,7 +61,7 @@ const ServiceProjectsModal = ({ isOpen, onClose, service, projects }) => {
                                     <div className="projects-grid">
                                         {projects.map((project, index) => (
                                             <motion.div
-                                                key={index}
+                                                key={project.id || index}
                                                 initial={{ opacity: 0, y: 20 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: index * 0.1 }}
@@ -68,9 +69,13 @@ const ServiceProjectsModal = ({ isOpen, onClose, service, projects }) => {
                                             >
                                                 <div className="project-image-container">
                                                     <img 
-                                                        src={project.images[0]} 
+                                                        src={publicService.getImageURL(project.url)}
                                                         alt={project.title}
                                                         className="project-thumbnail"
+                                                        onError={(e) => {
+                                                            console.log('Proje görsel yüklenemedi:', project.url)
+                                                            e.target.src = '/api/placeholder/400/300'
+                                                        }}
                                                     />
                                                     <div className="project-overlay">
                                                         <button 
@@ -89,8 +94,8 @@ const ServiceProjectsModal = ({ isOpen, onClose, service, projects }) => {
                                                             : project.description
                                                         }
                                                     </p>
-                                                    <span className={`status-badge ${project.status.toLowerCase()}`}>
-                                                        {project.status}
+                                                    <span className={`status-badge ${(project.status || '').toLowerCase().replace(' ', '_')}`}>
+                                                        {getStatusText ? getStatusText(project.status) : project.status}
                                                     </span>
                                                 </div>
                                             </motion.div>
@@ -113,6 +118,7 @@ const ServiceProjectsModal = ({ isOpen, onClose, service, projects }) => {
                 onClose={handleCloseModal}
                 project={selectedProject}
                 onBackToProjects={handleBackToProjects}
+                getStatusText={getStatusText}
             />
         </>
     )

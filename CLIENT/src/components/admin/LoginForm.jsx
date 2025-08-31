@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import adminService from '../../services/adminService';
 
@@ -10,6 +11,7 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setCredentials({
@@ -29,7 +31,8 @@ const LoginForm = () => {
       
       if (response.token) {
         login(response.token, { username: credentials.username });
-        // Başarılı giriş sonrası yönlendirme burada yapılacak
+        // Başarılı giriş sonrası page-content sayfasına yönlendirme
+        navigate('/admin/page-content');
       } else {
         setError('Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
       }

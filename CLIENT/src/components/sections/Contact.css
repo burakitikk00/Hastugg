@@ -97,6 +97,33 @@
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
+.form-submit:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+    transform: scale(1);
+}
+
+/* Status Messages */
+.success-message {
+    background-color: #d1fae5;
+    color: #065f46;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #a7f3d0;
+    font-weight: 500;
+    text-align: center;
+}
+
+.error-message {
+    background-color: #fee2e2;
+    color: #991b1b;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #fca5a5;
+    font-weight: 500;
+    text-align: center;
+}
+
 /* Contact Info */
 .contact-info-container {
     display: flex;

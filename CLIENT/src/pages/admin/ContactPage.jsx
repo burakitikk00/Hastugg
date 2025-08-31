@@ -25,9 +25,10 @@ const ContactPage = () => {
               facebook: c.facebook || '',
               twitter: c.twitter || '',
               instagram: c.instagram || '',
-              linkedin: c.linkedin || ''
+              linkedin: c.linkedin || '',
+              mapEmbedUrl: c.mapEmbedUrl || ''
             },
-            mapEmbedUrl: ''
+            
           });
         } else {
           setContactData({
@@ -64,7 +65,8 @@ const ContactPage = () => {
         facebook: sectionData.socialLinks?.facebook || '',
         twitter: sectionData.socialLinks?.twitter || '',
         instagram: sectionData.socialLinks?.instagram || '',
-        linkedin: sectionData.socialLinks?.linkedin || ''
+        linkedin: sectionData.socialLinks?.linkedin || '',
+        mapEmbedUrl: sectionData.socialLinks?.mapEmbedUrl || ''
       };
       await adminService.saveContact(payload);
       // Çalışma saatlerini local'e yaz

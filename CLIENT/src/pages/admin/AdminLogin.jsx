@@ -8,9 +8,9 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Eğer zaten giriş yapılmışsa dashboard'a yönlendir
+    // Eğer zaten giriş yapılmışsa page-content sayfasına yönlendir
     if (isAuthenticated) {
-      navigate('/admin/dashboard');
+      navigate('/admin/page-content');
     }
   }, [isAuthenticated, navigate]);
 
