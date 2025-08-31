@@ -46,7 +46,6 @@ const PageContentManager = () => {
 
   const handleCancel = () => {
     // İptal işlemi - form verilerini sıfırla
-    console.log('İptal edildi');
   };
 
   const ActiveComponent = sections.find(s => s.id === activeSection)?.component;
@@ -100,7 +99,6 @@ const PageContentManager = () => {
           <button
             onClick={() => {
               // Tüm değişiklikleri kaydet
-              console.log('Tüm değişiklikler kaydediliyor...');
             }}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
           >
@@ -118,7 +116,6 @@ const PageContentManager = () => {
           <button
             onClick={() => {
               // Yedekle
-              console.log('Yedek oluşturuluyor...');
             }}
             className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200"
           >

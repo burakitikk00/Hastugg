@@ -53,12 +53,10 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
   const handleImageUpload = async (index, file) => {
     if (!file) return;
 
-    console.log('Görsel yükleniyor:', file.name, file.size, 'bytes');
     setUploadingImages(prev => ({ ...prev, [index]: true }));
     
     try {
       const result = await adminService.uploadImage(file);
-      console.log('Upload result:', result);
       // Backend'den imageURL geliyor, url olarak kaydet
       handleServiceChange(index, 'url', result.imageURL);
       alert('Görsel başarıyla yüklendi!');
@@ -95,7 +93,6 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
     setIsLoading(true);
     
     try {
-      console.log('Kaydedilecek services data:', JSON.stringify(formData, null, 2));
       await onSave(formData);
       alert('Hizmetler başarıyla kaydedildi!');
     } catch (error) {

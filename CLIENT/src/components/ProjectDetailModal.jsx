@@ -81,7 +81,6 @@ const ProjectDetailModal = ({ isOpen, onClose, project, onBackToProjects, getSta
                                         alt={`${project.title} - Resim ${currentImageIndex + 1}`}
                                         className="project-image"
                                         onError={(e) => {
-                                            console.log('Modal görsel yüklenemedi:', project.images[currentImageIndex])
                                             e.target.src = '/api/placeholder/400/300'
                                         }}
                                     />

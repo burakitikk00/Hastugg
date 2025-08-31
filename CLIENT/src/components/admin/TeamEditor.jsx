@@ -68,49 +68,30 @@ const TeamEditor = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('=== FORM GÖNDERİMİ BAŞLADI ===');
-    console.log('Form Data:', formData);
-    console.log('Selected Image:', selectedImage);
-    console.log('Editing Member:', editingMember);
-    console.log('Is Adding New:', isAddingNew);
-    
     if (!formData.namesurname || !formData.position) {
-      console.log('Validasyon hatası: Ad Soyad veya Pozisyon eksik');
       setError('Ad Soyad ve Pozisyon zorunludur.');
       return;
     }
 
     try {
       setLoading(true);
-      console.log('Loading state true yapıldı');
       
       if (editingMember) {
         // Güncelleme
-        console.log('Güncelleme işlemi başlatılıyor...');
-        const updateResult = await adminService.updateTeamMember(editingMember.id, formData, selectedImage);
-        console.log('Güncelleme sonucu:', updateResult);
+        await adminService.updateTeamMember(editingMember.id, formData, selectedImage);
       } else {
         // Yeni ekleme
-        console.log('Yeni ekleme işlemi başlatılıyor...');
-        console.log('adminService.addTeamMember çağrılıyor...');
-        const addResult = await adminService.addTeamMember(formData, selectedImage);
-        console.log('Ekleme sonucu:', addResult);
+        await adminService.addTeamMember(formData, selectedImage);
       }
 
-      console.log('İşlem başarılı, liste yenileniyor...');
       await loadTeamMembers();
       resetForm();
       setError(null);
-      console.log('=== FORM GÖNDERİMİ BAŞARILI ===');
     } catch (err) {
-      console.error('=== FORM GÖNDERİMİ HATASI ===');
-      console.error('Hata detayı:', err);
-      console.error('Hata mesajı:', err.message);
-      console.error('Hata stack:', err.stack);
+      console.error('Form gönderimi hatası:', err);
       setError('İşlem sırasında hata oluştu: ' + err.message);
     } finally {
       setLoading(false);
-      console.log('Loading state false yapıldı');
     }
   };
 
@@ -128,7 +109,6 @@ const TeamEditor = () => {
 
   // Yeni üye ekleme modunu aç
   const handleAddNew = () => {
-    console.log('Yeni üye ekleme modu açılıyor...');
     setEditingMember(null);
     setFormData({
       namesurname: '',
@@ -138,12 +118,10 @@ const TeamEditor = () => {
     setSelectedImage(null);
     setImagePreview(null);
     setIsAddingNew(true);
-    console.log('isAddingNew state true yapıldı');
   };
 
   // İptal et
   const handleCancel = () => {
-    console.log('İptal butonuna tıklandı, form kapatılıyor...');
     setEditingMember(null);
     setIsAddingNew(false);
     setFormData({
@@ -153,7 +131,6 @@ const TeamEditor = () => {
     });
     setSelectedImage(null);
     setImagePreview(null);
-    console.log('Form kapatıldı');
   };
 
   // Üye sil
@@ -305,7 +282,6 @@ const TeamEditor = () => {
         </div>
 
         {/* Düzenleme/Ekleme Formu */}
-        {console.log('Form render kontrolü:', { editingMember, isAddingNew })}
         {(editingMember || isAddingNew) && (
           <div className="bg-gray-50 rounded-lg p-6 border">
             <div className="flex items-center justify-between mb-4">

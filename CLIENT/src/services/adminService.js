@@ -396,30 +396,21 @@ class AdminService {
   // Team üyesi ekle
   async addTeamMember(memberData, imageFile = null) {
     try {
-      console.log('=== ADDTEAMMEMBER BAŞLADI ===');
-      console.log('Gelen veriler:', { memberData, imageFile });
-      
       const formData = new FormData();
       
       // Üye verilerini form data'ya ekle
       Object.keys(memberData).forEach(key => {
         if (memberData[key] !== undefined && memberData[key] !== null) {
           formData.append(key, memberData[key]);
-          console.log(`FormData'ya eklenen: ${key} = ${memberData[key]}`);
         }
       });
 
       // Resim varsa ekle
       if (imageFile) {
         formData.append('image', imageFile);
-        console.log('Resim dosyası eklendi:', imageFile.name);
       }
 
-      const url = `${this.baseURL}/team`;
-      console.log('API URL:', url);
-      console.log('Authorization header:', this.getHeaders().Authorization);
-      
-      const response = await fetch(url, {
+      const response = await fetch(`${this.baseURL}/team`, {
         method: 'POST',
         headers: {
           'Authorization': this.getHeaders().Authorization
@@ -427,26 +418,13 @@ class AdminService {
         body: formData
       });
 
-      console.log('API yanıtı alındı:');
-      console.log('- Status:', response.status);
-      console.log('- Status Text:', response.statusText);
-      console.log('- Headers:', Object.fromEntries(response.headers.entries()));
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('API hatası detayı:', errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
-      const result = await response.json();
-      console.log('API başarılı yanıt:', result);
-      console.log('=== ADDTEAMMEMBER BAŞARILI ===');
-      return result;
+      return await response.json();
     } catch (error) {
-      console.error('=== ADDTEAMMEMBER HATASI ===');
-      console.error('Hata detayı:', error);
-      console.error('Hata mesajı:', error.message);
-      console.error('Hata stack:', error.stack);
       throw error;
     }
   }

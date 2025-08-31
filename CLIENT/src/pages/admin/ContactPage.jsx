@@ -82,7 +82,6 @@ const ContactPage = () => {
 
   const handleCancel = () => {
     // İptal işlemi - form verilerini sıfırla
-    console.log('İptal edildi');
   };
 
   return (

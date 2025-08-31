@@ -247,7 +247,6 @@ const ProjectsPage = () => {
           serviceIds = serviceIds.filter(id => id && id !== 0);
           
         } catch (e) {
-          console.log('service_ids parse hatası:', e.message, 'row:', row);
           serviceIds = [];
         }
         

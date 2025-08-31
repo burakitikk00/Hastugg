@@ -236,8 +236,6 @@ router.post('/services', verifyToken, async (req, res) => {
             return res.status(400).json({ message: 'services array zorunludur.' });
         }
 
-        console.log('Gelen services data:', JSON.stringify(services, null, 2));
-
         const pool = await poolPromise;
         transaction = new sql.Transaction(pool);
         await transaction.begin();
@@ -247,8 +245,6 @@ router.post('/services', verifyToken, async (req, res) => {
 
         // Yeni services'leri ekle
         for (const service of services) {
-            console.log(`Service ekleniyor: ${service.service}, URL: ${service.url}`);
-            
             await new sql.Request(transaction)
                 .input('service', sql.VarChar, service.service)
                 .input('description', sql.NVarChar, service.description)
@@ -462,7 +458,6 @@ router.post('/contact', verifyToken, async (req, res) => {
         }
 
         if (targetId) {
-            console.log('UPDATE sorgusu çalıştırılıyor, targetId:', targetId);
             await new sql.Request(transaction)
                 .input('id', sql.Int, targetId)
                 .input('address', sql.NVarChar, address)
@@ -474,9 +469,7 @@ router.post('/contact', verifyToken, async (req, res) => {
                 .input('linkedin', sql.NVarChar, linkedin || null)
                 .input('mapEmbedUrl', sql.NVarChar(sql.MAX), mapEmbedUrl || null)
                 .query('UPDATE Contact SET address=@address, phone=@phone, email=@email, facebook=@facebook, twitter=@twitter, instagram=@instagram, linkedin=@linkedin, mapEmbedUrl=@mapEmbedUrl WHERE id=@id');
-            console.log('UPDATE sorgusu başarıyla tamamlandı');
         } else {
-            console.log('INSERT sorgusu çalıştırılıyor');
             await new sql.Request(transaction)
                 .input('address', sql.NVarChar, address)
                 .input('phone', sql.NVarChar, phone)
@@ -487,11 +480,9 @@ router.post('/contact', verifyToken, async (req, res) => {
                 .input('linkedin', sql.NVarChar, linkedin || null)
                 .input('mapEmbedUrl', sql.NVarChar(sql.MAX), mapEmbedUrl || null)
                 .query('INSERT INTO Contact (address, phone, email, facebook, twitter, instagram, linkedin, mapEmbedUrl) VALUES (@address, @phone, @email, @facebook, @twitter, @instagram, @linkedin, @mapEmbedUrl)');
-            console.log('INSERT sorgusu başarıyla tamamlandı');
         }
 
         await transaction.commit();
-        console.log('Transaction commit edildi');
         res.status(200).json({ message: 'İletişim bilgileri başarıyla kaydedildi' });
     } catch (error) {
         if (transaction) { try { await transaction.rollback(); } catch (e) { } }
@@ -933,7 +924,6 @@ router.put('/projects/:id/main-image', verifyToken, async (req, res) => {
 // Team verilerini getir
 router.get('/team', verifyToken, async (req, res) => {
     try {
-        console.log('Team verileri getirme isteği alındı');
         const pool = await poolPromise;
         
         // Önce Team tablosunun var olup olmadığını kontrol et
@@ -944,13 +934,10 @@ router.get('/team', verifyToken, async (req, res) => {
         `);
         
         if (tableCheck.recordset.length === 0) {
-            console.log('Team tablosu bulunamadı!');
             return res.status(404).json({ message: 'Team tablosu bulunamadı. Lütfen önce tabloyu oluşturun.' });
         }
         
-        console.log('Team tablosu bulundu, veriler getiriliyor...');
         const result = await pool.request().query('SELECT id, namesurname, position, url, LinkedIn FROM Team ORDER BY id');
-        console.log('Team verileri başarıyla getirildi:', result.recordset.length, 'kayıt');
         res.status(200).json(result.recordset);
     } catch (error) {
         console.error('Team verileri getirme hatası:', error);
@@ -962,19 +949,13 @@ router.get('/team', verifyToken, async (req, res) => {
 router.post('/team', verifyToken, upload.single('image'), async (req, res) => {
     let transaction;
     try {
-        console.log('Team üyesi ekleme isteği alındı');
-        console.log('Request body:', req.body);
-        console.log('Uploaded file:', req.file);
-
         const { namesurname, position, LinkedIn } = req.body;
         const uploadedFile = req.file;
 
         if (!namesurname || !position) {
-            console.log('Validasyon hatası: namesurname veya position eksik');
             return res.status(400).json({ message: 'namesurname ve position zorunludur.' });
         }
 
-        console.log('Veritabanı bağlantısı kuruluyor...');
         const pool = await poolPromise;
         transaction = new sql.Transaction(pool);
         await transaction.begin();
@@ -982,10 +963,8 @@ router.post('/team', verifyToken, upload.single('image'), async (req, res) => {
         let imageURL = null;
         if (uploadedFile) {
             imageURL = `/uploads/${uploadedFile.filename}`;
-            console.log('Resim URL oluşturuldu:', imageURL);
         }
 
-        console.log('Team üyesi veritabanına ekleniyor...');
         // Team üyesini ekle
         await new sql.Request(transaction)
             .input('namesurname', sql.NVarChar, namesurname)
@@ -994,10 +973,8 @@ router.post('/team', verifyToken, upload.single('image'), async (req, res) => {
             .input('LinkedIn', sql.NVarChar, LinkedIn || null)
             .query('INSERT INTO Team (namesurname, position, url, LinkedIn) VALUES (@namesurname, @position, @url, @LinkedIn)');
 
-        console.log('Transaction commit ediliyor...');
         await transaction.commit();
 
-        console.log('Team üyesi başarıyla eklendi');
         res.status(201).json({
             message: 'Team üyesi başarıyla eklendi!',
             imageURL: imageURL

@@ -15,7 +15,6 @@ const Services = () => {
         const fetchServices = async () => {
             try {
                 const servicesData = await publicService.getServices()
-                console.log('Yüklenen services:', servicesData);
                 setServices(servicesData)
             } catch (error) {
                 console.error('Hizmetler yüklenirken hata:', error)
@@ -55,7 +54,6 @@ const Services = () => {
         const fetchAllProjects = async () => {
             try {
                 const projectsData = await publicService.getProjects()
-                console.log('Tüm projeler yüklendi:', projectsData)
                 setAllProjects(projectsData)
             } catch (error) {
                 console.error('Projeler yüklenirken hata:', error)
@@ -67,9 +65,6 @@ const Services = () => {
 
     // Hizmete göre projeleri filtrele
     const getProjectsForService = (serviceTitle) => {
-        console.log('Filtreleme için hizmet:', serviceTitle)
-        console.log('Mevcut projeler:', allProjects)
-        
         // service_ids alanına göre filtreleme yap
         const filteredProjects = allProjects.filter(project => {
             if (!project.service_ids) return false
@@ -91,7 +86,6 @@ const Services = () => {
             return false
         })
         
-        console.log('Filtrelenmiş projeler:', filteredProjects)
         return filteredProjects
     }
 
@@ -189,7 +183,7 @@ const Services = () => {
                                             console.error('Görsel yüklenemedi:', e.target.src);
                                             e.target.src = 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&h=600&fit=crop';
                                         }}
-                                        onLoad={() => console.log('Görsel başarıyla yüklendi:', service.service)}
+
                                     />
                                     
                                     <div className="service-overlay">

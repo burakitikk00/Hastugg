@@ -17,7 +17,6 @@ const Projects = () => {
             try {
                 setLoading(true)
                 const data = await publicService.getProjects()
-                console.log('Gelen projeler:', data) // Debug için
                 setProjects(data)
                 setError(null)
             } catch (err) {
@@ -152,7 +151,6 @@ const Projects = () => {
                                         alt={project.name || project.title}
                                         className="project-image"
                                         onError={(e) => {
-                                            console.log('Görsel yüklenemedi:', project.url)
                                             e.target.src = '/api/placeholder/400/300'
                                         }}
                                     />

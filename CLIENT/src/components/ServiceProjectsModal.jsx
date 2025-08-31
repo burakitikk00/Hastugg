@@ -73,7 +73,6 @@ const ServiceProjectsModal = ({ isOpen, onClose, service, projects, getStatusTex
                                                         alt={project.title}
                                                         className="project-thumbnail"
                                                         onError={(e) => {
-                                                            console.log('Proje görsel yüklenemedi:', project.url)
                                                             e.target.src = '/api/placeholder/400/300'
                                                         }}
                                                     />

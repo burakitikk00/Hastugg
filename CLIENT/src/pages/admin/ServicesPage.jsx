@@ -70,13 +70,9 @@ const ServicesPage = () => {
   const handleSave = async (sectionData) => {
     setIsLoading(true);
     try {
-      console.log('ServicesPage handleSave çağrıldı:', sectionData);
       // Services verilerini API'ye kaydet
       await adminService.saveServices(sectionData);
       setServicesData(sectionData);
-      
-      // Başarılı kayıt sonrası işlemler - Artık ServicesEditor'da alert var
-      console.log('Hizmetler başarıyla kaydedildi!');
     } catch (error) {
       console.error('Kaydetme hatası:', error);
       alert(`Kaydetme sırasında bir hata oluştu: ${error.message}`);
@@ -87,7 +83,6 @@ const ServicesPage = () => {
 
   const handleCancel = () => {
     // İptal işlemi - form verilerini sıfırla
-    console.log('İptal edildi');
   };
 
   return (

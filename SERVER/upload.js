@@ -45,7 +45,6 @@ const deleteImage = async (imagePath) => {
 
         if (await fs.pathExists(fullPath)) {
             await fs.remove(fullPath);
-            console.log(`Dosya silindi: ${fullPath}`);
             return true;
         }
         return false;
@@ -78,7 +77,6 @@ const cleanupUnusedImages = async (usedImagePaths) => {
             if (!usedFileNames.includes(file)) {
                 const filePath = path.join(uploadsDir, file);
                 await fs.remove(filePath);
-                console.log(`Kullanılmayan dosya silindi: ${filePath}`);
             }
         }
     } catch (error) {

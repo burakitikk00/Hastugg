@@ -13,29 +13,18 @@ const config = {
     port: 1433 // SQL Server varsayılan portu
 };
 
-// Veritabanı bağlantısını test et
-async function testConnection() {
-    try {
-        await sql.connect(config);
-        console.log('Veritabanı bağlantısı başarılı');
-        return true;
-    } catch (err) {
-        console.error('Veritabanı bağlantı hatası:', err);
-        return false;
-    }
-}
 const poolPromise= new sql.ConnectionPool(config)
 .connect()
 .then(pool => {
-    console.log('Veritabanına başarıyla bağlanıldı.')
-return pool;
+    return pool;
 })
-.catch(err => console.log('Veritabanı bağlantı hatası: ',err));
+.catch(err => {
+    console.error('Veritabanı bağlantı hatası: ',err);
+});
 
 module.exports = {
     config,
     sql,
-    poolPromise,
-    testConnection
+    poolPromise
 }; 
 
