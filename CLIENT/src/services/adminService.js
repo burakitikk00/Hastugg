@@ -80,6 +80,25 @@ class AdminService {
     }
   }
 
+  // Hero verilerini getir
+  async getHero() {
+    try {
+      const response = await fetch(`${this.baseURL}/hero`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Hero verilerini kaydet/güncelle
   async saveHero(heroData) {
     try {
@@ -87,6 +106,45 @@ class AdminService {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify(heroData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // About verilerini getir
+  async getAbout() {
+    try {
+      const response = await fetch(`${this.baseURL}/about`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // About verilerini kaydet/güncelle
+  async saveAbout(aboutData) {
+    try {
+      const response = await fetch(`${this.baseURL}/about`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(aboutData)
       });
 
       if (!response.ok) {

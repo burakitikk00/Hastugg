@@ -1,37 +1,68 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FormButtons from './FormButtons';
+import adminService from '../../services/adminService';
 
-const AboutEditor = ({ aboutData = null, onSave, onCancel }) => {
+const AboutEditor = ({ onSave, onCancel }) => {
   const [formData, setFormData] = useState({
-    title: aboutData?.title || 'Hakkımızda',
-    description: aboutData?.description || 'Hastuğ, mühendislik ve estetik anlayışını birleştirerek; fonksiyonel, dayanıklı ve çağdaş yaşam alanları inşa eden yenilikçi bir inşaat firmasıdır. Kalite, güven ve sürdürülebilirlik ilkeleriyle, her projede teknik doğruluk ve müşteri memnuniyetini ön planda tutar.',
-    features: aboutData?.features || [
-      {
-        title: 'Kalite ve Güven',
-        description: 'Tüm projelerimizde en yüksek kalite standartlarını benimser, güvenilir ve şeffaf bir iş anlayışıyla hareket ederiz. Müşterilerimizin memnuniyetini ve güvenini her şeyin önünde tutarız.',
-        icon: '✅'
-      },
-      {
-        title: 'Yenilikçi Çözümler',
-        description: 'Sürekli gelişen teknolojileri ve modern inşaat yöntemlerini takip ederek, projelerimize yenilikçi ve sürdürülebilir çözümler entegre ederiz.',
-        icon: '💡'
-      },
-      {
-        title: 'Sürdürülebilirlik',
-        description: 'Çevreye duyarlı malzeme ve uygulamalarla, gelecek nesillere yaşanabilir alanlar bırakmayı hedefleriz. Sürdürülebilirlik, tüm süreçlerimizin merkezindedir.',
-        icon: '🌱'
-      },
-      {
-        title: 'Uzman Kadro',
-        description: 'Alanında deneyimli ve uzman ekibimizle, her projede titiz mühendislik ve estetik bakış açısını bir araya getiririz.',
-        icon: '👷‍♂️'
-      }
-    ]
+    mainTitle: '',
+    mainDescription: '',
+    features: []
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [selectedFeatureIndex, setSelectedFeatureIndex] = useState(null);
+
+  // Veritabanından verileri yükle
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        const aboutData = await adminService.getAbout();
+        if (aboutData) {
+          setFormData({
+            mainTitle: aboutData.mainTitle || '',
+            mainDescription: aboutData.mainDescription || '',
+            features: aboutData.features || []
+          });
+        }
+      } catch (error) {
+        console.error('About verileri getirilemedi:', error);
+        // Hata durumunda default değerler
+        setFormData({
+          mainTitle: 'Hakkımızda',
+          mainDescription: 'Hastuğ, mühendislik ve estetik anlayışını birleştirerek; fonksiyonel, dayanıklı ve çağdaş yaşam alanları inşa eden yenilikçi bir inşaat firmasıdır. Kalite, güven ve sürdürülebilirlik ilkeleriyle, her projede teknik doğruluk ve müşteri memnuniyetini ön planda tutar.',
+          features: [
+            {
+              id: null,
+              feaute: 'Kalite ve Güven',
+              description: 'Tüm projelerimizde en yüksek kalite standartlarını benimser, güvenilir ve şeffaf bir iş anlayışıyla hareket ederiz. Müşterilerimizin memnuniyetini ve güvenini her şeyin önünde tutarız.',
+              icon: '✅'
+            },
+            {
+              id: null,
+              feaute: 'Yenilikçi Çözümler',
+              description: 'Sürekli gelişen teknolojileri ve modern inşaat yöntemlerini takip ederek, projelerimize yenilikçi ve sürdürülebilir çözümler entegre ederiz.',
+              icon: '💡'
+            },
+            {
+              id: null,
+              feaute: 'Sürdürülebilirlik',
+              description: 'Çevreye duyarlı malzeme ve uygulamalarla, gelecek nesillere yaşanabilir alanlar bırakmayı hedefleriz. Sürdürülebilirlik, tüm süreçlerimizin merkezindedir.',
+              icon: '🌱'
+            },
+            {
+              id: null,
+              feaute: 'Uzman Kadro',
+              description: 'Alanında deneyimli ve uzman ekibimizle, her projede titiz mühendislik ve estetik bakış açısını bir araya getiririz.',
+              icon: '👷‍♂️'
+            }
+          ]
+        });
+      }
+    };
+
+    fetchAboutData();
+  }, []);
 
   // Kullanılabilir simgeler
   const availableIcons = [
@@ -48,7 +79,9 @@ const AboutEditor = ({ aboutData = null, onSave, onCancel }) => {
 
   const handleFeatureChange = (index, field, value) => {
     const newFeatures = [...formData.features];
-    newFeatures[index] = { ...newFeatures[index], [field]: value };
+    // Boşlukları temizle (sadece başta ve sonda)
+    const cleanedValue = field === 'icon' ? value : value.trim();
+    newFeatures[index] = { ...newFeatures[index], [field]: cleanedValue };
     setFormData(prev => ({ ...prev, features: newFeatures }));
   };
 
@@ -56,7 +89,8 @@ const AboutEditor = ({ aboutData = null, onSave, onCancel }) => {
     setFormData(prev => ({
       ...prev,
       features: [...prev.features, { 
-        title: 'Yeni Özellik', 
+        id: null, // Yeni feature için ID null
+        feaute: 'Yeni Özellik', 
         description: 'Özellik açıklaması buraya gelecek',
         icon: '⭐'
       }]
@@ -88,10 +122,23 @@ const AboutEditor = ({ aboutData = null, onSave, onCancel }) => {
     setIsLoading(true);
     
     try {
-      // Local olarak veriyi kaydet - localStorage'a kaydet
-      localStorage.setItem('aboutData', JSON.stringify(formData));
+      // Features'ları temizle ve kontrol et
+      const cleanedFeatures = formData.features.map(feature => ({
+        ...feature,
+        feaute: (feature.feaute || '').trim(),
+        description: (feature.description || '').trim(),
+        icon: feature.icon || '⭐'
+      }));
       
-      await onSave(formData);
+      const cleanedFormData = {
+        ...formData,
+        features: cleanedFeatures
+      };
+      
+      // Veritabanına kaydet
+      await adminService.saveAbout(cleanedFormData);
+      
+      await onSave(cleanedFormData);
     } catch (error) {
       console.error('About kaydedilirken hata:', error);
     } finally {
@@ -109,14 +156,14 @@ const AboutEditor = ({ aboutData = null, onSave, onCancel }) => {
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         {/* Ana Başlık */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="mainTitle" className="block text-sm font-medium text-gray-700 mb-2">
             Ana Başlık *
           </label>
           <input
             type="text"
-            id="title"
-            name="title"
-            value={formData.title}
+            id="mainTitle"
+            name="mainTitle"
+            value={formData.mainTitle}
             onChange={handleChange}
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -126,13 +173,13 @@ const AboutEditor = ({ aboutData = null, onSave, onCancel }) => {
 
         {/* Ana Açıklama */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="mainDescription" className="block text-sm font-medium text-gray-700 mb-2">
             Ana Açıklama *
           </label>
           <textarea
-            id="description"
-            name="description"
-            value={formData.description}
+            id="mainDescription"
+            name="mainDescription"
+            value={formData.mainDescription}
             onChange={handleChange}
             required
             rows={4}
@@ -175,13 +222,13 @@ const AboutEditor = ({ aboutData = null, onSave, onCancel }) => {
                   <div className="flex-1 space-y-3">
                     <input
                       type="text"
-                      value={feature.title}
-                      onChange={(e) => handleFeatureChange(index, 'title', e.target.value)}
+                      value={feature.feaute || ''}
+                      onChange={(e) => handleFeatureChange(index, 'feaute', e.target.value)}
                       placeholder="Özellik başlığı"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
                     />
                     <textarea
-                      value={feature.description}
+                      value={feature.description || ''}
                       onChange={(e) => handleFeatureChange(index, 'description', e.target.value)}
                       placeholder="Özellik açıklaması"
                       rows={3}

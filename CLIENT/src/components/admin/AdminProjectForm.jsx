@@ -6,7 +6,7 @@ const AdminProjectForm = ({ project = null, services = [], onSave, onCancel }) =
     title: project?.title || '',
     description: project?.description || '',
     service_ids: Array.isArray(project?.service_ids) ? project.service_ids : [],
-    status: project?.status || 'Planned',
+    status: project?.status || 'In Progress',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +18,7 @@ const AdminProjectForm = ({ project = null, services = [], onSave, onCancel }) =
         title: project.title || '',
         description: project.description || '',
         service_ids: Array.isArray(project.service_ids) ? project.service_ids : [],
-        status: project.status || 'Planned',
+        status: project.status || 'In Progress',
       });
     } else {
       // Yeni proje için form'u sıfırla
@@ -26,7 +26,7 @@ const AdminProjectForm = ({ project = null, services = [], onSave, onCancel }) =
         title: '',
         description: '',
         service_ids: [],
-        status: 'Planned',
+        status: 'In Progress',
       });
     }
   }, [project]);
@@ -78,10 +78,8 @@ const AdminProjectForm = ({ project = null, services = [], onSave, onCancel }) =
   };
 
   const statusOptions = [
-    { value: 'Planned', label: 'Planlandı' },
     { value: 'In Progress', label: 'Devam Ediyor' },
-    { value: 'Completed', label: 'Tamamlandı' },
-    { value: 'On Hold', label: 'Beklemede' }
+    { value: 'Completed', label: 'Tamamlandı' }
   ];
 
   return (

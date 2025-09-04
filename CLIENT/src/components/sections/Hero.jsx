@@ -5,38 +5,17 @@ import publicService from '../../services/publicService'
 import './Hero.css'
 
 const Hero = () => {
-    const [heroData, setHeroData] = useState({
-        title: 'Siz İsteyin, Biz İnşa Edelim',
-        subtitle: 'Profesyonel ekibimizle isteğinizi birebir yerine getiriyoruz. Hemen teklif alabilirsiniz.'
-    });
-
-    const [contactInfo, setContactInfo] = useState([
-        {
-            icon: FaMapMarkerAlt,
-            title: 'Lokasyon',
-            info: 'Yükleniyor...',
-            subInfo: ''
-        },
-        {
-            icon: FaPhone,
-            title: 'Telefon',
-            info: 'Yükleniyor...'
-        },
-        {
-            icon: FaEnvelope,
-            title: 'E-Posta',
-            info: 'Yükleniyor...'
-        }
-    ])
+    const [heroData, setHeroData] = useState(null);
+    const [contactInfo, setContactInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // LocalStorage'dan hero verilerini yükle
-                const savedHero = localStorage.getItem('heroData');
-                if (savedHero) {
-                    const parsedHero = JSON.parse(savedHero);
-                    setHeroData(parsedHero);
+                // Veritabanından hero verilerini getir
+                const heroResponse = await publicService.getHero();
+                if (heroResponse) {
+                    setHeroData(heroResponse);
                 }
 
                 // Contact bilgilerini getir
@@ -64,21 +43,14 @@ const Hero = () => {
                 }
             } catch (error) {
                 console.error('Veriler getirilemedi:', error)
+                setHeroData(null);
+                setContactInfo(null);
+            } finally {
+                setLoading(false);
             }
         }
 
         fetchData()
-
-        // LocalStorage'dan gelen güncellemeleri dinle
-        const handleHeroUpdate = (event) => {
-            setHeroData(event.detail);
-        };
-
-        window.addEventListener('heroDataUpdated', handleHeroUpdate);
-
-        return () => {
-            window.removeEventListener('heroDataUpdated', handleHeroUpdate);
-        };
     }, [])
 
     const scrollToSection = (sectionId) => {
@@ -86,6 +58,37 @@ const Hero = () => {
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' })
         }
+    }
+
+    if (loading || !heroData) {
+        return (
+            <section id="home" className="hero">
+                <div className="hero-background">
+                    <div className="hero-overlay"></div>
+                </div>
+
+                <div className="hero-content">
+                    <div className="hero-text">
+                        <div className="loading-message">
+                            <div className="loading-spinner"></div>
+                            <p>İçerik yükleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Contact Info Overlay */}
+                <div className="contact-overlay">
+                    <div className="contact-container">
+                        <div className="contact-grid">
+                            <div className="loading-message">
+                                <div className="loading-spinner"></div>
+                                <p>İletişim bilgileri yükleniyor...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        )
     }
 
     return (
@@ -102,10 +105,10 @@ const Hero = () => {
                     className="hero-text"
                 >
                     <h3 className="hero-title">
-                        {heroData.title}
+                        {heroData.mainTitle || 'Siz İsteyin, Biz İnşa Edelim'}
                     </h3>
                     <p className="hero-description">
-                        {heroData.subtitle}
+                        {heroData.subheading || 'Profesyonel ekibimizle isteğinizi birebir yerine getiriyoruz. Hemen teklif alabilirsiniz.'}
                     </p>
                     <div className="hero-buttons">
                         <button
@@ -125,29 +128,31 @@ const Hero = () => {
             </div>
 
             {/* Contact Info Overlay */}
-            <div className="contact-overlay">
-                <div className="contact-container">
-                    <div className="contact-grid">
-                        {contactInfo.map((item, index) => (
-                            <motion.div
-                                key={index}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.6, delay: index * 0.1 }}
-                                className="contact-item"
-                            >
-                                
-                                <div className="contact-text">
-                                    <p className="contact-title">{item.title}</p>
-                                    <item.icon className="contact-icon" />
-                                    <p className="contact-info">{item.info}</p>
-                                    {item.subInfo && <p className="contact-sub-info">{item.subInfo}</p>}
-                                </div>
-                            </motion.div>
-                        ))}
+            {contactInfo && (
+                <div className="contact-overlay">
+                    <div className="contact-container">
+                        <div className="contact-grid">
+                            {contactInfo.map((item, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                                    className="contact-item"
+                                >
+                                    
+                                    <div className="contact-text">
+                                        <p className="contact-title">{item.title}</p>
+                                        <item.icon className="contact-icon" />
+                                        <p className="contact-info">{item.info}</p>
+                                        {item.subInfo && <p className="contact-sub-info">{item.subInfo}</p>}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </section>
     )
 }

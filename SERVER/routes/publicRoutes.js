@@ -8,8 +8,42 @@ const nodemailer = require('nodemailer');
 router.get('/hero', async (req, res) => {
     try {
         const pool = await poolPromise;
-        const result = await pool.request().query('SELECT * FROM Hero');
-        res.status(200).json(result.recordset);
+        const result = await pool.request().query('SELECT TOP 1 * FROM Hero ORDER BY id');
+        
+        if (result.recordset.length > 0) {
+            res.status(200).json(result.recordset[0]);
+        } else {
+            res.status(404).json({ message: 'Hero verisi bulunamadı' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Sunucu hatası');
+    }
+});
+
+// About verilerini getir (herkes erişebilir)
+router.get('/about', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        
+        // AboutUs tablosundan ana verileri al
+        const aboutResult = await pool.request().query('SELECT TOP 1 * FROM AboutUs ORDER BY id');
+        
+        if (aboutResult.recordset.length === 0) {
+            return res.status(404).json({ message: 'About verisi bulunamadı' });
+        }
+        
+        const aboutData = aboutResult.recordset[0];
+        
+        // FeatureCards verilerini al
+        const featuresResult = await pool.request().query('SELECT * FROM FeatureCards ORDER BY id');
+        
+        res.status(200).json({
+            id: aboutData.id,
+            mainTitle: aboutData.mainTitle,
+            mainDescription: aboutData.mainDescription,
+            features: featuresResult.recordset
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Sunucu hatası');

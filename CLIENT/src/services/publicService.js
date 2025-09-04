@@ -34,6 +34,26 @@ class PublicService {
     }
   }
 
+  // About verilerini getir (herkes erişebilir)
+  async getAbout() {
+    try {
+      const response = await fetch(`${this.baseURL}/about`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('About verileri getirilemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // İletişim bilgilerini getir (herkes erişebilir)
   async getContact() {
     try {

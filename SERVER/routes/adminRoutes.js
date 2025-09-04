@@ -7,13 +7,30 @@ const { sql, poolPromise } = require('./dbConfig');
 const verifyToken = require('./middleware/authMiddleware');
 const { upload, deleteImage, deleteMultipleImages, cleanupUnusedImages } = require('../upload');
 
+// Hero verilerini getir
+router.get('/hero', verifyToken, async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query('SELECT TOP 1 * FROM Hero ORDER BY id');
+        
+        if (result.recordset.length > 0) {
+            res.status(200).json(result.recordset[0]);
+        } else {
+            res.status(404).json({ message: 'Hero verisi bulunamadı' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Sunucu hatası');
+    }
+});
+
 // Hero verilerini kaydet/güncelle
 router.post('/hero', verifyToken, async (req, res) => {
     try {
-        const { title, subtitle } = req.body;
+        const { mainTitle, subheading } = req.body;
         
-        if (!title || !subtitle) {
-            return res.status(400).json({ message: 'title ve subtitle zorunludur.' });
+        if (!mainTitle || !subheading) {
+            return res.status(400).json({ message: 'mainTitle ve subheading zorunludur.' });
         }
 
         const pool = await poolPromise;
@@ -24,19 +41,123 @@ router.post('/hero', verifyToken, async (req, res) => {
         if (existingHero.recordset.length > 0) {
             // Mevcut kaydı güncelle
             await pool.request()
-                .input('title', sql.NVarChar, title)
-                .input('subtitle', sql.NVarChar, subtitle)
-                .query('UPDATE Hero SET title = @title, subtitle = @subtitle WHERE id = 1');
+                .input('mainTitle', sql.NVarChar, mainTitle)
+                .input('subheading', sql.NVarChar, subheading)
+                .query('UPDATE Hero SET mainTitle = @mainTitle, subheading = @subheading WHERE id = 1');
         } else {
             // Yeni kayıt ekle
             await pool.request()
-                .input('title', sql.NVarChar, title)
-                .input('subtitle', sql.NVarChar, subtitle)
-                .query('INSERT INTO Hero (title, subtitle) VALUES (@title, @subtitle)');
+                .input('mainTitle', sql.NVarChar, mainTitle)
+                .input('subheading', sql.NVarChar, subheading)
+                .query('INSERT INTO Hero (mainTitle, subheading) VALUES (@mainTitle, @subheading)');
         }
 
         res.status(200).json({ message: 'Hero verileri başarıyla kaydedildi' });
     } catch (error) {
+        console.error(error);
+        res.status(500).send('Sunucu hatası');
+    }
+});
+
+// AboutUs verilerini getir
+router.get('/about', verifyToken, async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        
+        // AboutUs tablosundan ana verileri al
+        const aboutResult = await pool.request().query('SELECT TOP 1 * FROM AboutUs ORDER BY id');
+        
+        if (aboutResult.recordset.length === 0) {
+            return res.status(404).json({ message: 'About verisi bulunamadı' });
+        }
+        
+        const aboutData = aboutResult.recordset[0];
+        
+        // FeatureCards verilerini al
+        const featuresResult = await pool.request().query('SELECT * FROM FeatureCards ORDER BY id');
+        
+        res.status(200).json({
+            id: aboutData.id,
+            mainTitle: aboutData.mainTitle,
+            mainDescription: aboutData.mainDescription,
+            features: featuresResult.recordset
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Sunucu hatası');
+    }
+});
+
+// AboutUs verilerini kaydet/güncelle
+router.post('/about', verifyToken, async (req, res) => {
+    let transaction;
+    try {
+        const { mainTitle, mainDescription, features } = req.body;
+        
+        if (!mainTitle || !mainDescription || !features || !Array.isArray(features)) {
+            return res.status(400).json({ message: 'mainTitle, mainDescription ve features array zorunludur.' });
+        }
+
+        const pool = await poolPromise;
+        transaction = new sql.Transaction(pool);
+        await transaction.begin();
+
+        // AboutUs tablosunda kayıt var mı kontrol et
+        const existingAbout = await new sql.Request(transaction).query('SELECT TOP 1 * FROM AboutUs');
+        
+        if (existingAbout.recordset.length > 0) {
+            // Mevcut AboutUs kaydını güncelle
+            await new sql.Request(transaction)
+                .input('mainTitle', sql.NVarChar, mainTitle)
+                .input('mainDescription', sql.NVarChar, mainDescription)
+                .query('UPDATE AboutUs SET mainTitle = @mainTitle, mainDescription = @mainDescription WHERE id = 1');
+        } else {
+            // Yeni AboutUs kaydı ekle
+            await new sql.Request(transaction)
+                .input('mainTitle', sql.NVarChar, mainTitle)
+                .input('mainDescription', sql.NVarChar, mainDescription)
+                .query('INSERT INTO AboutUs (mainTitle, mainDescription) VALUES (@mainTitle, @mainDescription)');
+        }
+
+        // Mevcut FeatureCards'ları al
+        const existingFeatures = await new sql.Request(transaction).query('SELECT * FROM FeatureCards ORDER BY id');
+        const existingFeaturesMap = new Map(existingFeatures.recordset.map(f => [f.id, f]));
+
+        // Gelen features'ları işle
+        for (let i = 0; i < features.length; i++) {
+            const feature = features[i];
+            
+            if (feature.id && feature.id !== null && existingFeaturesMap.has(parseInt(feature.id))) {
+                // Mevcut feature'ı güncelle
+                await new sql.Request(transaction)
+                    .input('id', sql.Int, parseInt(feature.id))
+                    .input('feaute', sql.NVarChar(50), (feature.feaute || '').trim())
+                    .input('description', sql.NVarChar, (feature.description || '').trim())
+                    .input('icon', sql.NVarChar(10), (feature.icon || '').trim())
+                    .query('UPDATE FeatureCards SET feaute = @feaute, description = @description, icon = @icon WHERE id = @id');
+                
+                existingFeaturesMap.delete(parseInt(feature.id));
+            } else {
+                // Yeni feature ekle
+                await new sql.Request(transaction)
+                    .input('feaute', sql.NVarChar(50), (feature.feaute || '').trim())
+                    .input('description', sql.NVarChar, (feature.description || '').trim())
+                    .input('icon', sql.NVarChar(10), (feature.icon || '').trim())
+                    .query('INSERT INTO FeatureCards (feaute, description, icon) VALUES (@feaute, @description, @icon)');
+            }
+        }
+
+        // Kullanılmayan feature'ları sil
+        for (const [id, feature] of existingFeaturesMap) {
+            await new sql.Request(transaction)
+                .input('id', sql.Int, id)
+                .query('DELETE FROM FeatureCards WHERE id = @id');
+        }
+
+        await transaction.commit();
+        res.status(200).json({ message: 'About verileri başarıyla kaydedildi' });
+    } catch (error) {
+        if (transaction) { try { await transaction.rollback(); } catch (e) { } }
         console.error(error);
         res.status(500).send('Sunucu hatası');
     }

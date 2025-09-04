@@ -1,20 +1,32 @@
 import { useState, useEffect } from 'react';
 import FormButtons from './FormButtons';
+import adminService from '../../services/adminService';
 
 const HeroEditor = ({ onSave, onCancel }) => {
   const [formData, setFormData] = useState({
-    title: 'Siz İsteyin, Biz İnşa Edelim',
-    subtitle: 'Profesyonel ekibimizle isteğinizi birebir yerine getiriyoruz. Hemen teklif alabilirsiniz.',
+    mainTitle: 'Siz İsteyin, Biz İnşa Edelim',
+    subheading: 'Profesyonel ekibimizle isteğinizi birebir yerine getiriyoruz. Hemen teklif alabilirsiniz.',
   });
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // LocalStorage'dan verileri yükle
+  // Veritabanından verileri yükle
   useEffect(() => {
-    const savedHero = localStorage.getItem('heroData');
-    if (savedHero) {
-      setFormData(JSON.parse(savedHero));
-    }
+    const fetchHeroData = async () => {
+      try {
+        const heroData = await adminService.getHero();
+        if (heroData) {
+          setFormData({
+            mainTitle: heroData.mainTitle || 'Siz İsteyin, Biz İnşa Edelim',
+            subheading: heroData.subheading || 'Profesyonel ekibimizle isteğinizi birebir yerine getiriyoruz. Hemen teklif alabilirsiniz.'
+          });
+        }
+      } catch (error) {
+        console.error('Hero verileri getirilemedi:', error);
+      }
+    };
+
+    fetchHeroData();
   }, []);
 
   const handleChange = (e) => {
@@ -30,11 +42,8 @@ const HeroEditor = ({ onSave, onCancel }) => {
     setIsLoading(true);
     
     try {
-      // LocalStorage'a kaydet
-      localStorage.setItem('heroData', JSON.stringify(formData));
-      
-      // Ana sayfayı güncelle
-      window.dispatchEvent(new CustomEvent('heroDataUpdated', { detail: formData }));
+      // Veritabanına kaydet
+      await adminService.saveHero(formData);
       
       await onSave(formData);
     } catch (error) {
@@ -54,14 +63,14 @@ const HeroEditor = ({ onSave, onCancel }) => {
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         {/* Ana Başlık */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="mainTitle" className="block text-sm font-medium text-gray-700 mb-2">
             Ana Başlık *
           </label>
           <input
             type="text"
-            id="title"
-            name="title"
-            value={formData.title}
+            id="mainTitle"
+            name="mainTitle"
+            value={formData.mainTitle}
             onChange={handleChange}
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -71,13 +80,13 @@ const HeroEditor = ({ onSave, onCancel }) => {
 
         {/* Alt Başlık */}
         <div>
-          <label htmlFor="subtitle" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="subheading" className="block text-sm font-medium text-gray-700 mb-2">
             Alt Başlık *
           </label>
           <textarea
-            id="subtitle"
-            name="subtitle"
-            value={formData.subtitle}
+            id="subheading"
+            name="subheading"
+            value={formData.subheading}
             onChange={handleChange}
             required
             rows={3}

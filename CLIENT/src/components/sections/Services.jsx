@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import ServiceProjectsModal from '../ServiceProjectsModal'
+import LoadingImage from '../common/LoadingImage'
 import publicService from '../../services/publicService'
 import './Services.css'
 
@@ -18,29 +19,8 @@ const Services = () => {
                 setServices(servicesData)
             } catch (error) {
                 console.error('Hizmetler yüklenirken hata:', error)
-                // Hata durumunda varsayılan verileri kullan
-                setServices([
-                    {
-                        service: 'Mimari ve Yapı Projeleri',
-                        description: 'Uygulama projeleri, kat planları, kesit ve görünüş çizimleri, yapısal sistem çözümleri, malzeme detayı geliştirme, teklif dosyası hazırlama, 3D modelleme ve render alma hizmetleri.',
-                        url: null
-                    },
-                    {
-                        service: 'Saha Uygulama ve Takip',
-                        description: 'Saha uygulama takibi, keşif–metraj çalışmaları, hakediş düzenleme ve tüm uygulama aşamalarında mühendislik ilkelerine bağlı titiz çalışma.',
-                        url: null
-                    },
-                    {
-                        service: 'Dış Cephe ve İzolasyon',
-                        description: 'Dış cephe kaplama, mantolama ve izolasyon uygulamalarında teknik doğruluk ve görsel başarı odaklı çözümler.',
-                        url: null
-                    },
-                    {
-                        service: 'Peyzaj Tasarımı',
-                        description: 'Estetik beklentileri fonksiyonel gereksinimlerle buluşturan, çevreye değer katan peyzaj tasarımı ve uygulamaları.',
-                        url: null
-                    }
-                ])
+                // Hata durumunda boş array kullan - sabit veriler gösterme
+                setServices([])
             } finally {
                 setLoading(false)
             }
@@ -145,6 +125,28 @@ const Services = () => {
         )
     }
 
+    // Hata durumunda veya veri yoksa
+    if (services.length === 0) {
+        return (
+            <section id="services" className="services">
+                <div className="services-container">
+                    <div className="services-header">
+                        <h2 className="services-title">HİZMETLERİMİZ</h2>
+                        <p className="services-description">
+                            Konutlar ve Sektörler İçin Yüksek Kaliteli İnşaat Çözümleri!
+                        </p>
+                    </div>
+                    <div className="services-grid">
+                        <div className="loading-message">
+                            <div className="loading-spinner"></div>
+                            <p>Hizmetler yükleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        )
+    }
+
     return (
         <>
             <section id="services" className="services">
@@ -175,15 +177,13 @@ const Services = () => {
                                 className="service-card"
                             >
                                 <div className="service-image-container">
-                                    <img 
-                                        src={service.url ? `http://localhost:5000${service.url}` : 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&h=600&fit=crop'} 
+                                    <LoadingImage 
+                                        src={service.url ? publicService.getImageURL(service.url) : 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&h=600&fit=crop'} 
                                         alt={service.service}
                                         className="service-image"
-                                        onError={(e) => {
-                                            console.error('Görsel yüklenemedi:', e.target.src);
-                                            e.target.src = 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&h=600&fit=crop';
-                                        }}
-
+                                        fallbackSrc="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&h=600&fit=crop"
+                                        blurWhileLoading={true}
+                                        showLoadingSpinner={true}
                                     />
                                     
                                     <div className="service-overlay">

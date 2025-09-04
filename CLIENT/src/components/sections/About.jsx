@@ -1,51 +1,62 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import publicService from '../../services/publicService'
 import './About.css'
 
 const About = () => {
-    // Varsayılan veriler
-    const defaultData = {
-        title: 'Hakkımızda',
-        description: 'Hastuğ, mühendislik ve estetik anlayışını birleştirerek; fonksiyonel, dayanıklı ve çağdaş yaşam alanları inşa eden yenilikçi bir inşaat firmasıdır. Kalite, güven ve sürdürülebilirlik ilkeleriyle, her projede teknik doğruluk ve müşteri memnuniyetini ön planda tutar.',
-        features: [
-            {
-                title: 'Kalite ve Güven',
-                description: 'Tüm projelerimizde en yüksek kalite standartlarını benimser, güvenilir ve şeffaf bir iş anlayışıyla hareket ederiz. Müşterilerimizin memnuniyetini ve güvenini her şeyin önünde tutarız.',
-                icon: '✅'
-            },
-            {
-                title: 'Yenilikçi Çözümler',
-                description: 'Sürekli gelişen teknolojileri ve modern inşaat yöntemlerini takip ederek, projelerimize yenilikçi ve sürdürülebilir çözümler entegre ederiz.',
-                icon: '💡'
-            },
-            {
-                title: 'Sürdürülebilirlik',
-                description: 'Çevreye duyarlı malzeme ve uygulamalarla, gelecek nesillere yaşanabilir alanlar bırakmayı hedefleriz. Sürdürülebilirlik, tüm süreçlerimizin merkezindedir.',
-                icon: '🌱'
-            },
-            {
-                title: 'Uzman Kadro',
-                description: 'Alanında deneyimli ve uzman ekibimizle, her projede titiz mühendislik ve estetik bakış açısını bir araya getiririz.',
-                icon: '👷‍♂️'
-            }
-        ]
-    };
-
-    const [data, setData] = useState(defaultData);
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // localStorage'dan about verilerini oku
-        const savedAboutData = localStorage.getItem('aboutData');
-        if (savedAboutData) {
+        const fetchData = async () => {
             try {
-                const parsedData = JSON.parse(savedAboutData);
-                setData(parsedData);
+                // Veritabanından about verilerini getir
+                const aboutResponse = await publicService.getAbout();
+                if (aboutResponse) {
+                    setData(aboutResponse);
+                }
             } catch (error) {
-                console.error('About verisi parse edilemedi:', error);
-                setData(defaultData);
+                console.error('About verileri getirilemedi:', error);
+                setData(null);
+            } finally {
+                setLoading(false);
             }
-        }
+        };
+
+        fetchData();
     }, []);
+
+    if (loading) {
+        return (
+            <section id="about" className="about">
+                <div className="about-container">
+                    <div className="about-header">
+                        <h2 className="about-title">Hakkımızda</h2>
+                        <div className="loading-message">
+                            <div className="loading-spinner"></div>
+                            <p>İçerik yükleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        )
+    }
+
+    if (!data) {
+        return (
+            <section id="about" className="about">
+                <div className="about-container">
+                    <div className="about-header">
+                        <h2 className="about-title">Hakkımızda</h2>
+                        <div className="loading-message">
+                            <div className="loading-spinner"></div>
+                            <p>İçerik yükleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        )
+    }
 
     return (
         <section id="about" className="about">
@@ -58,15 +69,15 @@ const About = () => {
                     className="about-header"
                 >
                     <h2 className="about-title">
-                        {data.title}
+                        {data.mainTitle || 'Hakkımızda'}
                     </h2>
                     <p className="about-description">
-                        {data.description}
+                        {data.mainDescription || 'İçerik yükleniyor...'}
                     </p>
                 </motion.div>
 
                 <div className="features-grid">
-                    {data.features.map((feature, index) => (
+                    {data.features && data.features.map((feature, index) => (
                         <motion.div
                             key={index}
                             initial={{ opacity: 0, y: 30 }}
@@ -76,7 +87,7 @@ const About = () => {
                             className="feature-card"
                         >
                             <div className="feature-icon">{feature.icon}</div>
-                            <h3 className="feature-title">{feature.title}</h3>
+                            <h3 className="feature-title">{feature.feaute}</h3>
                             <p className="feature-description">{feature.description}</p>
                         </motion.div>
                     ))}

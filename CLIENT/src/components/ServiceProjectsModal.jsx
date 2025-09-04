@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ProjectDetailModal from './ProjectDetailModal'
+import LoadingImage from './common/LoadingImage'
 import publicService from '../services/publicService'
 import './ServiceProjectsModal.css'
 
@@ -68,13 +69,13 @@ const ServiceProjectsModal = ({ isOpen, onClose, service, projects, getStatusTex
                                                 className="project-card"
                                             >
                                                 <div className="project-image-container">
-                                                    <img 
+                                                    <LoadingImage 
                                                         src={publicService.getImageURL(project.url)}
                                                         alt={project.title}
                                                         className="project-thumbnail"
-                                                        onError={(e) => {
-                                                            e.target.src = '/api/placeholder/400/300'
-                                                        }}
+                                                        fallbackSrc="/api/placeholder/400/300"
+                                                        blurWhileLoading={true}
+                                                        showLoadingSpinner={true}
                                                     />
                                                     <div className="project-overlay">
                                                         <button 

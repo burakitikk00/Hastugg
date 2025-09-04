@@ -1,25 +1,14 @@
 import { useState } from 'react';
 import FormButtons from './FormButtons';
+import LoadingImage from '../common/LoadingImage';
 import adminService from '../../services/adminService';
 
 const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
-    services: (servicesData?.services || [
-      {
-        id: 1,
-        service: 'Mimari ve Yapı Projeleri',
-        description: 'Uygulama projeleri, kat planları, kesit ve görünüş çizimleri, yapısal sistem çözümleri, malzeme detayı geliştirme, teklif dosyası hazırlama, 3D modelleme ve render alma hizmetleri.',
-        url: null
-      },
-      {
-        id: 2,
-        service: 'Saha Uygulama ve Takip',
-        description: 'Saha uygulama takibi, keşif-metraj çalışmaları, hakediş düzenleme ve tüm uygulama aşamalarında mühendislik ilkelerine bağlı titiz çalışma.',
-        url: null
-      }
-    ]).map(service => ({
+    services: (servicesData?.services || []).map(service => ({
       ...service,
-      url: service.url || null
+      // Eğer url relative path ise tam URL'ye çevir
+      url: service.url ? (service.url.startsWith('http') ? service.url : `http://localhost:5000${service.url}`) : null
     }))
   });
 
@@ -57,8 +46,9 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
     
     try {
       const result = await adminService.uploadImage(file);
-      // Backend'den imageURL geliyor, url olarak kaydet
-      handleServiceChange(index, 'url', result.imageURL);
+      // Backend'den gelen relative path'i tam URL'ye çevir
+      const fullImageURL = `http://localhost:5000${result.imageURL}`;
+      handleServiceChange(index, 'url', fullImageURL);
       alert('Görsel başarıyla yüklendi!');
     } catch (error) {
       console.error('Görsel yüklenirken hata:', error);
@@ -90,6 +80,14 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if any images are currently uploading
+    const isAnyImageUploading = Object.values(uploadingImages).some(uploading => uploading);
+    if (isAnyImageUploading) {
+      alert('Lütfen görsel yüklemelerinin tamamlanmasını bekleyin!');
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -163,8 +161,19 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
                         <div className="text-sm text-blue-600">Görsel yükleniyor...</div>
                       )}
                       {service.url && (
-                        <div className="text-sm text-green-600">
-                          ✓ Görsel yüklendi: {service.url}
+                        <div className="flex items-center space-x-3">
+                          <div className="text-sm text-green-600">
+                            ✓ Görsel yüklendi
+                          </div>
+                          <div className="w-16 h-16 rounded-md border border-gray-200 overflow-hidden">
+                            <LoadingImage 
+                              src={service.url} 
+                              alt="Service preview" 
+                              className="w-full h-full object-cover"
+                              blurWhileLoading={true}
+                              showLoadingSpinner={false}
+                            />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -206,6 +215,7 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
           onCancel={onCancel}
           saveText="Kaydet"
           isLoading={isLoading}
+          isDisabled={Object.values(uploadingImages).some(uploading => uploading)}
         />
       </form>
     </div>

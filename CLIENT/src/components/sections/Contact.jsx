@@ -5,24 +5,8 @@ import publicService from '../../services/publicService'
 import './Contact.css'
 
 const Contact = () => {
-    const [contactInfo, setContactInfo] = useState([
-        {
-            icon: FaMapMarkerAlt,
-            title: 'Adres',
-            info: 'Yükleniyor...',
-            subInfo: ''
-        },
-        {
-            icon: FaPhone,
-            title: 'Telefon',
-            info: 'Yükleniyor...'
-        },
-        {
-            icon: FaEnvelope,
-            title: 'E-posta',
-            info: 'Yükleniyor...'
-        }
-    ])
+    const [contactInfo, setContactInfo] = useState(null)
+    const [loading, setLoading] = useState(true)
 
 
 
@@ -115,10 +99,12 @@ const Contact = () => {
                         instagram: contact.instagram || '',
                         linkedin: contact.linkedin || ''
                     })
-
                 }
             } catch (error) {
                 console.error('Contact bilgileri getirilemedi:', error)
+                setContactInfo(null)
+            } finally {
+                setLoading(false)
             }
         }
 
@@ -143,6 +129,25 @@ const Contact = () => {
     const [socialLinks, setSocialLinks] = useState({ facebook: '', twitter: '', instagram: '', linkedin: '' })
 
 
+
+    if (loading || !contactInfo) {
+        return (
+            <section id="contact" className="contact">
+                <div className="contact-container">
+                    <div className="contact-header">
+                        <h2 className="contact-title">İLETİŞİM</h2>
+                        <p className="contact-description">Projeleriniz için bizimle iletişime geçin</p>
+                    </div>
+                    <div className="contact-content">
+                        <div className="loading-message">
+                            <div className="loading-spinner"></div>
+                            <p>İletişim bilgileri yükleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        )
+    }
 
     return (
         <section id="contact" className="contact">

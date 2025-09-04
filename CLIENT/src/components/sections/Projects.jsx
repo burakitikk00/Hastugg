@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import ProjectDetailModal from '../ProjectDetailModal'
+import LoadingImage from '../common/LoadingImage'
 import publicService from '../../services/publicService'
 import './Projects.css'
 
@@ -146,13 +147,13 @@ const Projects = () => {
                                 className="project-card"
                             >
                                 <div className="project-image-container">
-                                    <img
+                                    <LoadingImage
                                         src={publicService.getImageURL(project.url)}
                                         alt={project.name || project.title}
                                         className="project-image"
-                                        onError={(e) => {
-                                            e.target.src = '/api/placeholder/400/300'
-                                        }}
+                                        fallbackSrc="/api/placeholder/400/300"
+                                        blurWhileLoading={true}
+                                        showLoadingSpinner={true}
                                     />
                                     <div className="project-status">
                                         <span className={`status-badge ${(project.status || '').toLowerCase().replace(' ', '_')}`}>

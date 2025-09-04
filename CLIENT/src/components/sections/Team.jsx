@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import LoadingImage from '../common/LoadingImage'
 import publicService from '../../services/publicService'
 import './Team.css'
 
@@ -18,33 +19,7 @@ const Team = () => {
             } catch (err) {
                 console.error('Team verileri yüklenirken hata:', err)
                 setError('Ekip bilgileri yüklenirken bir hata oluştu')
-                // Fallback veriler
-                setTeamMembers([
-                    {
-                        id: 1,
-                        namesurname: 'John Touch',
-                        position: 'ENGINEERING OFFICER',
-                        url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
-                    },
-                    {
-                        id: 2,
-                        namesurname: 'Tony Draxler',
-                        position: 'MARKETING MANAGER',
-                        url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
-                    },
-                    {
-                        id: 3,
-                        namesurname: 'Richard Keaton',
-                        position: 'TECHNOLOGY OFFICER',
-                        url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
-                    },
-                    {
-                        id: 4,
-                        namesurname: 'Ali Koçeller',
-                        position: 'FIELD OFFICER',
-                        url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
-                    }
-                ])
+                setTeamMembers([])
             } finally {
                 setLoading(false)
             }
@@ -90,6 +65,26 @@ const Team = () => {
         )
     }
 
+    // Hata durumunda veya veri yoksa
+    if (teamMembers.length === 0) {
+        return (
+            <section id="team" className="team">
+                <div className="team-container">
+                    <div className="team-header">
+                        <h2 className="team-title">PROFESYONEL EKİP</h2>
+                        <p className="team-description">BİZİMLE TANIŞIN</p>
+                    </div>
+                    <div className="team-grid">
+                        <div className="loading-message">
+                            <div className="loading-spinner"></div>
+                            <p>Ekip bilgileri yükleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        )
+    }
+
     return (
         <section id="team" className="team">
             <div className="team-container">
@@ -125,13 +120,13 @@ const Team = () => {
                             className="team-card"
                         >
                             <div className="member-image-container">
-                                <img
+                                <LoadingImage
                                     src={getImageUrl(member)}
                                     alt={member.namesurname}
                                     className="member-image"
-                                    onError={(e) => {
-                                        e.target.src = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
-                                    }}
+                                    fallbackSrc="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                                    blurWhileLoading={true}
+                                    showLoadingSpinner={true}
                                 />
                             </div>
                             <div className="member-info">
