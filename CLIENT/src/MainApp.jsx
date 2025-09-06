@@ -9,9 +9,11 @@ import {
   Team,
   Contact
 } from './components';
+import { useGoogleAnalytics } from './hooks/useGoogleAnalytics';
 
 function MainApp() {
   const [activeSection, setActiveSection] = useState('home');
+  const { trackEvent, trackPageView, analyticsSettings } = useGoogleAnalytics();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,7 +35,21 @@ function MainApp() {
 
   const handleSectionChange = (sectionId) => {
     setActiveSection(sectionId);
+    
+    // Google Analytics ile sayfa görüntüleme takibi
+    if (analyticsSettings.is_active) {
+      trackPageView(`/${sectionId}`);
+      trackEvent('page_view', 'navigation', sectionId);
+    }
   };
+
+  // Sayfa yüklendiğinde ana sayfa görüntülemesini takip et
+  useEffect(() => {
+    if (analyticsSettings.is_active) {
+      trackPageView('/');
+      trackEvent('page_view', 'navigation', 'home');
+    }
+  }, [analyticsSettings.is_active]);
 
   return (
     <div className="app">

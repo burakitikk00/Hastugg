@@ -133,6 +133,30 @@ class PublicService {
       throw error;
     }
   }
+
+  // Analytics ayarlarını getir (herkes erişebilir)
+  async getAnalyticsSettings() {
+    try {
+      const response = await fetch(`${this.baseURL}/analytics-settings`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Analytics ayarları getirilemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      // Analytics ayarları yüklenemezse varsayılan değer döndür
+      return {
+        measurement_id: null,
+        is_active: false
+      };
+    }
+  }
 }
 
 export default new PublicService();

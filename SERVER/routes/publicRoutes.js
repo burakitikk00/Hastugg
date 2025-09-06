@@ -2,6 +2,77 @@ const express = require("express");
 const router = express.Router();
 const { sql, poolPromise } = require('./dbConfig');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+
+// Email şifreleme/çözme fonksiyonları (adminRoutes.js ile aynı)
+const ENCRYPTION_KEY = crypto.scryptSync('hastugg_email_encryption_key_2024', 'salt', 32);
+const IV_LENGTH = 16;
+
+function decryptEmailPassword(encryptedText) {
+    const textParts = encryptedText.split(':');
+    const iv = Buffer.from(textParts.shift(), 'hex');
+    const encryptedData = textParts.join(':');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
+    let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+}
+
+// Otomatik email gönderme fonksiyonu
+async function sendContactEmail(message) {
+    try {
+        const pool = await poolPromise;
+        
+        // Email ayarlarını al
+        const emailResult = await pool.request().query('SELECT TOP 1 * FROM EmailSettings ORDER BY id');
+        
+        if (emailResult.recordset.length === 0) {
+            console.log('Email ayarları bulunamadı, otomatik email gönderilemedi');
+            return false;
+        }
+        
+        const emailSettings = emailResult.recordset[0];
+        
+        // Şifrelenmiş şifreyi çöz
+        const decryptedPassword = decryptEmailPassword(emailSettings.email_pass);
+        
+        // Nodemailer transporter oluştur
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: emailSettings.email_user,
+                pass: decryptedPassword
+            }
+        });
+
+        // E-posta içeriği
+        const mailOptions = {
+            from: emailSettings.email_user,
+            to: emailSettings.email_user, // Admin'e gönder
+            subject: `Yeni İletişim Formu - ${message.first_name} ${message.last_name}`,
+            html: `
+                <h2>Yeni İletişim Formu Mesajı</h2>
+                <p><strong>Ad Soyad:</strong> ${message.first_name} ${message.last_name}</p>
+                <p><strong>E-posta:</strong> ${message.email}</p>
+                <p><strong>Telefon:</strong> ${message.phone}</p>
+                <p><strong>Mesaj:</strong></p>
+                <p>${message.message.replace(/\n/g, '<br>')}</p>
+                <hr>
+                <p><em>Bu mesaj web sitenizin iletişim formundan otomatik olarak gönderilmiştir.</em></p>
+                <p><strong>Gönderim Zamanı:</strong> ${new Date(message.created_at).toLocaleString('tr-TR')}</p>
+            `
+        };
+
+        // E-postayı gönder
+        await transporter.sendMail(mailOptions);
+        console.log('Otomatik email başarıyla gönderildi:', message.email);
+        return true;
+        
+    } catch (error) {
+        console.error('Otomatik email gönderme hatası:', error);
+        return false;
+    }
+}
 
 
 // Hero verilerini getir (herkes erişebilir)
@@ -136,76 +207,91 @@ router.post('/contact', async (req, res) => {
             return res.status(400).json({ error: 'Geçerli bir e-posta adresi giriniz' });
         }
 
-        // E-posta transporter oluştur (Gmail için örnek)
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER || 'your-email@gmail.com', // Gmail adresiniz
-                pass: process.env.EMAIL_PASS || 'your-app-password' // Gmail uygulama şifresi
+        // Database'e mesajı kaydet
+        const { sql, poolPromise } = require('./dbConfig');
+        const pool = await poolPromise;
+        
+        try {
+            // ContactMessages tablosuna kaydet
+            const insertResult = await pool.request()
+                .input('firstName', sql.NVarChar, firstName)
+                .input('lastName', sql.NVarChar, lastName)
+                .input('email', sql.NVarChar, email)
+                .input('phone', sql.NVarChar, phone)
+                .input('message', sql.NVarChar, message)
+                .query('INSERT INTO ContactMessages (first_name, last_name, email, phone, message) VALUES (@firstName, @lastName, @email, @phone, @message); SELECT SCOPE_IDENTITY() as id;');
+
+            // Kaydedilen mesajın ID'sini al
+            const messageId = insertResult.recordset[0].id;
+            
+            // Mesajı tekrar al (created_at ile birlikte)
+            const messageResult = await pool.request()
+                .input('id', sql.Int, messageId)
+                .query('SELECT * FROM ContactMessages WHERE id = @id');
+            
+            const savedMessage = messageResult.recordset[0];
+            
+            // Otomatik email gönder (asenkron, hata olsa bile devam et)
+            sendContactEmail(savedMessage).then(emailSent => {
+                if (emailSent) {
+                    // Email gönderildi olarak işaretle
+                    pool.request()
+                        .input('id', sql.Int, messageId)
+                        .query('UPDATE ContactMessages SET is_sent = 1 WHERE id = @id')
+                        .catch(err => console.error('Email gönderildi işaretleme hatası:', err));
+                }
+            }).catch(err => console.error('Otomatik email gönderme hatası:', err));
+
+            // Başarılı yanıt
+            res.status(200).json({ message: 'Mesajınız başarıyla kaydedildi. En kısa sürede size dönüş yapacağız.' });
+
+        } catch (dbError) {
+            console.error('Veritabanı hatası:', dbError);
+            // Eğer ContactMessages tablosu yoksa, eski yöntemi kullan
+            if (dbError.message.includes('ContactMessages')) {
+                return res.status(500).json({ 
+                    error: 'Mesaj sistemi henüz yapılandırılmamış. Lütfen daha sonra tekrar deneyin.' 
+                });
             }
-        });
-
-        // E-posta içeriği
-        const mailOptions = {
-            from: process.env.EMAIL_USER || 'your-email@gmail.com',
-            to: process.env.EMAIL_USER || 'your-email@gmail.com', // Kendi e-posta adresiniz
-            subject: `Yeni İletişim Formu - ${firstName} ${lastName}`,
-            html: `
-                <h2>Yeni İletişim Formu Mesajı</h2>
-                <p><strong>Ad Soyad:</strong> ${firstName} ${lastName}</p>
-                <p><strong>E-posta:</strong> ${email}</p>
-                <p><strong>Telefon:</strong> ${phone}</p>
-                <p><strong>Mesaj:</strong></p>
-                <p>${message.replace(/\n/g, '<br>')}</p>
-                <hr>
-                <p><em>Bu mesaj web sitenizin iletişim formundan gönderilmiştir.</em></p>
-            `
-        };
-
-        // E-postayı gönder
-        await transporter.sendMail(mailOptions);
-
-        // Başarılı yanıt
-        res.status(200).json({ message: 'Mesajınız başarıyla gönderildi' });
+            throw dbError;
+        }
 
     } catch (error) {
-        console.error('E-posta gönderme hatası:', error);
-        res.status(500).json({ error: 'Mesaj gönderilirken bir hata oluştu' });
+        console.error('Mesaj kaydetme hatası:', error);
+        res.status(500).json({ error: 'Mesaj kaydedilirken bir hata oluştu' });
     }
 });
 
-// E-posta ayarlarını test etmek için endpoint
-router.get('/test-email', async (req, res) => {
+// Public test endpoint kaldırıldı - güvenlik için
+// Email test işlemi sadece admin panelinden yapılabilir
+
+// ==================== GOOGLE ANALYTICS AYARLARI (PUBLIC) ====================
+
+// Analytics ayarlarını getir (public - frontend için)
+router.get('/analytics-settings', async (req, res) => {
     try {
-        // E-posta transporter oluştur
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER || 'your-email@gmail.com',
-                pass: process.env.EMAIL_PASS || 'your-app-password'
-            }
-        });
-
-        // Test e-postası gönder
-        const mailOptions = {
-            from: process.env.EMAIL_USER || 'your-email@gmail.com',
-            to: process.env.EMAIL_USER || 'your-email@gmail.com',
-            subject: 'E-posta Ayarları Test',
-            html: `
-                <h2>E-posta Ayarları Başarılı!</h2>
-                <p>Bu bir test e-postasıdır. E-posta ayarlarınız doğru çalışıyor.</p>
-                <p><strong>Gönderim Zamanı:</strong> ${new Date().toLocaleString('tr-TR')}</p>
-            `
-        };
-
-        await transporter.sendMail(mailOptions);
-        res.status(200).json({ message: 'Test e-postası başarıyla gönderildi' });
-
+        const pool = await poolPromise;
+        const result = await pool.request().query(`
+            SELECT TOP 1 measurement_id, is_active 
+            FROM analytics_settings 
+            WHERE is_active = 1
+            ORDER BY created_at DESC
+        `);
+        
+        if (result.recordset.length > 0) {
+            res.json(result.recordset[0]);
+        } else {
+            // Analytics aktif değilse boş döndür
+            res.json({
+                measurement_id: null,
+                is_active: false
+            });
+        }
     } catch (error) {
-        console.error('Test e-postası hatası:', error);
-        res.status(500).json({ 
-            error: 'Test e-postası gönderilemedi',
-            details: error.message 
+        console.error('Analytics ayarları getirme hatası:', error);
+        res.json({
+            measurement_id: null,
+            is_active: false
         });
     }
 });

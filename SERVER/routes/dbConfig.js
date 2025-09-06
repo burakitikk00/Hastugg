@@ -7,7 +7,7 @@ const config = {
     server: process.env.DB_SERVER, // SQL Server adresi
     database: process.env.DB_DATABASE, // Veritabanı adı
     options: {
-        encrypt: false, // Windows için false
+        encrypt: true, // Windows için false
         trustServerCertificate: true, // SSL sertifikası doğrulamasını atla
         enableArithAbort: true
     },

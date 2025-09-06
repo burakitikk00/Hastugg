@@ -34,6 +34,11 @@ class AdminService {
     };
   }
 
+  // Token'ı al
+  getToken() {
+    return localStorage.getItem('adminToken');
+  }
+
   // Admin girişi
   async login(credentials) {
     try {
@@ -553,6 +558,287 @@ class AdminService {
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // EMAIL AYARLARI METHODLARİ
+
+  // Email ayarlarını getir
+  async getEmailSettings() {
+    try {
+      const response = await fetch(`${this.baseURL}/email-settings`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Email ayarlarını kaydet/güncelle
+  async saveEmailSettings(emailData) {
+    try {
+      const response = await fetch(`${this.baseURL}/email-settings`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(emailData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Email ayarları kaydedilemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Email ayarlarını test et
+  async testEmailSettings() {
+    try {
+      const response = await fetch(`${this.baseURL}/email-settings/test`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({})
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || errorData.error || 'Test e-postası gönderilemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Contact Messages CRUD Operations
+
+  // Contact mesajları istatistiklerini getir
+  async getContactMessagesStats() {
+    try {
+      const response = await fetch(`${this.baseURL}/contact-messages/stats`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Contact mesajları istatistikleri alınamadı');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Contact mesajlarını getir (sayfalama ile)
+  async getContactMessages(page = 1, limit = 10, filter = 'all') {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        filter: filter
+      });
+
+      const response = await fetch(`${this.baseURL}/contact-messages?${params}`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Contact mesajları alınamadı');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Contact mesajını okundu olarak işaretle
+  async markContactMessageAsRead(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/contact-messages/${id}/read`, {
+        method: 'PUT',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Mesaj okundu olarak işaretlenemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Contact mesajını e-posta olarak gönder
+  async sendContactMessageEmail(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/contact-messages/${id}/send-email`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({})
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || errorData.error || 'E-posta gönderilemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Contact mesajını sil
+  async deleteContactMessage(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/contact-messages/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Mesaj silinemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // ==================== GOOGLE ANALYTICS AYARLARI ====================
+
+  // Analytics ayarlarını getir
+  async getAnalyticsSettings() {
+    try {
+      const response = await fetch(`${this.baseURL}/analytics-settings`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.getToken()}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Analytics ayarları alınamadı');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Analytics ayarlarını kaydet
+  async saveAnalyticsSettings(analyticsData) {
+    try {
+      const response = await fetch(`${this.baseURL}/analytics-settings`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.getToken()}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(analyticsData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Analytics ayarları kaydedilemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Analytics ayarlarını test et
+  async testAnalyticsSettings(measurementId) {
+    try {
+      const response = await fetch(`${this.baseURL}/analytics-settings/test`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.getToken()}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ measurement_id: measurementId })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Analytics test edilemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // ==================== ŞİFRE DEĞİŞTİRME ====================
+
+  // Admin şifresini değiştir
+  async changePassword(passwordData) {
+    try {
+      const response = await fetch(`${this.baseURL}/change-password`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(passwordData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Şifre değiştirilemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // ==================== ŞİFRE SIFIRLAMA ====================
+
+  // Şifre sıfırlama isteği gönder
+  async forgotPassword(email) {
+    try {
+      const response = await fetch(`${this.baseURL}/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Şifre sıfırlama isteği gönderilemedi');
       }
 
       return await response.json();

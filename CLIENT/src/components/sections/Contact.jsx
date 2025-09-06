@@ -2,11 +2,13 @@ import { motion } from 'framer-motion'
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaInstagram, FaFacebook, FaTwitter, FaLinkedin, FaMap } from 'react-icons/fa'
 import { useState, useEffect } from 'react'
 import publicService from '../../services/publicService'
+import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics'
 import './Contact.css'
 
 const Contact = () => {
     const [contactInfo, setContactInfo] = useState(null)
     const [loading, setLoading] = useState(true)
+    const { trackEvent } = useGoogleAnalytics()
 
 
 
@@ -56,6 +58,9 @@ const Contact = () => {
                     phone: '',
                     message: ''
                 })
+                
+                // Google Analytics ile form gönderimini takip et
+                trackEvent('form_submit', 'contact', 'contact_form', 1)
             } else {
                 const errorData = await response.json()
                 console.error('Backend hatası:', errorData)

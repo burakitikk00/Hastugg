@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import HeroEditor from './HeroEditor';
 import AboutEditor from './AboutEditor';
+import adminService from '../../services/adminService';
 
 const PageContentManager = () => {
   const [activeSection, setActiveSection] = useState('hero');
@@ -54,14 +55,14 @@ const PageContentManager = () => {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold text-gray-900">Sayfa İçerik Yönetimi</h1>
-        <p className="text-gray-600 mt-2">Hero ve Hakkımızda bölümlerini buradan düzenleyebilirsiniz</p>
+        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+        <p className="text-gray-600 mt-2">Sayfa içerikleri ve email ayarlarını buradan düzenleyebilirsiniz</p>
       </div>
 
       {/* Section Navigation */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Sayfa Bölümleri</h3>
+          <h3 className="text-lg font-medium text-gray-900">Yönetim Bölümleri</h3>
         </div>
         <div className="p-6">
           <div className="flex flex-wrap gap-3">

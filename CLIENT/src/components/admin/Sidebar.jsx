@@ -5,11 +5,16 @@ const Sidebar = ({ onLogout }) => {
   const location = useLocation();
 
   const menuItems = [
+    { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/admin/page-content', label: 'Sayfa İçerikleri', icon: '📝' },
+    { path: '/admin/contact-messages', label: 'Mesajlar', icon: '💬' },
     { path: '/admin/services', label: 'Hizmetler', icon: '🔧' },
     { path: '/admin/team', label: 'Ekip', icon: '👥' },
     { path: '/admin/projects', label: 'Projeler', icon: '💼' },
     { path: '/admin/contact', label: 'İletişim', icon: '📞' },
+    { path: '/admin/email-settings', label: 'Email Ayarları', icon: '📧' },
+    { path: '/admin/analytics', label: 'Analytics', icon: '📈' },
+    { path: '/admin/change-password', label: 'Şifre Değiştir', icon: '🔒' },
   ];
 
   const isActive = (path) => location.pathname === path;

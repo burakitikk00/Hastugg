@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import adminService from '../../services/adminService';
+import ForgotPasswordForm from './ForgotPasswordForm';
 
 const LoginForm = () => {
   const [credentials, setCredentials] = useState({
@@ -10,6 +11,7 @@ const LoginForm = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -42,6 +44,15 @@ const LoginForm = () => {
       setLoading(false);
     }
   };
+
+  // Şifre sıfırlama formunu göster
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <ForgotPasswordForm onBackToLogin={() => setShowForgotPassword(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -126,6 +137,17 @@ const LoginForm = () => {
                 </svg>
               )}
               {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+            </button>
+          </div>
+
+          {/* Şifremi Unuttum Linki */}
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+            >
+              Şifremi Unuttum
             </button>
           </div>
         </form>
