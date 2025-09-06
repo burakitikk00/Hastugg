@@ -18,48 +18,18 @@ const AboutEditor = ({ onSave, onCancel }) => {
     const fetchAboutData = async () => {
       try {
         const aboutData = await adminService.getAbout();
-        console.log('About data received:', aboutData);
+        
         if (aboutData) {
           setFormData({
             mainTitle: aboutData.mainTitle || '',
             mainDescription: aboutData.mainDescription || '',
             features: aboutData.features || []
           });
-          console.log('Features loaded:', aboutData.features);
+          
         }
       } catch (error) {
         console.error('About verileri getirilemedi:', error);
-        // Hata durumunda default değerler
-        setFormData({
-          mainTitle: 'Hakkımızda',
-          mainDescription: 'Hastuğ, mühendislik ve estetik anlayışını birleştirerek; fonksiyonel, dayanıklı ve çağdaş yaşam alanları inşa eden yenilikçi bir inşaat firmasıdır. Kalite, güven ve sürdürülebilirlik ilkeleriyle, her projede teknik doğruluk ve müşteri memnuniyetini ön planda tutar.',
-          features: [
-            {
-              id: null,
-              feature: 'Kalite ve Güven',
-              description: 'Tüm projelerimizde en yüksek kalite standartlarını benimser, güvenilir ve şeffaf bir iş anlayışıyla hareket ederiz. Müşterilerimizin memnuniyetini ve güvenini her şeyin önünde tutarız.',
-              icon: '✅'
-            },
-            {
-              id: null,
-              feature: 'Yenilikçi Çözümler',
-              description: 'Sürekli gelişen teknolojileri ve modern inşaat yöntemlerini takip ederek, projelerimize yenilikçi ve sürdürülebilir çözümler entegre ederiz.',
-              icon: '💡'
-            },
-            {
-              id: null,
-              feature: 'Sürdürülebilirlik',
-              description: 'Çevreye duyarlı malzeme ve uygulamalarla, gelecek nesillere yaşanabilir alanlar bırakmayı hedefleriz. Sürdürülebilirlik, tüm süreçlerimizin merkezindedir.',
-              icon: '🌱'
-            },
-            {
-              id: null,
-              feature: 'Uzman Kadro',
-              description: 'Alanında deneyimli ve uzman ekibimizle, her projede titiz mühendislik ve estetik bakış açısını bir araya getiririz.',
-              icon: '👷‍♂️'
-            }
-          ]
-        });
+        alert('About verileri yüklenirken hata oluştu: ' + error.message);
       }
     };
 

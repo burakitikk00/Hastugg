@@ -52,7 +52,6 @@ export const useGoogleAnalytics = () => {
 
     script1.onload = () => {
       setIsLoaded(true);
-      console.log('Google Analytics yüklendi:', measurementId);
     };
 
     script1.onerror = () => {
