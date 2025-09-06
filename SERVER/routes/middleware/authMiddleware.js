@@ -1,8 +1,9 @@
 
 const jwt = require('jsonwebtoken');
-// Not: SECRET_KEY'i adminRoutes'tan buraya taşımak veya
-// merkezi bir config dosyasında tutmak daha iyi bir pratiktir.
-const SECRET_KEY = 'your_super_secret_and_long_key_that_no_one_can_guess'; 
+require('dotenv').config();
+
+// JWT secret key'i environment variable'dan al
+const SECRET_KEY = process.env.JWT_SECRET; 
 
 const verifyToken = (req, res, next) => {
     // 1. İstek başlıklarından token'ı al

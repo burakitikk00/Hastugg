@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = 'your_super_secret_and_long_key_that_no_one_can_guess';
+require('dotenv').config();
+const SECRET_KEY = process.env.JWT_SECRET;
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
