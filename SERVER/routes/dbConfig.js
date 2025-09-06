@@ -7,9 +7,16 @@ const config = {
     server: process.env.DB_SERVER, // SQL Server adresi
     database: process.env.DB_DATABASE, // Veritabanı adı
     options: {
-        encrypt: true, // Windows için false
+        encrypt: true, // Azure SQL için true
         trustServerCertificate: true, // SSL sertifikası doğrulamasını atla
-        enableArithAbort: true
+        enableArithAbort: true,
+        requestTimeout: 30000, // 30 saniye timeout
+        connectionTimeout: 30000, // 30 saniye connection timeout
+        pool: {
+            max: 10,
+            min: 0,
+            idleTimeoutMillis: 30000
+        }
     },
     port: 1433 // SQL Server varsayılan portu
 };
