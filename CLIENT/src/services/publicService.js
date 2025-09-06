@@ -1,10 +1,17 @@
-const API_BASE_URL = 'http://localhost:5000/api';
-const SERVER_BASE_URL = 'http://localhost:5000';
+import API_CONFIG from '../config/api.js';
 
 class PublicService {
   constructor() {
-    this.baseURL = API_BASE_URL;
-    this.serverURL = SERVER_BASE_URL;
+    // URL'leri her seferinde dinamik olarak al
+  }
+
+  // Dinamik URL getter'ları
+  get baseURL() {
+    return API_CONFIG.API_BASE_URL;
+  }
+
+  get serverURL() {
+    return API_CONFIG.SERVER_BASE_URL;
   }
 
   // Görsel URL'ini tam URL'ye dönüştür
