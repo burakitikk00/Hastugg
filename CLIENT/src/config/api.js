@@ -3,8 +3,14 @@ const API_CONFIG = {
   // Base URL - environment variable'dan al, yoksa localhost kullan
   get BASE_URL() {
     // Production'da VITE_API_URL kullan, development'ta localhost
-    if (import.meta.env.PROD && import.meta.env.VITE_API_URL) {
-      return import.meta.env.VITE_API_URL;
+    if (import.meta.env.PROD) {
+      // Production'da mutlaka VITE_API_URL kullan
+      if (import.meta.env.VITE_API_URL) {
+        return import.meta.env.VITE_API_URL;
+      }
+      // Eğer VITE_API_URL yoksa Render URL'ini kullan
+      console.warn('VITE_API_URL bulunamadı, Render URL kullanılıyor');
+      return 'https://hastugg.onrender.com';
     }
     // Development ortamında localhost kullan
     return 'http://localhost:5000';

@@ -1,10 +1,13 @@
 import API_CONFIG from '../config/api.js';
 
-const API_BASE_URL = API_CONFIG.ADMIN_API_URL;
-
 class AdminService {
   constructor() {
-    this.baseURL = API_BASE_URL;
+    // URL'yi her seferinde dinamik olarak al
+  }
+
+  // Dinamik URL getter'ı
+  get baseURL() {
+    return API_CONFIG.ADMIN_API_URL;
   }
 
   // İletişim bilgilerini kaydet/güncelle
