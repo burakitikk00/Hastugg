@@ -116,7 +116,7 @@ router.get('/about', verifyToken, async (req, res) => {
 router.post('/about', verifyToken, async (req, res) => {
     let transaction;
     try {
-        console.log('About POST request received:', req.body);
+        console.log('About POST request received:', JSON.stringify(req.body, null, 2));
         const { mainTitle, mainDescription, features } = req.body;
         
         if (!mainTitle || !mainDescription || !features || !Array.isArray(features)) {

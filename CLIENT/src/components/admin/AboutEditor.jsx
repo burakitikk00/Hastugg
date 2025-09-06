@@ -90,7 +90,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
       ...prev,
       features: [...prev.features, { 
         id: null, // Yeni feature için ID null
-        feaute: 'Yeni Özellik', 
+        feature: 'Yeni Özellik', 
         description: 'Özellik açıklaması buraya gelecek',
         icon: '⭐'
       }]
@@ -125,7 +125,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
       // Features'ları temizle ve kontrol et
       const cleanedFeatures = formData.features.map(feature => ({
         ...feature,
-        feaute: (feature.feaute || '').trim(),
+        feature: (feature.feature || '').trim(),
         description: (feature.description || '').trim(),
         icon: feature.icon || '⭐'
       }));
@@ -222,8 +222,8 @@ const AboutEditor = ({ onSave, onCancel }) => {
                   <div className="flex-1 space-y-3">
                     <input
                       type="text"
-                      value={feature.feaute || ''}
-                      onChange={(e) => handleFeatureChange(index, 'feaute', e.target.value)}
+                      value={feature.feature || ''}
+                      onChange={(e) => handleFeatureChange(index, 'feature', e.target.value)}
                       placeholder="Özellik başlığı"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
                     />
