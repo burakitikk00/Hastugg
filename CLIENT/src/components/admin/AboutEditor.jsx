@@ -18,12 +18,14 @@ const AboutEditor = ({ onSave, onCancel }) => {
     const fetchAboutData = async () => {
       try {
         const aboutData = await adminService.getAbout();
+        console.log('About data received:', aboutData);
         if (aboutData) {
           setFormData({
             mainTitle: aboutData.mainTitle || '',
             mainDescription: aboutData.mainDescription || '',
             features: aboutData.features || []
           });
+          console.log('Features loaded:', aboutData.features);
         }
       } catch (error) {
         console.error('About verileri getirilemedi:', error);
@@ -34,25 +36,25 @@ const AboutEditor = ({ onSave, onCancel }) => {
           features: [
             {
               id: null,
-              feaute: 'Kalite ve Güven',
+              feature: 'Kalite ve Güven',
               description: 'Tüm projelerimizde en yüksek kalite standartlarını benimser, güvenilir ve şeffaf bir iş anlayışıyla hareket ederiz. Müşterilerimizin memnuniyetini ve güvenini her şeyin önünde tutarız.',
               icon: '✅'
             },
             {
               id: null,
-              feaute: 'Yenilikçi Çözümler',
+              feature: 'Yenilikçi Çözümler',
               description: 'Sürekli gelişen teknolojileri ve modern inşaat yöntemlerini takip ederek, projelerimize yenilikçi ve sürdürülebilir çözümler entegre ederiz.',
               icon: '💡'
             },
             {
               id: null,
-              feaute: 'Sürdürülebilirlik',
+              feature: 'Sürdürülebilirlik',
               description: 'Çevreye duyarlı malzeme ve uygulamalarla, gelecek nesillere yaşanabilir alanlar bırakmayı hedefleriz. Sürdürülebilirlik, tüm süreçlerimizin merkezindedir.',
               icon: '🌱'
             },
             {
               id: null,
-              feaute: 'Uzman Kadro',
+              feature: 'Uzman Kadro',
               description: 'Alanında deneyimli ve uzman ekibimizle, her projede titiz mühendislik ve estetik bakış açısını bir araya getiririz.',
               icon: '👷‍♂️'
             }
@@ -123,12 +125,14 @@ const AboutEditor = ({ onSave, onCancel }) => {
     
     try {
       // Features'ları temizle ve kontrol et
+      console.log('Form data before cleaning:', formData);
       const cleanedFeatures = formData.features.map(feature => ({
         ...feature,
         feature: (feature.feature || '').trim(),
         description: (feature.description || '').trim(),
         icon: feature.icon || '⭐'
       }));
+      console.log('Cleaned features:', cleanedFeatures);
       
       const cleanedFormData = {
         ...formData,

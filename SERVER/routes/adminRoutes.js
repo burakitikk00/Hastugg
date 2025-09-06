@@ -119,6 +119,8 @@ router.post('/about', verifyToken, async (req, res) => {
         console.log('About POST request received:', JSON.stringify(req.body, null, 2));
         const { mainTitle, mainDescription, features } = req.body;
         
+        console.log('Features array:', JSON.stringify(features, null, 2));
+        
         if (!mainTitle || !mainDescription || !features || !Array.isArray(features)) {
             return res.status(400).json({ message: 'mainTitle, mainDescription ve features array zorunludur.' });
         }
@@ -149,8 +151,10 @@ router.post('/about', verifyToken, async (req, res) => {
         const existingFeaturesMap = new Map(existingFeatures.recordset.map(f => [f.id, f]));
 
         // Gelen features'ları işle
+        console.log('Processing features, count:', features.length);
         for (let i = 0; i < features.length; i++) {
             const feature = features[i];
+            console.log(`Processing feature ${i}:`, JSON.stringify(feature, null, 2));
             
             if (feature.id && feature.id !== null && existingFeaturesMap.has(parseInt(feature.id))) {
                 // Mevcut feature'ı güncelle
