@@ -178,10 +178,9 @@ const Services = () => {
                             >
                                 <div className="service-image-container">
                                     <LoadingImage 
-                                        src={service.url ? publicService.getImageURL(service.url) : 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&h=600&fit=crop'} 
+                                        src={service.url ? publicService.getImageURL(service.url) : null} 
                                         alt={service.service}
                                         className="service-image"
-                                        fallbackSrc="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&h=600&fit=crop"
                                         blurWhileLoading={true}
                                         showLoadingSpinner={true}
                                     />

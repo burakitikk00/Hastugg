@@ -5,7 +5,7 @@ const LoadingImage = ({
   src, 
   alt, 
   className = '', 
-  fallbackSrc = 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&h=600&fit=crop',
+  fallbackSrc = null,
   showLoadingSpinner = true,
   blurWhileLoading = true,
   ...props 
@@ -41,6 +41,15 @@ const LoadingImage = ({
     ${isLoading && blurWhileLoading ? 'image-loading' : ''}
     ${hasError ? 'image-error' : ''}
   `.trim();
+
+  // Eğer resim yoksa veya hata varsa ve fallback de yoksa boş div göster
+  if (!src || (hasError && !fallbackSrc)) {
+    return (
+      <div className={`${className} bg-gray-200 flex items-center justify-center`}>
+        <span className="text-gray-400 text-sm">Görsel Yok</span>
+      </div>
+    );
+  }
 
   return (
     <div className="loading-image-container">

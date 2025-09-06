@@ -33,8 +33,7 @@ const Team = () => {
         if (member.url) {
             return publicService.getImageURL(member.url)
         }
-        // Varsayılan resim
-        return 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+        return null
     }
 
     if (loading) {
@@ -124,7 +123,6 @@ const Team = () => {
                                     src={getImageUrl(member)}
                                     alt={member.namesurname}
                                     className="member-image"
-                                    fallbackSrc="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
                                     blurWhileLoading={true}
                                     showLoadingSpinner={true}
                                 />

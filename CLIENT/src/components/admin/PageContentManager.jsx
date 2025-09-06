@@ -93,37 +93,6 @@ const PageContentManager = () => {
         />
       )}
 
-      {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Hızlı İşlemler</h3>
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={() => {
-              // Tüm değişiklikleri kaydet
-            }}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
-          >
-            Tüm Değişiklikleri Kaydet
-          </button>
-          <button
-            onClick={() => {
-              // Önizleme
-              window.open('/', '_blank');
-            }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-          >
-            Önizleme
-          </button>
-          <button
-            onClick={() => {
-              // Yedekle
-            }}
-            className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200"
-          >
-            Yedek Oluştur
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
