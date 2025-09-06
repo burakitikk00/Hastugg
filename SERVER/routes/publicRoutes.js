@@ -4,6 +4,28 @@ const { sql, poolPromise } = require('./dbConfig');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
+// Veritabanı bağlantı test endpoint'i
+router.get('/test-db', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query('SELECT 1 as test');
+        res.json({ 
+            status: 'success', 
+            message: 'Veritabanı bağlantısı başarılı!',
+            data: result.recordset[0],
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Veritabanı test hatası:', error);
+        res.status(500).json({ 
+            status: 'error', 
+            message: 'Veritabanı bağlantı hatası',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 // Email şifreleme/çözme fonksiyonları (adminRoutes.js ile aynı)
 const ENCRYPTION_KEY = crypto.scryptSync('hastugg_email_encryption_key_2024', 'salt', 32);
 const IV_LENGTH = 16;
