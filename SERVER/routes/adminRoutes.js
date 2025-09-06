@@ -116,6 +116,7 @@ router.get('/about', verifyToken, async (req, res) => {
 router.post('/about', verifyToken, async (req, res) => {
     let transaction;
     try {
+        console.log('About POST request received:', req.body);
         const { mainTitle, mainDescription, features } = req.body;
         
         if (!mainTitle || !mainDescription || !features || !Array.isArray(features)) {
@@ -182,8 +183,12 @@ router.post('/about', verifyToken, async (req, res) => {
         res.status(200).json({ message: 'About verileri başarıyla kaydedildi' });
     } catch (error) {
         if (transaction) { try { await transaction.rollback(); } catch (e) { } }
-        console.error(error);
-        res.status(500).send('Sunucu hatası');
+        console.error('About POST error:', error);
+        res.status(500).json({ 
+            message: 'Sunucu hatası', 
+            error: error.message,
+            stack: error.stack 
+        });
     }
 });
 
