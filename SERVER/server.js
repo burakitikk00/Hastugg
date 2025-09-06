@@ -8,11 +8,18 @@ const port = process.env.PORT || 5000;
 
 const db = require('./routes/dbConfig');
 
-// Middleware
+// Middleware - CORS ayarları
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    credentials: true
+    origin: [
+        'http://localhost:5173', // Development frontend
+        'https://hastugg.vercel.app', // Vercel production
+        'https://hastugg.onrender.com' // Render production
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
