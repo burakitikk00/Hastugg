@@ -2,7 +2,7 @@
 const API_CONFIG = {
   // Sadece production URL kullan
   get BASE_URL() {
-    return 'https://hastugg.onrender.com';
+    return 'https://hastugg-2.onrender.com';
   },
   
   get API_BASE_URL() {

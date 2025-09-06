@@ -11,8 +11,9 @@ const db = require('./routes/dbConfig');
 // Middleware - CORS ayarları
 app.use(cors({
     origin: [
-        'https://hastugg-fov4.vercel.app/', // Vercel production        'https://hastugg-fov4-mjqyah1j4-buraks-projects-0138e460.vercel.app', // Vercel new deployment
-        'https://hastugg.onrender.com' // Render production
+        'https://hastugg-fov4.vercel.app', // Vercel production
+        'https://hastugg-fov4-mjqyah1j4-buraks-projects-0138e460.vercel.app', // Vercel new deployment
+        'https://hastugg-2.onrender.com' // Render production
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
