@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL + '/api/admin' || 'http://localhost:5000/api/admin';
+import API_CONFIG from '../config/api.js';
+
+const API_BASE_URL = API_CONFIG.ADMIN_API_URL;
 
 class AdminService {
   constructor() {

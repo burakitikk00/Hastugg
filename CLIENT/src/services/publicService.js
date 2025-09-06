@@ -1,5 +1,7 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api';
-const SERVER_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import API_CONFIG from '../config/api.js';
+
+const API_BASE_URL = API_CONFIG.API_BASE_URL;
+const SERVER_BASE_URL = API_CONFIG.SERVER_BASE_URL;
 
 class PublicService {
   constructor() {
