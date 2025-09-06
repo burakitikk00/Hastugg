@@ -11,7 +11,6 @@ const db = require('./routes/dbConfig');
 // Middleware - CORS ayarları
 app.use(cors({
     origin: [
-        'http://localhost:5173', // Development frontend
         'https://hastugg.vercel.app', // Vercel production
         'https://hastugg.onrender.com' // Render production
     ],
