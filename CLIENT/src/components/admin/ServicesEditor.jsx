@@ -2,13 +2,14 @@ import { useState } from 'react';
 import FormButtons from './FormButtons';
 import LoadingImage from '../common/LoadingImage';
 import adminService from '../../services/adminService';
+import API_CONFIG from '../../config/api';
 
 const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     services: (servicesData?.services || []).map(service => ({
       ...service,
       // Eğer url relative path ise tam URL'ye çevir
-      url: service.url ? (service.url.startsWith('http') ? service.url : `http://localhost:5000${service.url}`) : null
+      url: service.url ? (service.url.startsWith('http') ? service.url : `${API_CONFIG.SERVER_BASE_URL}${service.url}`) : null
     }))
   });
 
@@ -47,7 +48,7 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
     try {
       const result = await adminService.uploadImage(file);
       // Backend'den gelen relative path'i tam URL'ye çevir
-      const fullImageURL = `http://localhost:5000${result.imageURL}`;
+      const fullImageURL = `${API_CONFIG.SERVER_BASE_URL}${result.imageURL}`;
       handleServiceChange(index, 'url', fullImageURL);
       alert('Görsel başarıyla yüklendi!');
     } catch (error) {

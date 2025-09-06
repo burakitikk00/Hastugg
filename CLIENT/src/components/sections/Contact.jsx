@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaInstagram, FaFacebook, FaTwitter, FaLinkedin, FaMap } from 'react-icons/fa'
 import { useState, useEffect } from 'react'
 import publicService from '../../services/publicService'
+import API_CONFIG from '../../config/api'
 import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics'
 import './Contact.css'
 
@@ -41,7 +42,7 @@ const Contact = () => {
 
         try {
             // Backend'e gönder (nodemailer ile)
-            const response = await fetch('http://localhost:5000/api/contact', {
+            const response = await fetch(`${API_CONFIG.API_BASE_URL}/contact`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

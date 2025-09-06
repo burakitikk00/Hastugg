@@ -3,6 +3,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import DataTable from '../../components/admin/DataTable';
 import AdminProjectForm from '../../components/admin/AdminProjectForm';
 import adminService from '../../services/adminService';
+import API_CONFIG from '../../config/api';
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
@@ -295,7 +296,7 @@ const ProjectsPage = () => {
       label: 'Ana Görsel',
       render: (value) => value ? (
         <img 
-          src={`http://localhost:5000${value}`} 
+          src={`${API_CONFIG.SERVER_BASE_URL}${value}`} 
           alt="Proje görseli" 
           className="w-16 h-16 object-cover rounded-lg"
         />
@@ -499,7 +500,7 @@ const ProjectExpandedView = ({
               {projectImages.map((imageURL, index) => (
                 <div key={index} className="relative group">
                   <img
-                    src={`http://localhost:5000${imageURL}`}
+                    src={`${API_CONFIG.SERVER_BASE_URL}${imageURL}`}
                     alt={`Proje görseli ${index + 1}`}
                     className={`w-full h-20 object-cover rounded border-2 cursor-pointer transition-all ${
                       project.url === imageURL 

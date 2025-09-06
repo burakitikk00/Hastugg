@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaEdit, FaTrash, FaPlus, FaTimes, FaUser, FaLinkedin } from 'react-icons/fa';
 import adminService from '../../services/adminService';
+import API_CONFIG from '../../config/api';
 
 const TeamEditor = () => {
   const [teamMembers, setTeamMembers] = useState([]);
@@ -103,7 +104,7 @@ const TeamEditor = () => {
       position: member.position || '',
       LinkedIn: member.LinkedIn || ''
     });
-    setImagePreview(member.url ? `http://localhost:5000${member.url}` : null);
+    setImagePreview(member.url ? `${API_CONFIG.SERVER_BASE_URL}${member.url}` : null);
     setSelectedImage(null);
   };
 
@@ -239,7 +240,7 @@ const TeamEditor = () => {
                 {member.url ? (
                   <div className="relative">
                     <img
-                      src={`http://localhost:5000${member.url}`}
+                      src={`${API_CONFIG.SERVER_BASE_URL}${member.url}`}
                       alt={member.namesurname}
                       className="w-full h-48 object-cover rounded-lg"
                     />
@@ -356,7 +357,7 @@ const TeamEditor = () => {
                     <div className="flex items-start gap-2">
                       <div className="relative">
                         <img
-                          src={imagePreview || `http://localhost:5000${editingMember.url}`}
+                          src={imagePreview || `${API_CONFIG.SERVER_BASE_URL}${editingMember.url}`}
                           alt="Önizleme"
                           className="w-32 h-32 object-cover rounded-lg border"
                         />
