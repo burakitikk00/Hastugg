@@ -156,19 +156,19 @@ router.post('/about', verifyToken, async (req, res) => {
                 // Mevcut feature'ı güncelle
                 await new sql.Request(transaction)
                     .input('id', sql.Int, parseInt(feature.id))
-                    .input('feaute', sql.NVarChar(50), (feature.feaute || '').trim())
+                    .input('feature', sql.NVarChar(50), (feature.feature || '').trim())
                     .input('description', sql.NVarChar, (feature.description || '').trim())
                     .input('icon', sql.NVarChar(10), (feature.icon || '').trim())
-                    .query('UPDATE FeatureCards SET feaute = @feaute, description = @description, icon = @icon WHERE id = @id');
+                    .query('UPDATE FeatureCards SET feature = @feature, description = @description, icon = @icon WHERE id = @id');
                 
                 existingFeaturesMap.delete(parseInt(feature.id));
             } else {
                 // Yeni feature ekle
                 await new sql.Request(transaction)
-                    .input('feaute', sql.NVarChar(50), (feature.feaute || '').trim())
+                    .input('feature', sql.NVarChar(50), (feature.feature || '').trim())
                     .input('description', sql.NVarChar, (feature.description || '').trim())
                     .input('icon', sql.NVarChar(10), (feature.icon || '').trim())
-                    .query('INSERT INTO FeatureCards (feaute, description, icon) VALUES (@feaute, @description, @icon)');
+                    .query('INSERT INTO FeatureCards (feature, description, icon) VALUES (@feature, @description, @icon)');
             }
         }
 
