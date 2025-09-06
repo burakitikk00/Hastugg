@@ -87,7 +87,7 @@ const About = () => {
                             className="feature-card"
                         >
                             <div className="feature-icon">{feature.icon}</div>
-                            <h3 className="feature-title">{feature.feaute}</h3>
+                            <h3 className="feature-title">{feature.feature}</h3>
                             <p className="feature-description">{feature.description}</p>
                         </motion.div>
                     ))}
