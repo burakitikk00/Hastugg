@@ -15,11 +15,22 @@
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
-    "express": "^5.1.0",
+    "express": "^4.19.2",
     "fs-extra": "^11.3.1",
     "jsonwebtoken": "^9.0.2",
     "mssql": "^11.0.1",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  },
+  "overrides": {
+    "debug": "^4.3.4",
+    "agent-base": "^7.1.0",
+    "http-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^7.0.4",
+    "@mapbox/node-pre-gyp": "^1.0.11",
+    "chokidar": "^3.5.3"
   }
 }
