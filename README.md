@@ -1,0 +1,262 @@
+# Hastugg Construction
+
+Modern ve dinamik bir inşaat firması web sitesi. React, Node.js ve Supabase ile geliştirilmiş full-stack bir proje.
+
+## Proje Hakkında
+
+Hastugg Construction, inşaat firmalarının hizmetlerini, projelerini ve ekip üyelerini sergileyebileceği, müşterilerle iletişim kurabilecekleri modern bir web platformudur. Responsive tasarımı ve kullanıcı dostu arayüzü ile profesyonel bir görünüm sunar.
+
+##  Özellikler
+
+-  **Modern ve Responsive Tasarım** - Tüm cihazlarda mükemmel görünüm
+-  **Kullanıcı Yönetimi** - Google OAuth entegrasyonu ile güvenli giriş
+-  **Admin Paneli** - İçerik yönetimi için kapsamlı yönetim paneli
+-  **Proje Sergileme** - Görsel galeri ve detaylı proje bilgileri
+-  **Ekip Yönetimi** - Ekip üyelerinin tanıtımı
+-  **İletişim Formu** - Email entegrasyonu ile doğrudan iletişim
+-  **Dinamik İçerik** - Veritabanından yönetilen içerik sistemi
+-  **Mobil Uyumlu** - Her ekran boyutunda optimize edilmiş deneyim
+
+##  Teknolojiler
+
+### Frontend
+- **React** 19.1.1 - Modern kullanıcı arayüzü
+- **Vite** - Hızlı geliştirme ve build aracı
+- **React Router** - Sayfa yönlendirme
+- **Framer Motion** - Animasyonlar
+- **Axios** - HTTP istekleri
+- **React Icons** - İkon kütüphanesi
+- **React Hot Toast** - Bildirimler
+- **Tailwind CSS** - Responsive tasarım
+- **EmailJS** - Email gönderimi
+
+### Backend
+- **Node.js** - Server runtime
+- **Express.js** - Web framework
+- **Supabase** - Veritabanı ve authentication
+- **PostgreSQL** - İlişkisel veritabanı
+- **JWT** - Token tabanlı kimlik doğrulama
+- **Bcrypt** - Şifre hashleme
+- **Nodemailer** - Email servisi
+- **Multer** - Dosya yükleme
+- **CORS** - Cross-origin kaynak paylaşımı
+
+## 📁 Proje Yapısı
+
+```
+Hastugg/
+├── CLIENT/                 # Frontend React uygulaması
+│   ├── src/
+│   │   ├── components/    # React bileşenleri
+│   │   ├── pages/         # Sayfa bileşenleri
+│   │   ├── styles/        # CSS dosyaları
+│   │   └── utils/         # Yardımcı fonksiyonlar
+│   ├── public/            # Statik dosyalar
+│   └── package.json
+│
+├── SERVER/                # Backend Node.js uygulaması
+│   ├── routes/           # API route'ları
+│   │   ├── public/       # Public endpoints
+│   │   └── admin/        # Admin endpoints
+│   ├── middleware/       # Express middleware'leri
+│   ├── utils/            # Yardımcı modüller
+│   ├── server.js         # Ana server dosyası
+│   └── package.json
+│
+└── README.md
+```
+
+##  Kurulum
+
+### Gereksinimler
+
+- Node.js (v16 veya üzeri)
+- npm veya yarn
+- Supabase hesabı
+
+### Backend Kurulumu
+
+1. SERVER klasörüne gidin:
+```bash
+cd SERVER
+```
+
+2. Bağımlılıkları yükleyin:
+```bash
+npm install
+```
+
+3. `.env` dosyası oluşturun ve gerekli değişkenleri ekleyin:
+```env
+PORT=5000
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
+JWT_SECRET=your_jwt_secret
+EMAIL_USER=your_email
+EMAIL_PASS=your_email_password
+```
+
+4. Sunucuyu başlatın:
+```bash
+# Development modu
+npm run dev
+
+# Production modu
+npm start
+```
+
+### Frontend Kurulumu
+
+1. CLIENT klasörüne gidin:
+```bash
+cd CLIENT
+```
+
+2. Bağımlılıkları yükleyin:
+```bash
+npm install
+```
+
+3. `.env` dosyası oluşturun:
+```env
+VITE_API_URL=http://localhost:5000
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+4. Development sunucusunu başlatın:
+```bash
+npm run dev
+```
+
+Frontend varsayılan olarak `http://localhost:5173` adresinde çalışacaktır.
+
+## 📖 Kullanım
+
+### Development
+
+Backend ve frontend'i ayrı terminallerde çalıştırın:
+
+```bash
+# Terminal 1 - Backend
+cd SERVER
+npm run dev
+
+# Terminal 2 - Frontend
+cd CLIENT
+npm run dev
+```
+
+### Production Build
+
+Frontend için production build oluşturun:
+
+```bash
+cd CLIENT
+npm run build
+```
+
+Build edilmiş dosyalar `CLIENT/dist` klasöründe oluşturulacaktır.
+
+##  API Endpoints
+
+### Public Routes
+
+- `GET /api/hero` - Hero bölümü içeriği
+- `GET /api/about` - Hakkımızda içeriği
+- `GET /api/contact` - İletişim bilgileri
+- `POST /api/contact` - İletişim formu gönderimi
+- `GET /api/services` - Hizmetler listesi
+- `GET /api/projects` - Projeler listesi
+- `GET /api/team` - Ekip üyeleri
+
+### Admin Routes (Authentication Required)
+
+- `POST /api/admin/login` - Admin girişi
+- `GET /api/admin/users` - Kullanıcı listesi
+- `PUT /api/admin/users/:id` - Kullanıcı güncelleme
+- Content yönetimi endpoints
+
+##  Özelleştirme
+
+### Tailwind CSS
+
+Tailwind yapılandırması `CLIENT/tailwind.config.js` dosyasında düzenlenebilir:
+
+```javascript
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        // Özel renklerinizi buraya ekleyin
+      }
+    }
+  }
+}
+```
+
+### Ortam Değişkenleri
+
+Geliştirme ve production ortamları için farklı `.env` dosyaları kullanabilirsiniz:
+- `.env.development`
+- `.env.production`
+
+##  Katkıda Bulunma
+
+1. Bu repository'yi fork edin
+2. Feature branch'i oluşturun (`git checkout -b feature/amazing-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'feat: Add amazing feature'`)
+4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
+5. Pull Request oluşturun
+
+## 📝 Commit Mesaj Formatı
+
+Conventional Commits standardını kullanıyoruz:
+
+- `feat:` - Yeni özellik
+- `fix:` - Bug düzeltmesi
+- `docs:` - Dokümantasyon değişiklikleri
+- `style:` - Kod formatı değişiklikleri
+- `refactor:` - Kod refactoring
+- `test:` - Test eklemeleri
+- `chore:` - Bakım işleri
+
+##  Sorun Giderme
+
+### Port zaten kullanımda hatası
+
+Eğer port zaten kullanılıyorsa, `.env` dosyasında farklı bir port belirleyin:
+
+```env
+PORT=5001
+```
+
+### Supabase bağlantı hatası
+
+Supabase URL ve anahtarlarınızın doğru olduğundan emin olun. Supabase dashboard'dan kontrol edebilirsiniz.
+
+### CORS hatası
+
+Backend'de CORS yapılandırmasını kontrol edin. Frontend URL'inin izin verilen originler listesinde olduğundan emin olun.
+
+## 📄 Lisans
+
+Bu proje özel bir projedir. Tüm hakları saklıdır.
+
+##  Geliştirici
+
+**Hastugg Construction Team**
+
+##  İletişim
+
+Sorularınız için lütfen bizimle iletişime geçin
+
+
+## 🙏 Teşekkürler
+
+Bu projeyi geliştirirken kullanılan tüm açık kaynak kütüphanelere teşekkür ederiz.
+
+---
+
+⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!
