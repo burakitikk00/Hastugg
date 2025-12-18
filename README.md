@@ -1,4 +1,4 @@
-# Hastugg Construction
+# Hastug Construction
 
 Modern ve dinamik bir inşaat firması web sitesi. React, Node.js ve Supabase ile geliştirilmiş full-stack bir proje.
 
