@@ -20,7 +20,7 @@ const AnalyticsPage = () => {
       const settings = await adminService.getAnalyticsSettings();
       setAnalyticsData(settings);
     } catch (error) {
-      console.error('Analytics ayarları yüklenirken hata:', error);
+      logger.error('Analytics ayarları yüklenirken hata:', error);
       alert(`Analytics ayarları yüklenirken bir hata oluştu: ${error.message}`);
     } finally {
       setIsLoadingData(false);
@@ -42,7 +42,7 @@ const AnalyticsPage = () => {
       alert('Analytics ayarları başarıyla kaydedildi!');
       setTestResult(null);
     } catch (error) {
-      console.error('Analytics ayarları kaydedilirken hata:', error);
+      logger.error('Analytics ayarları kaydedilirken hata:', error);
       alert(`Analytics ayarları kaydedilirken bir hata oluştu: ${error.message}`);
     } finally {
       setIsLoading(false);
@@ -63,7 +63,7 @@ const AnalyticsPage = () => {
         alert('Test başarılı! Measurement ID formatı doğru.');
       }
     } catch (error) {
-      console.error('Analytics test hatası:', error);
+      logger.error('Analytics test hatası:', error);
       setTestResult({ success: false, message: error.message });
       alert(`Test sırasında hata: ${error.message}`);
     } finally {

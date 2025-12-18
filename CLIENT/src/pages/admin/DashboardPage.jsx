@@ -28,7 +28,7 @@ const DashboardPage = () => {
       const stats = await adminService.getContactMessagesStats();
       setMessageStats(stats);
     } catch (error) {
-      console.error('Mesaj istatistikleri yüklenirken hata:', error);
+      logger.error('Mesaj istatistikleri yüklenirken hata:', error);
       // Hata durumunda varsayılan değerler
       setMessageStats({ total: 0, unread: 0, sent: 0 });
     } finally {
@@ -45,7 +45,7 @@ const DashboardPage = () => {
         lastUpdated: settings.updated_at
       });
     } catch (error) {
-      console.error('Analytics ayarları yüklenirken hata:', error);
+      logger.error('Analytics ayarları yüklenirken hata:', error);
     }
   };
 

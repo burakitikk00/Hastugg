@@ -31,7 +31,7 @@ const Footer = () => {
         const servicesData = await publicService.getServices()
         setServices(servicesData)
       } catch (error) {
-        console.error('Footer verileri yüklenirken hata:', error)
+        logger.error('Footer verileri yüklenirken hata:', error)
         // Hata durumunda varsayılan hizmetler
         setServices([
           { service: 'Mimari ve Yapı Projeleri', id: 1 },

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ProjectDetailModal from './ProjectDetailModal'
 import LoadingImage from './common/LoadingImage'
@@ -8,6 +8,20 @@ import './ServiceProjectsModal.css'
 const ServiceProjectsModal = ({ isOpen, onClose, service, projects, getStatusText }) => {
     const [selectedProject, setSelectedProject] = useState(null)
     const [showProjectDetail, setShowProjectDetail] = useState(false)
+
+    // Modal açıldığında body scroll'u kapat
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = 'unset'
+        }
+
+        // Cleanup
+        return () => {
+            document.body.style.overflow = 'unset'
+        }
+    }, [isOpen])
 
     const handleProjectClick = (project) => {
         setSelectedProject(project)
@@ -48,7 +62,7 @@ const ServiceProjectsModal = ({ isOpen, onClose, service, projects, getStatusTex
                             {/* Header */}
                             <div className="modal-header">
                                 <h2 className="modal-title">{service.service} Projeleri</h2>
-                                <button 
+                                <button
                                     className="close-button"
                                     onClick={onClose}
                                 >
@@ -69,7 +83,7 @@ const ServiceProjectsModal = ({ isOpen, onClose, service, projects, getStatusTex
                                                 className="project-card"
                                             >
                                                 <div className="project-image-container">
-                                                    <LoadingImage 
+                                                    <LoadingImage
                                                         src={publicService.getImageURL(project.url)}
                                                         alt={project.title}
                                                         className="project-thumbnail"
@@ -77,26 +91,34 @@ const ServiceProjectsModal = ({ isOpen, onClose, service, projects, getStatusTex
                                                         blurWhileLoading={true}
                                                         showLoadingSpinner={true}
                                                     />
-                                                    <div className="project-overlay">
-                                                        <button 
-                                                            className="view-details-btn"
-                                                            onClick={() => handleProjectClick(project)}
-                                                        >
-                                                            Detayları Gör
-                                                        </button>
+
+                                                    <div className="project-status-badge">
+                                                        <span className={`status-badge ${(project.status || '').toLowerCase().replace(' ', '_')}`}>
+                                                            {getStatusText ? getStatusText(project.status) : project.status}
+                                                        </span>
                                                     </div>
-                                                </div>
-                                                <div className="project-info">
-                                                    <h3 className="project-title">{project.title}</h3>
-                                                    <p className="project-description">
-                                                        {project.description.length > 100 
-                                                            ? `${project.description.substring(0, 100)}...` 
-                                                            : project.description
-                                                        }
-                                                    </p>
-                                                    <span className={`status-badge ${(project.status || '').toLowerCase().replace(' ', '_')}`}>
-                                                        {getStatusText ? getStatusText(project.status) : project.status}
-                                                    </span>
+
+                                                    <div className="project-overlay">
+                                                        <div className="overlay-content">
+                                                            <h3 className="overlay-title">{project.title}</h3>
+                                                            <p className="overlay-description">
+                                                                {project.description.length > 120
+                                                                    ? `${project.description.substring(0, 120)}...`
+                                                                    : project.description
+                                                                }
+                                                            </p>
+                                                            <button
+                                                                className="overlay-button"
+                                                                onClick={() => handleProjectClick(project)}
+                                                            >
+                                                                DETAYLAR
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="project-name-overlay">
+                                                        <h3 className="project-name">{project.title}</h3>
+                                                    </div>
                                                 </div>
                                             </motion.div>
                                         ))}

@@ -73,7 +73,7 @@ const ContactPage = () => {
       localStorage.setItem('workingHours', sectionData.workingHours || '');
       alert('İletişim bilgileri başarıyla kaydedildi!');
     } catch (error) {
-      console.error('Kaydetme hatası:', error);
+      logger.error('Kaydetme hatası:', error);
       alert(`Kaydetme sırasında bir hata oluştu: ${error.message}`);
     } finally {
       setIsLoading(false);

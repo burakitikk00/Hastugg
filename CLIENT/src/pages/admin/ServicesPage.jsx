@@ -43,7 +43,7 @@ const ServicesPage = () => {
           });
         }
       } catch (error) {
-        console.error('Services verileri yüklenirken hata:', error);
+        logger.error('Services verileri yüklenirken hata:', error);
         // Hata durumunda varsayılan veriler
         setServicesData({
           services: [
@@ -74,7 +74,7 @@ const ServicesPage = () => {
       await adminService.saveServices(sectionData);
       setServicesData(sectionData);
     } catch (error) {
-      console.error('Kaydetme hatası:', error);
+      logger.error('Kaydetme hatası:', error);
       alert(`Kaydetme sırasında bir hata oluştu: ${error.message}`);
     } finally {
       setIsLoading(false);

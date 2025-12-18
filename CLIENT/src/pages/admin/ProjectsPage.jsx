@@ -104,7 +104,7 @@ const ProjectsPage = () => {
 
       await loadData();
       setNewImages([]); // Her durumda yeni görseller state'ini temizle
-      
+
       if (showForm) {
         handleCancel(); // Sadece üst form açıksa kapat
       } else {
@@ -143,7 +143,7 @@ const ProjectsPage = () => {
   // Mevcut görsel silme
   const handleDeleteImage = async (imageURL) => {
     if (!selectedProject) return;
-    
+
     // Ana görsel siliniyorsa uyarı ver
     if (selectedProject.url === imageURL) {
       const remainingImages = projectImages.filter(img => img !== imageURL);
@@ -151,7 +151,7 @@ const ProjectsPage = () => {
         alert('Bu projenin tek görseli. Silmeden önce başka görsel ekleyin veya ana görsel seçin.');
         return;
       }
-      
+
       if (!window.confirm('Bu ana görsel! Silinirse başka bir görsel otomatik olarak ana görsel olarak seçilecek. Devam etmek istiyor musunuz?')) {
         return;
       }
@@ -160,7 +160,7 @@ const ProjectsPage = () => {
         return;
       }
     }
-    
+
     try {
       await adminService.deleteProjectImage(selectedProject.id, imageURL);
       // Görsel listesini güncelle
@@ -206,7 +206,7 @@ const ProjectsPage = () => {
   // Ana görsel seçimi
   const handleSetMainImage = async (imageURL) => {
     if (!selectedProject) return;
-    
+
     try {
       await adminService.setMainImage(selectedProject.id, imageURL);
       // Proje listesini yeniden yükle
@@ -232,27 +232,27 @@ const ProjectsPage = () => {
       label: 'Hizmetler',
       render: (value, row) => {
         let serviceIds = [];
-        
+
         try {
           // service_ids parse et, hata olursa boş array kullan
           if (row.service_ids && typeof row.service_ids === 'string') {
             serviceIds = JSON.parse(row.service_ids);
           }
-          
+
           // Array değilse boş array yap
           if (!Array.isArray(serviceIds)) {
             serviceIds = [];
           }
-          
+
           // 0'ları filtrele
           serviceIds = serviceIds.filter(id => id && id !== 0);
-          
+
         } catch (e) {
           serviceIds = [];
         }
-        
+
         const serviceNames = services.filter(service => serviceIds.includes(service.id)).map(service => service.service);
-        
+
         return (
           <div className="flex flex-wrap gap-1">
             {serviceNames.length > 0 ? serviceNames.map((name, index) => (
@@ -295,9 +295,9 @@ const ProjectsPage = () => {
       key: 'url',
       label: 'Ana Görsel',
       render: (value) => value ? (
-        <img 
-          src={`${API_CONFIG.SERVER_BASE_URL}${value}`} 
-          alt="Proje görseli" 
+        <img
+          src={`${API_CONFIG.SERVER_BASE_URL}${value}`}
+          alt="Proje görseli"
           className="w-16 h-16 object-cover rounded-lg"
         />
       ) : (
@@ -342,13 +342,13 @@ const ProjectsPage = () => {
         {/* Yeni Proje Ekleme Formu - EN ÜSTTE */}
         {showForm && (
           <div className="bg-white rounded-lg shadow-lg p-6 space-y-6 mb-6">
-            
+
             {/* Proje Temel Bilgileri Formu */}
             <div className="border-b border-gray-200 pb-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 Yeni Proje Ekle
               </h3>
-              
+
               <AdminProjectForm
                 project={null}
                 services={services}
@@ -360,7 +360,7 @@ const ProjectsPage = () => {
             {/* Yeni Proje İçin Görsel Yükleme */}
             <div className="space-y-4">
               <h4 className="text-lg font-medium text-gray-900">Proje Görselleri</h4>
-              
+
               {/* Yeni Yüklenecek Görseller */}
               {newImages.length > 0 && (
                 <div>
@@ -419,7 +419,7 @@ const ProjectsPage = () => {
             expandedRowId={expandedProjectId}
             renderExpandedRow={(project) => (
               <div className="px-6 py-4 bg-gray-50 border-t">
-                <ProjectExpandedView 
+                <ProjectExpandedView
                   project={project}
                   services={services}
                   projectImages={projectImages}
@@ -441,15 +441,15 @@ const ProjectsPage = () => {
 };
 
 // Proje satırı genişletilmiş görünümü
-const ProjectExpandedView = ({ 
-  project, 
-  services, 
-  projectImages, 
-  newImages, 
-  onSave, 
-  onCancel, 
-  onDeleteImage, 
-  onAddImages, 
+const ProjectExpandedView = ({
+  project,
+  services,
+  projectImages,
+  newImages,
+  onSave,
+  onCancel,
+  onDeleteImage,
+  onAddImages,
   onDeleteNewImage,
   onSetMainImage
 }) => {
@@ -460,7 +460,7 @@ const ProjectExpandedView = ({
         <h3 className="text-lg font-medium text-gray-900 mb-3">
           Proje Düzenle
         </h3>
-        
+
         <AdminProjectForm
           project={{
             title: project.title,
@@ -489,7 +489,7 @@ const ProjectExpandedView = ({
         <h3 className="text-lg font-medium text-gray-900 mb-3">
           Proje Görselleri
         </h3>
-        
+
         {/* Mevcut Görseller */}
         <div className="mb-4">
           <h4 className="text-sm font-medium text-gray-700 mb-2">
@@ -502,11 +502,10 @@ const ProjectExpandedView = ({
                   <img
                     src={`${API_CONFIG.SERVER_BASE_URL}${imageURL}`}
                     alt={`Proje görseli ${index + 1}`}
-                    className={`w-full h-20 object-cover rounded border-2 cursor-pointer transition-all ${
-                      project.url === imageURL 
-                        ? 'border-blue-500 ring-2 ring-blue-200' 
+                    className={`w-full h-20 object-cover rounded border-2 cursor-pointer transition-all ${project.url === imageURL
+                        ? 'border-blue-500 ring-2 ring-blue-200'
                         : 'border-gray-200 hover:border-blue-300'
-                    }`}
+                      }`}
                     onClick={() => onSetMainImage(imageURL)}
                     title={project.url === imageURL ? 'Ana görsel' : 'Ana görsel olarak seç'}
                   />

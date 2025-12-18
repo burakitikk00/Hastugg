@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import HeroEditor from './HeroEditor';
 import AboutEditor from './AboutEditor';
 import adminService from '../../services/adminService';
+import logger from '../../utils/logger';
 
 const PageContentManager = () => {
   const [activeSection, setActiveSection] = useState('hero');
@@ -21,7 +22,7 @@ const PageContentManager = () => {
         const parsedData = JSON.parse(savedAboutData);
         setAboutData(parsedData);
       } catch (error) {
-        console.error('About verisi parse edilemedi:', error);
+        logger.error('About verisi parse edilemedi:', error);
       }
     }
   }, []);
@@ -38,7 +39,7 @@ const PageContentManager = () => {
       // Başarılı kayıt sonrası işlemler
       alert(`${sections.find(s => s.id === activeSection)?.label} başarıyla kaydedildi!`);
     } catch (error) {
-      console.error('Kaydetme hatası:', error);
+      logger.error('Kaydetme hatası:', error);
       alert(`Kaydetme sırasında bir hata oluştu: ${error.message}`);
     } finally {
       setIsLoading(false);

@@ -17,7 +17,7 @@ const Team = () => {
                 setTeamMembers(data)
                 setError(null)
             } catch (err) {
-                console.error('Team verileri yüklenirken hata:', err)
+                logger.error('Team verileri yüklenirken hata:', err)
                 setError('Ekip bilgileri yüklenirken bir hata oluştu')
                 setTeamMembers([])
             } finally {

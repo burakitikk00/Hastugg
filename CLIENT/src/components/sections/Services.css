@@ -1,5 +1,5 @@
 .services {
-    padding: 4rem 1rem;
+    padding: 3rem 1rem;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
@@ -14,7 +14,7 @@
 }
 
 .services-title {
-    font-size: 2.5rem;
+    font-size: 1.875rem;
     font-weight: 800;
     background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
     -webkit-background-clip: text;
@@ -37,7 +37,7 @@
 }
 
 .services-description {
-    font-size: 1.25rem;
+    font-size: 1rem;
     color: #64748b;
     max-width: 48rem;
     margin: 0 auto;
@@ -59,7 +59,7 @@
     transform: scale(1);
     position: relative;
     overflow: hidden;
-    min-height: 400px;
+    min-height: 280px;
     display: flex;
     flex-direction: column;
     z-index: 1;
@@ -93,10 +93,10 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(135deg, 
-        rgba(15, 23, 42, 0.9) 0%, 
-        rgba(30, 41, 59, 0.85) 50%, 
-        rgba(51, 65, 85, 0.8) 100%);
+    background: linear-gradient(135deg,
+            rgba(15, 23, 42, 0.9) 0%,
+            rgba(30, 41, 59, 0.85) 50%,
+            rgba(51, 65, 85, 0.8) 100%);
     padding: 1.5rem;
     z-index: 5;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -123,10 +123,10 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, 
-        rgba(15, 23, 42, 0.95) 0%, 
-        rgba(30, 41, 59, 0.9) 50%, 
-        rgba(51, 65, 85, 0.85) 100%);
+    background: linear-gradient(135deg,
+            rgba(15, 23, 42, 0.95) 0%,
+            rgba(30, 41, 59, 0.9) 50%,
+            rgba(51, 65, 85, 0.85) 100%);
     backdrop-filter: blur(15px);
     display: flex;
     align-items: center;
@@ -230,6 +230,7 @@
     0% {
         background-position: 200% 0;
     }
+
     100% {
         background-position: -200% 0;
     }
@@ -250,11 +251,11 @@
     .services-description {
         font-size: 1.5rem;
     }
-    
+
     .service-card {
         min-height: 350px;
     }
-    
+
     .service-image-container {
         height: 350px;
     }
@@ -269,11 +270,11 @@
         grid-template-columns: repeat(2, 1fr);
         gap: 2.5rem;
     }
-    
+
     .service-card {
         min-height: 400px;
     }
-    
+
     .service-image-container {
         height: 400px;
     }
@@ -284,11 +285,11 @@
         grid-template-columns: repeat(4, 1fr);
         gap: 2.5rem;
     }
-    
+
     .service-card {
         min-height: 450px;
     }
-    
+
     .service-image-container {
         height: 450px;
     }

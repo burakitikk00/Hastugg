@@ -37,7 +37,7 @@ const ContactMessagesEditor = ({ onSave, onCancel, isLoading }) => {
       setMessages(data.messages);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Mesajlar yüklenirken hata:', error);
+      logger.error('Mesajlar yüklenirken hata:', error);
       alert('Mesajlar yüklenirken bir hata oluştu: ' + error.message);
     } finally {
       setIsLoadingMessages(false);
@@ -60,7 +60,7 @@ const ContactMessagesEditor = ({ onSave, onCancel, isLoading }) => {
         msg.id === id ? { ...msg, is_read: 1 } : msg
       ));
     } catch (error) {
-      console.error('Mesaj okundu işaretlenirken hata:', error);
+      logger.error('Mesaj okundu işaretlenirken hata:', error);
       alert('Mesaj okundu işaretlenirken bir hata oluştu: ' + error.message);
     }
   };
@@ -73,7 +73,7 @@ const ContactMessagesEditor = ({ onSave, onCancel, isLoading }) => {
       ));
       alert('Email başarıyla gönderildi!');
     } catch (error) {
-      console.error('Email gönderilirken hata:', error);
+      logger.error('Email gönderilirken hata:', error);
       alert('Email gönderilirken bir hata oluştu: ' + error.message);
     }
   };
@@ -88,7 +88,7 @@ const ContactMessagesEditor = ({ onSave, onCancel, isLoading }) => {
       setMessages(messages.filter(msg => msg.id !== id));
       alert('Mesaj başarıyla silindi!');
     } catch (error) {
-      console.error('Mesaj silinirken hata:', error);
+      logger.error('Mesaj silinirken hata:', error);
       alert('Mesaj silinirken bir hata oluştu: ' + error.message);
     }
   };

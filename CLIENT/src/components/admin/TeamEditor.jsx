@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FaEdit, FaTrash, FaPlus, FaTimes, FaUser, FaLinkedin } from 'react-icons/fa';
 import adminService from '../../services/adminService';
 import API_CONFIG from '../../config/api';
+import logger from '../../utils/logger';
 
 const TeamEditor = () => {
   const [teamMembers, setTeamMembers] = useState([]);
@@ -89,7 +90,7 @@ const TeamEditor = () => {
       resetForm();
       setError(null);
     } catch (err) {
-      console.error('Form gönderimi hatası:', err);
+      logger.error('Form gönderimi hatası:', err);
       setError('İşlem sırasında hata oluştu: ' + err.message);
     } finally {
       setLoading(false);

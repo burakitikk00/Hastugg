@@ -42,7 +42,7 @@ const Hero = () => {
                     ])
                 }
             } catch (error) {
-                console.error('Veriler getirilemedi:', error)
+                logger.error('Veriler getirilemedi:', error)
                 setHeroData(null);
                 setContactInfo(null);
             } finally {

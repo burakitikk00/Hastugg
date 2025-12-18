@@ -1,5 +1,6 @@
 const multer = require('multer');
 const path = require('path');
+const logger = require('./utils/logger');
 const fs = require('fs-extra');
 
 // 1. Dosyaların nereye ve nasıl kaydedileceğini belirle
@@ -49,7 +50,7 @@ const deleteImage = async (imagePath) => {
         }
         return false;
     } catch (error) {
-        console.error('Dosya silinirken hata:', error);
+        logger.error('Dosya silinirken hata:', error);
         return false;
     }
 };
@@ -60,7 +61,7 @@ const deleteMultipleImages = async (imagePaths) => {
         await Promise.all(deletePromises);
         return true;
     } catch (error) {
-        console.error('Çoklu dosya silinirken hata:', error);
+        logger.error('Çoklu dosya silinirken hata:', error);
         return false;
     }
 };
@@ -80,7 +81,7 @@ const cleanupUnusedImages = async (usedImagePaths) => {
             }
         }
     } catch (error) {
-        console.error('Kullanılmayan dosyalar temizlenirken hata:', error);
+        logger.error('Kullanılmayan dosyalar temizlenirken hata:', error);
     }
 };
 

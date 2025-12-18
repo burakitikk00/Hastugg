@@ -1,7 +1,8 @@
 .hero {
     position: relative;
-    padding-top: 5rem;
+    padding-top: 6rem;
     min-height: 100vh;
+    max-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -35,6 +36,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 1rem;
 }
 
 .hero-text {
@@ -43,20 +45,21 @@
 }
 
 .hero-title {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 800;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    line-height: 1.1;
+    line-height: 1.2;
 }
 
 .hero-description {
-    font-size: 1.25rem;
-    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
     color: #e5e7eb;
     max-width: 48rem;
     margin-left: auto;
     margin-right: auto;
+    line-height: 1.4;
 }
 
 .hero-buttons {
@@ -71,8 +74,8 @@
     background-color: #eab308;
     color: white;
     font-weight: 600;
-    font-size: 1.125rem;
-    padding: 1rem 2rem;
+    font-size: 0.9rem;
+    padding: 0.75rem 1.5rem;
     border-radius: 0.5rem;
     transition: all 0.3s;
     transform: scale(1);
@@ -89,8 +92,8 @@
     background-color: white;
     color: #0284c7;
     font-weight: 600;
-    font-size: 1.125rem;
-    padding: 1rem 2rem;
+    font-size: 0.9rem;
+    padding: 0.75rem 1.5rem;
     border-radius: 0.5rem;
     border: 2px solid #0284c7;
     transition: all 0.3s;
@@ -115,13 +118,13 @@
 .contact-container {
     max-width: 80rem;
     margin: 0 auto;
-    padding: 1.5rem 1rem;
+    padding: 1rem 0.75rem;
 }
 
 .contact-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0,75rem;
+    gap: 0, 75rem;
     color: white;
 }
 
@@ -137,8 +140,8 @@
     font-size: 1.25rem;
     flex-shrink: 0;
     margin-top: -2.4rem;
-    display:inline-flex;
-    
+    display: inline-flex;
+
 }
 
 .contact-text {

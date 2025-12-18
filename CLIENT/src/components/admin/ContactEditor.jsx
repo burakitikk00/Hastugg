@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import FormButtons from './FormButtons';
 import { FaInstagram, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa'
+import logger from '../../utils/logger';
 
 
 const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
@@ -63,7 +64,7 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
       const payload = { ...formData, phone: formatPhone(formData.phone) };
       await onSave(payload);
     } catch (error) {
-      console.error('Contact kaydedilirken hata:', error);
+      logger.error('Contact kaydedilirken hata:', error);
     } finally {
       setIsLoading(false);
     }

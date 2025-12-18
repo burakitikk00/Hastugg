@@ -64,11 +64,11 @@ const Contact = () => {
                 trackEvent('form_submit', 'contact', 'contact_form', 1)
             } else {
                 const errorData = await response.json()
-                console.error('Backend hatası:', errorData)
+                logger.error('Backend hatası:', errorData)
                 setSubmitStatus('error')
             }
         } catch (error) {
-            console.error('Form gönderimi hatası:', error)
+            logger.error('Form gönderimi hatası:', error)
             setSubmitStatus('error')
         } finally {
             setIsSubmitting(false)
@@ -107,7 +107,7 @@ const Contact = () => {
                     })
                 }
             } catch (error) {
-                console.error('Contact bilgileri getirilemedi:', error)
+                logger.error('Contact bilgileri getirilemedi:', error)
                 setContactInfo(null)
             } finally {
                 setLoading(false)

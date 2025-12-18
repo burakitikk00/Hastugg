@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import FormButtons from './FormButtons';
+import logger from '../../utils/logger';
 import adminService from '../../services/adminService';
 
 const AboutEditor = ({ onSave, onCancel }) => {
@@ -18,17 +19,17 @@ const AboutEditor = ({ onSave, onCancel }) => {
     const fetchAboutData = async () => {
       try {
         const aboutData = await adminService.getAbout();
-        
+
         if (aboutData) {
           setFormData({
             mainTitle: aboutData.mainTitle || '',
             mainDescription: aboutData.mainDescription || '',
             features: aboutData.features || []
           });
-          
+
         }
       } catch (error) {
-        console.error('About verileri getirilemedi:', error);
+        logger.error('About verileri getirilemedi:', error);
         alert('About verileri yüklenirken hata oluştu: ' + error.message);
       }
     };
@@ -60,9 +61,9 @@ const AboutEditor = ({ onSave, onCancel }) => {
   const addFeature = () => {
     setFormData(prev => ({
       ...prev,
-      features: [...prev.features, { 
+      features: [...prev.features, {
         id: null, // Yeni feature için ID null
-        feature: 'Yeni Özellik', 
+        feature: 'Yeni Özellik',
         description: 'Özellik açıklaması buraya gelecek',
         icon: '⭐'
       }]
@@ -92,29 +93,26 @@ const AboutEditor = ({ onSave, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      // Features'ları temizle ve kontrol et
-      console.log('Form data before cleaning:', formData);
       const cleanedFeatures = formData.features.map(feature => ({
         ...feature,
         feature: (feature.feature || '').trim(),
         description: (feature.description || '').trim(),
         icon: feature.icon || '⭐'
       }));
-      console.log('Cleaned features:', cleanedFeatures);
-      
+
       const cleanedFormData = {
         ...formData,
         features: cleanedFeatures
       };
-      
+
       // Veritabanına kaydet
       await adminService.saveAbout(cleanedFormData);
-      
+
       await onSave(cleanedFormData);
     } catch (error) {
-      console.error('About kaydedilirken hata:', error);
+      logger.error('About kaydedilirken hata:', error);
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +124,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
         <h3 className="text-lg font-medium text-gray-900">Hakkımızda Bölümü Düzenle</h3>
         <p className="text-sm text-gray-600 mt-1">Hakkımızda bölümünü özelleştirin</p>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         {/* Ana Başlık */}
         <div>
@@ -176,7 +174,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
               + Yeni Kart Ekle
             </button>
           </div>
-          
+
           <div className="space-y-4">
             {formData.features.map((feature, index) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
@@ -191,7 +189,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
                       {feature.icon}
                     </button>
                   </div>
-                  
+
                   {/* Kart İçeriği */}
                   <div className="flex-1 space-y-3">
                     <input
@@ -209,7 +207,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-                  
+
                   {/* Silme Butonu */}
                   <button
                     type="button"
@@ -238,7 +236,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
                   ✕
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-8 gap-2">
                 {availableIcons.map((icon, index) => (
                   <button
@@ -251,7 +249,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
                   </button>
                 ))}
               </div>
-              
+
               <div className="mt-4 text-center">
                 <button
                   type="button"

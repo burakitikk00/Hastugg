@@ -18,94 +18,94 @@ import './App.css';
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
         <Routes>
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route 
-            path="/admin/dashboard" 
+          <Route
+            path="/admin/dashboard"
             element={
               <ProtectedRoute>
                 <DashboardPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/page-content" 
+          <Route
+            path="/admin/page-content"
             element={
               <ProtectedRoute>
                 <AdminDashboard />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/services" 
+          <Route
+            path="/admin/services"
             element={
               <ProtectedRoute>
                 <ServicesPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/team" 
+          <Route
+            path="/admin/team"
             element={
               <ProtectedRoute>
                 <TeamPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/contact" 
+          <Route
+            path="/admin/contact"
             element={
               <ProtectedRoute>
                 <ContactPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/contact-messages" 
+          <Route
+            path="/admin/contact-messages"
             element={
               <ProtectedRoute>
                 <ContactMessagesPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/projects" 
+          <Route
+            path="/admin/projects"
             element={
               <ProtectedRoute>
                 <ProjectsPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/email-settings" 
+          <Route
+            path="/admin/email-settings"
             element={
               <ProtectedRoute>
                 <EmailSettingsPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/analytics" 
+          <Route
+            path="/admin/analytics"
             element={
               <ProtectedRoute>
                 <AnalyticsPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/change-password" 
+          <Route
+            path="/admin/change-password"
             element={
               <ProtectedRoute>
                 <ChangePasswordPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Redirect /admin to /admin/dashboard */}
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-          
+
           {/* Main App Route */}
           <Route path="/*" element={<MainApp />} />
         </Routes>

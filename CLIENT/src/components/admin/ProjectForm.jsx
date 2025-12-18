@@ -29,7 +29,7 @@ const ProjectForm = ({ project = null, onSave, onCancel }) => {
     try {
       await onSave(formData);
     } catch (error) {
-      console.error('Proje kaydedilirken hata:', error);
+      logger.error('Proje kaydedilirken hata:', error);
     } finally {
       setIsLoading(false);
     }

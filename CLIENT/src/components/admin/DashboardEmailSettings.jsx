@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaEnvelope, FaKey, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import adminService from '../../services/adminService';
+import logger from '../../utils/logger';
 
 const DashboardEmailSettings = ({ onSave, onCancel, isLoading }) => {
   const [formData, setFormData] = useState({
@@ -28,7 +29,7 @@ const DashboardEmailSettings = ({ onSave, onCancel, isLoading }) => {
         });
       }
     } catch (error) {
-      console.error('Email ayarları yüklenirken hata:', error);
+      logger.error('Email ayarları yüklenirken hata:', error);
     }
   };
 

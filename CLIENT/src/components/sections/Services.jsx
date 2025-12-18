@@ -18,7 +18,7 @@ const Services = () => {
                 const servicesData = await publicService.getServices()
                 setServices(servicesData)
             } catch (error) {
-                console.error('Hizmetler yüklenirken hata:', error)
+                logger.error('Hizmetler yüklenirken hata:', error)
                 // Hata durumunda boş array kullan - sabit veriler gösterme
                 setServices([])
             } finally {
@@ -36,7 +36,7 @@ const Services = () => {
                 const projectsData = await publicService.getProjects()
                 setAllProjects(projectsData)
             } catch (error) {
-                console.error('Projeler yüklenirken hata:', error)
+                logger.error('Projeler yüklenirken hata:', error)
             }
         }
 
@@ -48,24 +48,42 @@ const Services = () => {
         // service_ids alanına göre filtreleme yap
         const filteredProjects = allProjects.filter(project => {
             if (!project.service_ids) return false
-            
+
             try {
-                const serviceIds = JSON.parse(project.service_ids)
+                // service_ids'yi parse et
+                let serviceIds = project.service_ids
+
+                // Eğer string ise parse et
+                if (typeof serviceIds === 'string') {
+                    // Boş string kontrolü
+                    if (serviceIds.trim() === '' || serviceIds.trim() === '[]') return false
+                    serviceIds = JSON.parse(serviceIds)
+                }
+
+                // Array kontrolü
+                if (!Array.isArray(serviceIds)) return false
+
+                // 0 ve null değerleri filtrele
+                serviceIds = serviceIds.filter(id => id && id !== 0)
+
+                if (serviceIds.length === 0) return false
+
                 // Hizmet adına göre eşleştirme yap
-                const matchingService = services.find(service => 
+                const matchingService = services.find(service =>
                     service.service === serviceTitle
                 )
-                
+
                 if (matchingService && serviceIds.includes(matchingService.id)) {
                     return true
                 }
             } catch (error) {
-                console.error('service_ids parse hatası:', error)
+                // Parse hatası durumunda sessizce atla
+                logger.log('service_ids parse atlandı:', project.title, error.message)
             }
-            
+
             return false
         })
-        
+
         return filteredProjects
     }
 
@@ -177,14 +195,14 @@ const Services = () => {
                                 className="service-card"
                             >
                                 <div className="service-image-container">
-                                    <LoadingImage 
-                                        src={service.url ? publicService.getImageURL(service.url) : null} 
+                                    <LoadingImage
+                                        src={service.url ? publicService.getImageURL(service.url) : null}
                                         alt={service.service}
                                         className="service-image"
                                         blurWhileLoading={true}
                                         showLoadingSpinner={true}
                                     />
-                                    
+
                                     <div className="service-overlay">
                                         <div className="overlay-content">
                                             <h3 className="overlay-title">{service.service}</h3>
@@ -197,7 +215,7 @@ const Services = () => {
                                             </button>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="service-name-overlay">
                                         <h3 className="service-name">{service.service}</h3>
                                     </div>

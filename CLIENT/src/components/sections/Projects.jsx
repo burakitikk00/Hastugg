@@ -21,7 +21,7 @@ const Projects = () => {
                 setProjects(data)
                 setError(null)
             } catch (err) {
-                console.error('Projeler yüklenirken hata:', err)
+                logger.error('Projeler yüklenirken hata:', err)
                 setError('Projeler yüklenirken bir hata oluştu.')
             } finally {
                 setLoading(false)
@@ -155,20 +155,28 @@ const Projects = () => {
                                         blurWhileLoading={true}
                                         showLoadingSpinner={true}
                                     />
-                                    <div className="project-status">
+
+                                    <div className="project-status-badge">
                                         <span className={`status-badge ${(project.status || '').toLowerCase().replace(' ', '_')}`}>
                                             {getStatusText(project.status)}
                                         </span>
                                     </div>
-                                </div>
-                                <div className="project-content">
-                                    <h3 className="project-name">{project.name || project.title}</h3>
-                                    <button 
-                                        className="project-button"
-                                        onClick={() => handleProjectClick(project)}
-                                    >
-                                        Detayları Gör
-                                    </button>
+
+                                    <div className="project-overlay">
+                                        <div className="overlay-content">
+                                            <h3 className="overlay-title">{project.name || project.title}</h3>
+                                            <button
+                                                className="overlay-button"
+                                                onClick={() => handleProjectClick(project)}
+                                            >
+                                                DETAYLAR
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="project-name-overlay">
+                                        <h3 className="project-name">{project.name || project.title}</h3>
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}

@@ -12,7 +12,7 @@ const EmailSettingsPage = () => {
       await adminService.saveEmailSettings(emailData);
       alert('Email ayarları başarıyla kaydedildi!');
     } catch (error) {
-      console.error('Email ayarları kaydedilirken hata:', error);
+      logger.error('Email ayarları kaydedilirken hata:', error);
       alert(`Email ayarları kaydedilirken bir hata oluştu: ${error.message}`);
     } finally {
       setIsLoading(false);

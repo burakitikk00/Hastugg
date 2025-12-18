@@ -52,7 +52,7 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
       handleServiceChange(index, 'url', fullImageURL);
       alert('Görsel başarıyla yüklendi!');
     } catch (error) {
-      console.error('Görsel yüklenirken hata:', error);
+      logger.error('Görsel yüklenirken hata:', error);
       alert('Görsel yüklenirken hata oluştu: ' + error.message);
     } finally {
       setUploadingImages(prev => ({ ...prev, [index]: false }));
@@ -95,7 +95,7 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
       await onSave(formData);
       alert('Hizmetler başarıyla kaydedildi!');
     } catch (error) {
-      console.error('Services kaydedilirken hata:', error);
+      logger.error('Services kaydedilirken hata:', error);
       alert('Kayıt sırasında hata oluştu: ' + error.message);
     } finally {
       setIsLoading(false);

@@ -70,7 +70,7 @@ const AdminProjectForm = ({ project = null, services = [], onSave, onCancel }) =
 
       await onSave(formData);
     } catch (error) {
-      console.error('Proje kaydedilirken hata:', error);
+      logger.error('Proje kaydedilirken hata:', error);
       throw error; // Hatayı üst bileşene aktar
     } finally {
       setIsLoading(false);

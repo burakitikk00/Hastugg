@@ -18,7 +18,7 @@ export const useGoogleAnalytics = () => {
           loadGoogleAnalytics(settings.measurement_id);
         }
       } catch (error) {
-        console.error('Analytics ayarları yüklenirken hata:', error);
+        logger.error('Analytics ayarları yüklenirken hata:', error);
       }
     };
 
@@ -55,7 +55,7 @@ export const useGoogleAnalytics = () => {
     };
 
     script1.onerror = () => {
-      console.error('Google Analytics yüklenemedi');
+      logger.error('Google Analytics yüklenemedi');
     };
   };
 

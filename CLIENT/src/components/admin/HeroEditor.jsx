@@ -22,7 +22,7 @@ const HeroEditor = ({ onSave, onCancel }) => {
           });
         }
       } catch (error) {
-        console.error('Hero verileri getirilemedi:', error);
+        logger.error('Hero verileri getirilemedi:', error);
       }
     };
 
@@ -47,7 +47,7 @@ const HeroEditor = ({ onSave, onCancel }) => {
       
       await onSave(formData);
     } catch (error) {
-      console.error('Hero kaydedilirken hata:', error);
+      logger.error('Hero kaydedilirken hata:', error);
     } finally {
       setIsLoading(false);
     }

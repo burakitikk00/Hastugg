@@ -16,7 +16,7 @@ const About = () => {
                     setData(aboutResponse);
                 }
             } catch (error) {
-                console.error('About verileri getirilemedi:', error);
+                logger.error('About verileri getirilemedi:', error);
                 setData(null);
             } finally {
                 setLoading(false);

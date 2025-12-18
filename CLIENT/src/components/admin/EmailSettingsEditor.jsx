@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import FormButtons from './FormButtons';
 import { FaEnvelope, FaKey, FaServer, FaCog, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import adminService from '../../services/adminService';
+import logger from '../../utils/logger';
 
 const EmailSettingsEditor = ({ onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -30,7 +31,7 @@ const EmailSettingsEditor = ({ onSave, onCancel }) => {
         });
       }
     } catch (error) {
-      console.error('Email ayarları yüklenirken hata:', error);
+      logger.error('Email ayarları yüklenirken hata:', error);
     }
   };
 
@@ -50,7 +51,7 @@ const EmailSettingsEditor = ({ onSave, onCancel }) => {
     try {
       await onSave(formData);
     } catch (error) {
-      console.error('Email ayarları kaydedilirken hata:', error);
+      logger.error('Email ayarları kaydedilirken hata:', error);
     } finally {
       setIsLoading(false);
     }
