@@ -1,18 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const logger = require('../../utils/logger');
+const { supabase } = require('../supabaseClient');
+const verifyToken = require('../middleware/authMiddleware');
 
-const dbTestRoutes = require('./test');
-const contentRoutes = require('./content');
-const contactRoutes = require('./contact');
-
-router.use(dbTestRoutes);
-router.use(contentRoutes);
-router.use(contactRoutes);
-
-// Supabase Storage test endpoint (public - token gerektirmez)
+// Supabase Storage test endpoint (token gerektirmez - sadece test için)
 router.get('/test-storage', async (_req, res) => {
     try {
-        const { supabase } = require('../supabaseClient');
         const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'images';
         
         // 1. Supabase client kontrolü
@@ -28,6 +22,7 @@ router.get('/test-storage', async (_req, res) => {
         const { data: buckets, error: listError } = await supabase.storage.listBuckets();
         
         if (listError) {
+            logger.error('Bucket listesi alınamadı:', listError);
             return res.status(500).json({
                 success: false,
                 error: 'Bucket listesi alınamadı',
@@ -64,6 +59,7 @@ router.get('/test-storage', async (_req, res) => {
             .list('', { limit: 10 });
 
         if (listFilesError) {
+            logger.error('Dosya listesi alınamadı:', listFilesError);
             return res.status(500).json({
                 success: false,
                 error: 'Dosya listesi alınamadı',
@@ -76,7 +72,7 @@ router.get('/test-storage', async (_req, res) => {
             });
         }
 
-        // 5. Test dosyası yükleme
+        // 5. Test dosyası yükleme (küçük bir test görseli)
         const testFileName = `test-${Date.now()}.txt`;
         const testContent = Buffer.from('Test file for Supabase Storage connection');
         
@@ -88,6 +84,7 @@ router.get('/test-storage', async (_req, res) => {
             });
 
         if (uploadError) {
+            logger.error('Test dosyası yüklenemedi:', uploadError);
             return res.status(500).json({
                 success: false,
                 error: 'Test dosyası yüklenemedi',
@@ -109,6 +106,10 @@ router.get('/test-storage', async (_req, res) => {
         const { error: deleteError } = await supabase.storage
             .from(STORAGE_BUCKET)
             .remove([testFileName]);
+
+        if (deleteError) {
+            logger.warn('Test dosyası silinemedi:', deleteError);
+        }
 
         // Başarılı test sonucu
         res.json({
@@ -133,10 +134,12 @@ router.get('/test-storage', async (_req, res) => {
         });
 
     } catch (error) {
+        logger.error('Storage test hatası:', error);
         res.status(500).json({
             success: false,
             error: 'Storage testi sırasında hata oluştu',
-            details: error.message
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });

@@ -17,7 +17,19 @@ class PublicService {
   // Görsel URL'ini tam URL'ye dönüştür
   getImageURL(imagePath) {
     if (!imagePath) return '/api/placeholder/400/300';
-    if (imagePath.startsWith('http')) return imagePath; // Zaten tam URL
+    
+    // Zaten tam URL ise (Supabase Storage veya başka bir URL)
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    
+    // Eski format URL'ler (/uploads/...) - artık çalışmıyor, placeholder döndür
+    if (imagePath.startsWith('/uploads/')) {
+      console.warn('Eski format URL tespit edildi:', imagePath, '- Lütfen görseli yeniden yükleyin');
+      return '/api/placeholder/400/300';
+    }
+    
+    // Diğer durumlar için server URL ile birleştir
     return `${this.serverURL}${imagePath}`;
   }
 

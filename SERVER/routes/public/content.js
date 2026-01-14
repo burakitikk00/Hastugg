@@ -145,6 +145,22 @@ router.get('/team', async (req, res) => {
 // Analytics ayarlarını getir (public - frontend için)
 router.get('/analytics-settings', async (req, res) => {
     try {
+        // Önce tablonun var olup olmadığını kontrol et
+        const tableCheck = await pool.query(`
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'analytics_settings'
+            );
+        `);
+        
+        if (!tableCheck.rows[0].exists) {
+            // Tablo yok, sessizce fallback döndür
+            logger.warn('Analytics settings tablosu bulunamadı. Tabloyu oluşturmak için SQL script\'ini çalıştırın.');
+            return res.json({ measurement_id: null, is_active: false });
+        }
+
+        // Tablo varsa sorguyu çalıştır
         const result = await pool.query(`
             SELECT measurement_id, is_active 
             FROM analytics_settings 
@@ -156,9 +172,11 @@ router.get('/analytics-settings', async (req, res) => {
         if (result.rows.length > 0) {
             res.json(result.rows[0]);
         } else {
+            // Tablo var ama aktif kayıt yok - bu normal
             res.json({ measurement_id: null, is_active: false });
         }
     } catch (error) {
+        // Beklenmeyen hatalar için logla ama yine de fallback döndür
         logger.error('Analytics ayarları getirme hatası:', error);
         res.json({ measurement_id: null, is_active: false });
     }

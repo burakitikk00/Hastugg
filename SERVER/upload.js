@@ -33,13 +33,17 @@ const upload = multer({
 const uploadImageToSupabase = async (file, folder = '') => {
     try {
         if (!supabase) {
-            throw new Error('Supabase client başlatılmamış');
+            const errorMsg = 'Supabase client başlatılmamış. SUPABASE_URL ve SUPABASE_SERVICE_ROLE_KEY environment variable\'larını kontrol edin.';
+            logger.error(errorMsg);
+            throw new Error(errorMsg);
         }
 
         // Benzersiz dosya adı oluştur
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const fileExt = path.extname(file.originalname);
         const fileName = `${folder ? folder + '/' : ''}${file.fieldname || 'image'}-${uniqueSuffix}${fileExt}`;
+
+        logger.log(`📤 Görsel yükleniyor: ${fileName} (Bucket: ${STORAGE_BUCKET})`);
 
         // Supabase Storage'a yükle
         const { data, error } = await supabase.storage
@@ -50,8 +54,22 @@ const uploadImageToSupabase = async (file, folder = '') => {
             });
 
         if (error) {
-            logger.error('Supabase Storage yükleme hatası:', error);
-            throw error;
+            logger.error('❌ Supabase Storage yükleme hatası:', {
+                message: error.message,
+                statusCode: error.statusCode,
+                error: error.error,
+                bucket: STORAGE_BUCKET,
+                fileName: fileName
+            });
+            
+            // Daha açıklayıcı hata mesajları
+            if (error.statusCode === 404 || error.message?.includes('not found')) {
+                throw new Error(`Bucket '${STORAGE_BUCKET}' bulunamadı. Lütfen Supabase Dashboard'dan bucket'ı oluşturun ve Public yapın.`);
+            } else if (error.statusCode === 403 || error.message?.includes('permission')) {
+                throw new Error(`Bucket '${STORAGE_BUCKET}' için yetki hatası. Service Role Key'in doğru olduğundan ve bucket'ın Public olduğundan emin olun.`);
+            } else {
+                throw new Error(`Yükleme hatası: ${error.message || 'Bilinmeyen hata'}`);
+            }
         }
 
         // Public URL al
@@ -60,13 +78,19 @@ const uploadImageToSupabase = async (file, folder = '') => {
             .getPublicUrl(fileName);
 
         if (!urlData?.publicUrl) {
-            throw new Error('Public URL alınamadı');
+            logger.error('Public URL alınamadı:', { fileName, bucket: STORAGE_BUCKET });
+            throw new Error('Public URL alınamadı. Bucket\'ın Public olduğundan emin olun.');
         }
 
         logger.log(`✅ Görsel Supabase Storage'a yüklendi: ${fileName}`);
+        logger.log(`🔗 Public URL: ${urlData.publicUrl}`);
         return urlData.publicUrl;
     } catch (error) {
-        logger.error('Görsel yüklenirken hata:', error);
+        logger.error('Görsel yüklenirken hata:', {
+            message: error.message,
+            fileName: file?.originalname,
+            bucket: STORAGE_BUCKET
+        });
         throw error;
     }
 };

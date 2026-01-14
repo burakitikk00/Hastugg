@@ -120,6 +120,42 @@ Görsellerin bulut depolamada saklanması için Supabase Storage bucket'ı oluş
 
 **Not:** Eğer bucket adını `images` dışında bir şey yaptıysanız, `SUPABASE_STORAGE_BUCKET` environment variable'ını Render'da güncelleyin.
 
+### Adım 4.6: Analytics Settings Tablosunu Oluşturma
+
+Eğer `analytics_settings` tablosu hatası alıyorsanız, tabloyu oluşturmanız gerekiyor:
+
+#### Yöntem 1: Supabase SQL Editor (Önerilen)
+
+1. **Supabase Dashboard'a gidin**
+   - [https://app.supabase.com](https://app.supabase.com)
+   - Projenizi seçin
+
+2. **SQL Editor'a gidin**
+   - Sol menüden **"SQL Editor"** seçeneğine tıklayın
+
+3. **SQL Script'ini çalıştırın**
+   - **"New query"** butonuna tıklayın
+   - Aşağıdaki SQL kodunu yapıştırın:
+   ```sql
+   CREATE TABLE IF NOT EXISTS analytics_settings (
+       id SERIAL PRIMARY KEY,
+       measurement_id VARCHAR(50),
+       is_active BOOLEAN DEFAULT FALSE,
+       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   );
+   ```
+   - **"Run"** butonuna tıklayın
+
+#### Yöntem 2: psql Komut Satırı
+
+Eğer psql kullanıyorsanız:
+```bash
+psql -h <host> -U <user> -d <database> -f SERVER/scripts/create_analytics_table.sql
+```
+
+**Not:** Tablo oluşturulduktan sonra, Render servisi otomatik olarak hatayı düzeltecektir. Eğer hata devam ederse, Render servisini yeniden başlatın.
+
 ### Adım 5: Deploy
 
 1. **"Create Web Service"** butonuna tıklayın

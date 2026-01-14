@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Hastugg Construction
 
 Modern ve dinamik bir inşaat firması web sitesi. React, Node.js ve Supabase ile geliştirilmiş full-stack bir proje.
@@ -18,6 +19,28 @@ Hastugg Construction, inşaat firmalarının hizmetlerini, projelerini ve ekip �
 - 📱 **Mobil Uyumlu** - Her ekran boyutunda optimize edilmiş deneyim
 
 ## 🛠️ Teknolojiler
+=======
+# Hastug Construction
+
+Modern ve dinamik bir inşaat firması web sitesi. React, Node.js ve Supabase ile geliştirilmiş full-stack bir proje.
+
+## Proje Hakkında
+
+Hastugg Construction, inşaat firmalarının hizmetlerini, projelerini ve ekip üyelerini sergileyebileceği, müşterilerle iletişim kurabilecekleri modern bir web platformudur. Responsive tasarımı ve kullanıcı dostu arayüzü ile profesyonel bir görünüm sunar.
+
+##  Özellikler
+
+-  **Modern ve Responsive Tasarım** - Tüm cihazlarda mükemmel görünüm
+-  **Kullanıcı Yönetimi** - Google OAuth entegrasyonu ile güvenli giriş
+-  **Admin Paneli** - İçerik yönetimi için kapsamlı yönetim paneli
+-  **Proje Sergileme** - Görsel galeri ve detaylı proje bilgileri
+-  **Ekip Yönetimi** - Ekip üyelerinin tanıtımı
+-  **İletişim Formu** - Email entegrasyonu ile doğrudan iletişim
+-  **Dinamik İçerik** - Veritabanından yönetilen içerik sistemi
+-  **Mobil Uyumlu** - Her ekran boyutunda optimize edilmiş deneyim
+
+##  Teknolojiler
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 
 ### Frontend
 - **React** 19.1.1 - Modern kullanıcı arayüzü
@@ -66,7 +89,11 @@ Hastugg/
 └── README.md
 ```
 
+<<<<<<< HEAD
 ## 🚀 Kurulum
+=======
+##  Kurulum
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 
 ### Gereksinimler
 
@@ -74,9 +101,13 @@ Hastugg/
 - npm veya yarn
 - Supabase hesabı
 
+<<<<<<< HEAD
 ### Local Development Kurulumu
 
 #### Backend Kurulumu
+=======
+### Backend Kurulumu
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 
 1. SERVER klasörüne gidin:
 ```bash
@@ -88,6 +119,7 @@ cd SERVER
 npm install
 ```
 
+<<<<<<< HEAD
 3. `.env` dosyası oluşturun (`env.example` dosyasını kopyalayarak):
 ```bash
 # Windows
@@ -110,6 +142,19 @@ ALLOWED_ORIGINS=http://localhost:5173
 ```
 
 5. Sunucuyu başlatın:
+=======
+3. `.env` dosyası oluşturun ve gerekli değişkenleri ekleyin:
+```env
+PORT=5000
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
+JWT_SECRET=your_jwt_secret
+EMAIL_USER=your_email
+EMAIL_PASS=your_email_password
+```
+
+4. Sunucuyu başlatın:
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 ```bash
 # Development modu
 npm run dev
@@ -118,7 +163,11 @@ npm run dev
 npm start
 ```
 
+<<<<<<< HEAD
 #### Frontend Kurulumu
+=======
+### Frontend Kurulumu
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 
 1. CLIENT klasörüne gidin:
 ```bash
@@ -130,6 +179,7 @@ cd CLIENT
 npm install
 ```
 
+<<<<<<< HEAD
 3. `.env` dosyası oluşturun (`.env.example` dosyasını kopyalayarak):
 ```bash
 # Windows
@@ -147,6 +197,17 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
 5. Development sunucusunu başlatın:
+=======
+3. `.env` dosyası oluşturun:
+```env
+VITE_API_URL=http://localhost:5000
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+4. Development sunucusunu başlatın:
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 ```bash
 npm run dev
 ```
@@ -155,7 +216,11 @@ Frontend varsayılan olarak `http://localhost:5173` adresinde çalışacaktır.
 
 ## 📖 Kullanım
 
+<<<<<<< HEAD
 ### Local Development
+=======
+### Development
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 
 Backend ve frontend'i ayrı terminallerde çalıştırın:
 
@@ -180,6 +245,7 @@ npm run build
 
 Build edilmiş dosyalar `CLIENT/dist` klasöründe oluşturulacaktır.
 
+<<<<<<< HEAD
 ## 🚀 Deployment
 
 Bu proje **Render** (backend) ve **Vercel** (frontend) üzerinde deploy edilebilir.
@@ -267,6 +333,9 @@ Bu proje **Render** (backend) ve **Vercel** (frontend) üzerinde deploy edilebil
 - `VITE_SUPABASE_ANON_KEY` - Supabase anonymous key
 
 ## 🔑 API Endpoints
+=======
+##  API Endpoints
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 
 ### Public Routes
 
@@ -285,7 +354,11 @@ Bu proje **Render** (backend) ve **Vercel** (frontend) üzerinde deploy edilebil
 - `PUT /api/admin/users/:id` - Kullanıcı güncelleme
 - Content yönetimi endpoints
 
+<<<<<<< HEAD
 ## 🎨 Özelleştirme
+=======
+##  Özelleştirme
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 
 ### Tailwind CSS
 
@@ -309,7 +382,11 @@ Geliştirme ve production ortamları için farklı `.env` dosyaları kullanabili
 - `.env.development`
 - `.env.production`
 
+<<<<<<< HEAD
 ## 🤝 Katkıda Bulunma
+=======
+##  Katkıda Bulunma
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 
 1. Bu repository'yi fork edin
 2. Feature branch'i oluşturun (`git checkout -b feature/amazing-feature`)
@@ -329,7 +406,11 @@ Conventional Commits standardını kullanıyoruz:
 - `test:` - Test eklemeleri
 - `chore:` - Bakım işleri
 
+<<<<<<< HEAD
 ## 🐛 Sorun Giderme
+=======
+##  Sorun Giderme
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 
 ### Port zaten kullanımda hatası
 
@@ -351,6 +432,7 @@ Backend'de CORS yapılandırmasını kontrol edin. Frontend URL'inin izin verile
 
 Bu proje özel bir projedir. Tüm hakları saklıdır.
 
+<<<<<<< HEAD
 ## 👨‍💻 Geliştirici
 
 **Hastugg Construction Team**
@@ -360,6 +442,16 @@ Bu proje özel bir projedir. Tüm hakları saklıdır.
 Sorularınız için lütfen bizimle iletişime geçin:
 - Website: [hastugg.com](https://hastugg.com)
 - Email: info@hastugg.com
+=======
+##  Geliştirici
+
+**Hastugg Construction Team**
+
+##  İletişim
+
+Sorularınız için lütfen bizimle iletişime geçin
+
+>>>>>>> 036184521e0a9434cb2498fbf7c92b4f05093937
 
 ## 🙏 Teşekkürler
 

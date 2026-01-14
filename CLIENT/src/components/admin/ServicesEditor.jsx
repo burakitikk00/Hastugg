@@ -47,8 +47,10 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
     
     try {
       const result = await adminService.uploadImage(file);
-      // Backend'den gelen relative path'i tam URL'ye çevir
-      const fullImageURL = `${API_CONFIG.SERVER_BASE_URL}${result.imageURL}`;
+      // Backend'den gelen URL zaten Supabase Storage URL'i (tam URL)
+      // Eğer eski format ise publicService düzeltecek
+      const publicService = (await import('../../services/publicService')).default;
+      const fullImageURL = publicService.getImageURL(result.imageURL);
       handleServiceChange(index, 'url', fullImageURL);
       alert('Görsel başarıyla yüklendi!');
     } catch (error) {

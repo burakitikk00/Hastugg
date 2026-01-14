@@ -12,5 +12,7 @@ router.use(require('./contactMessages'));
 router.use(require('./analytics'));
 router.use(require('./password'));
 router.use(require('./emailSettings').router);
+router.use(require('./testStorage'));
+router.use(require('./migrateImages'));
 
 module.exports = router;

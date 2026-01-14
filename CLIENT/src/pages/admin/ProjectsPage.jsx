@@ -3,6 +3,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import DataTable from '../../components/admin/DataTable';
 import AdminProjectForm from '../../components/admin/AdminProjectForm';
 import adminService from '../../services/adminService';
+import publicService from '../../services/publicService';
 import API_CONFIG from '../../config/api';
 
 const ProjectsPage = () => {
@@ -500,7 +501,7 @@ const ProjectExpandedView = ({
               {projectImages.map((imageURL, index) => (
                 <div key={index} className="relative group">
                   <img
-                    src={`${API_CONFIG.SERVER_BASE_URL}${imageURL}`}
+                    src={publicService.getImageURL(imageURL)}
                     alt={`Proje görseli ${index + 1}`}
                     className={`w-full h-20 object-cover rounded border-2 cursor-pointer transition-all ${project.url === imageURL
                         ? 'border-blue-500 ring-2 ring-blue-200'

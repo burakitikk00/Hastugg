@@ -45,20 +45,53 @@ router.post('/add-project', verifyToken, upload.array('images', 10), async (req,
         );
         const projectId = projectResult.rows[0].id;
 
-        // Görselleri Supabase Storage'a yükle
-        const imageURLs = await uploadMultipleImagesToSupabase(files, 'projects');
+        // Görselleri Supabase Storage'a yükle (hata durumunda rollback yapılacak)
+        let imageURLs = [];
+        try {
+            imageURLs = await uploadMultipleImagesToSupabase(files, 'projects');
+            if (imageURLs.length === 0) {
+                throw new Error('Görseller Supabase Storage\'a yüklenemedi');
+            }
+        } catch (uploadError) {
+            await client.query('ROLLBACK');
+            logger.error('Supabase Storage yükleme hatası:', uploadError);
+            return res.status(500).json({ 
+                message: 'Görseller yüklenirken hata oluştu', 
+                error: uploadError.message 
+            });
+        }
+
         const firstImageURL = imageURLs[0] || null;
 
         // Veritabanına görsel URL'lerini kaydet
-        for (const imageURL of imageURLs) {
-            await client.query(
-                'INSERT INTO "Images" (projectid, "imageURL") VALUES ($1, $2)',
-                [projectId, imageURL]
-            );
-        }
+        try {
+            for (const imageURL of imageURLs) {
+                await client.query(
+                    'INSERT INTO "Images" (projectid, "imageURL") VALUES ($1, $2)',
+                    [projectId, imageURL]
+                );
+                logger.log(`✅ Görsel veritabanına kaydedildi: ${imageURL}`);
+            }
 
-        if (firstImageURL) {
-            await client.query('UPDATE "Projects" SET url = $1 WHERE id = $2', [firstImageURL, projectId]);
+            if (firstImageURL) {
+                await client.query('UPDATE "Projects" SET url = $1 WHERE id = $2', [firstImageURL, projectId]);
+                logger.log(`✅ Proje ana görseli güncellendi: ${firstImageURL}`);
+            }
+        } catch (dbError) {
+            // Veritabanı hatası durumunda Supabase Storage'dan görselleri sil
+            await client.query('ROLLBACK');
+            logger.error('Veritabanı kayıt hatası:', dbError);
+            // Yüklenen görselleri temizle
+            try {
+                const { deleteMultipleImages } = require('../../upload');
+                await deleteMultipleImages(imageURLs);
+            } catch (cleanupError) {
+                logger.error('Görsel temizleme hatası:', cleanupError);
+            }
+            return res.status(500).json({ 
+                message: 'Görseller veritabanına kaydedilemedi', 
+                error: dbError.message 
+            });
         }
 
         await client.query('COMMIT');
@@ -185,18 +218,51 @@ router.post('/projects/:id/images', verifyToken, upload.array('images', 10), asy
 
         await client.query('BEGIN');
         
-        // Görselleri Supabase Storage'a yükle
-        const imageURLs = await uploadMultipleImagesToSupabase(files, 'projects');
+        // Görselleri Supabase Storage'a yükle (hata durumunda rollback yapılacak)
+        let imageURLs = [];
+        try {
+            imageURLs = await uploadMultipleImagesToSupabase(files, 'projects');
+            if (imageURLs.length === 0) {
+                throw new Error('Görseller Supabase Storage\'a yüklenemedi');
+            }
+        } catch (uploadError) {
+            await client.query('ROLLBACK');
+            logger.error('Supabase Storage yükleme hatası:', uploadError);
+            return res.status(500).json({ 
+                message: 'Görseller yüklenirken hata oluştu', 
+                error: uploadError.message 
+            });
+        }
+
         const firstImageURL = imageURLs[0] || null;
 
         // Veritabanına görsel URL'lerini kaydet
-        for (const imageURL of imageURLs) {
-            await client.query('INSERT INTO "Images" (projectid, "imageURL") VALUES ($1, $2)', [id, imageURL]);
-        }
+        try {
+            for (const imageURL of imageURLs) {
+                await client.query('INSERT INTO "Images" (projectid, "imageURL") VALUES ($1, $2)', [id, imageURL]);
+                logger.log(`✅ Görsel veritabanına kaydedildi: ${imageURL}`);
+            }
 
-        const projectHasMain = await client.query('SELECT url FROM "Projects" WHERE id = $1', [id]);
-        if (projectHasMain.rowCount > 0 && !projectHasMain.rows[0].url && firstImageURL) {
-            await client.query('UPDATE "Projects" SET url = $1 WHERE id = $2', [firstImageURL, id]);
+            const projectHasMain = await client.query('SELECT url FROM "Projects" WHERE id = $1', [id]);
+            if (projectHasMain.rowCount > 0 && !projectHasMain.rows[0].url && firstImageURL) {
+                await client.query('UPDATE "Projects" SET url = $1 WHERE id = $2', [firstImageURL, id]);
+                logger.log(`✅ Proje ana görseli güncellendi: ${firstImageURL}`);
+            }
+        } catch (dbError) {
+            // Veritabanı hatası durumunda Supabase Storage'dan görselleri sil
+            await client.query('ROLLBACK');
+            logger.error('Veritabanı kayıt hatası:', dbError);
+            // Yüklenen görselleri temizle
+            try {
+                const { deleteMultipleImages } = require('../../upload');
+                await deleteMultipleImages(imageURLs);
+            } catch (cleanupError) {
+                logger.error('Görsel temizleme hatası:', cleanupError);
+            }
+            return res.status(500).json({ 
+                message: 'Görseller veritabanına kaydedilemedi', 
+                error: dbError.message 
+            });
         }
 
         await client.query('COMMIT');
@@ -279,7 +345,7 @@ router.put('/projects/:id/main-image', verifyToken, async (req, res) => {
     }
 });
 
-// Tek görsel yükleme (genel)
+// Tek görsel yükleme (genel) - Sadece Supabase Storage'a yükler, veritabanına kaydetmez
 router.post('/upload-image', verifyToken, upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {
@@ -287,7 +353,12 @@ router.post('/upload-image', verifyToken, upload.single('image'), async (req, re
         }
         const { uploadImageToSupabase } = require('../../upload');
         const imageURL = await uploadImageToSupabase(req.file, 'general');
-        res.status(200).json({ message: 'Görsel yüklendi', imageURL });
+        logger.log(`✅ Genel görsel Supabase Storage'a yüklendi: ${imageURL}`);
+        res.status(200).json({ 
+            message: 'Görsel Supabase Storage\'a yüklendi', 
+            imageURL,
+            note: 'Bu görsel veritabanına kaydedilmedi. İlgili tabloya manuel olarak eklemeniz gerekiyor.'
+        });
     } catch (error) {
         logger.error('Yükleme hatası:', error);
         res.status(500).json({ message: 'Sunucu hatası', error: error.message });

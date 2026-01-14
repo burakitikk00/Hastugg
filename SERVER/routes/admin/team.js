@@ -34,13 +34,47 @@ router.post('/team', verifyToken, upload.single('image'), async (req, res) => {
 
         await client.query('BEGIN');
         let imageURL = null;
+        
+        // Görsel varsa Supabase Storage'a yükle
         if (req.file) {
-            imageURL = await uploadImageToSupabase(req.file, 'team');
+            try {
+                imageURL = await uploadImageToSupabase(req.file, 'team');
+                logger.log(`✅ Team görseli Supabase Storage'a yüklendi: ${imageURL}`);
+            } catch (uploadError) {
+                await client.query('ROLLBACK');
+                logger.error('Team görsel yükleme hatası:', uploadError);
+                return res.status(500).json({ 
+                    message: 'Görsel yüklenirken hata oluştu', 
+                    error: uploadError.message 
+                });
+            }
         }
-        await client.query(
-            'INSERT INTO "Team" (namesurname, position, url, "LinkedIn") VALUES ($1, $2, $3, $4)',
-            [namesurname, position, imageURL, LinkedIn || null]
-        );
+        
+        // Veritabanına kaydet
+        try {
+            await client.query(
+                'INSERT INTO "Team" (namesurname, position, url, "LinkedIn") VALUES ($1, $2, $3, $4)',
+                [namesurname, position, imageURL, LinkedIn || null]
+            );
+            logger.log(`✅ Team üyesi veritabanına kaydedildi: ${namesurname}`);
+        } catch (dbError) {
+            // Veritabanı hatası durumunda Supabase Storage'dan görseli sil
+            await client.query('ROLLBACK');
+            logger.error('Team veritabanı kayıt hatası:', dbError);
+            if (imageURL) {
+                try {
+                    const { deleteImage } = require('../../upload');
+                    await deleteImage(imageURL);
+                } catch (cleanupError) {
+                    logger.error('Team görsel temizleme hatası:', cleanupError);
+                }
+            }
+            return res.status(500).json({ 
+                message: 'Team üyesi veritabanına kaydedilemedi', 
+                error: dbError.message 
+            });
+        }
+        
         await client.query('COMMIT');
 
         res.status(201).json({ message: 'Team üyesi eklendi', imageURL });
@@ -71,15 +105,53 @@ router.put('/team/:id', verifyToken, upload.single('image'), async (req, res) =>
         }
 
         let imageURL = current.rows[0].url;
+        let oldImageURL = imageURL;
+        
+        // Yeni görsel varsa Supabase Storage'a yükle
         if (req.file) {
-            if (imageURL) await deleteImage(imageURL);
-            imageURL = await uploadImageToSupabase(req.file, 'team');
+            try {
+                // Eski görseli sil
+                if (oldImageURL) {
+                    await deleteImage(oldImageURL);
+                    logger.log(`🗑️ Eski team görseli silindi: ${oldImageURL}`);
+                }
+                // Yeni görseli yükle
+                imageURL = await uploadImageToSupabase(req.file, 'team');
+                logger.log(`✅ Yeni team görseli Supabase Storage'a yüklendi: ${imageURL}`);
+            } catch (uploadError) {
+                await client.query('ROLLBACK');
+                logger.error('Team görsel güncelleme hatası:', uploadError);
+                return res.status(500).json({ 
+                    message: 'Görsel yüklenirken hata oluştu', 
+                    error: uploadError.message 
+                });
+            }
         }
 
-        await client.query(
-            'UPDATE "Team" SET namesurname = $1, position = $2, url = $3, "LinkedIn" = $4 WHERE id = $5',
-            [namesurname, position, imageURL, LinkedIn || null, id]
-        );
+        // Veritabanını güncelle
+        try {
+            await client.query(
+                'UPDATE "Team" SET namesurname = $1, position = $2, url = $3, "LinkedIn" = $4 WHERE id = $5',
+                [namesurname, position, imageURL, LinkedIn || null, id]
+            );
+            logger.log(`✅ Team üyesi veritabanında güncellendi: ${namesurname}`);
+        } catch (dbError) {
+            // Veritabanı hatası durumunda yeni görseli sil, eski görseli geri yükle
+            await client.query('ROLLBACK');
+            logger.error('Team veritabanı güncelleme hatası:', dbError);
+            if (req.file && imageURL && imageURL !== oldImageURL) {
+                try {
+                    const { deleteImage } = require('../../upload');
+                    await deleteImage(imageURL);
+                } catch (cleanupError) {
+                    logger.error('Team görsel temizleme hatası:', cleanupError);
+                }
+            }
+            return res.status(500).json({ 
+                message: 'Team üyesi güncellenemedi', 
+                error: dbError.message 
+            });
+        }
 
         await client.query('COMMIT');
         res.status(200).json({ message: 'Team üyesi güncellendi', imageURL });
