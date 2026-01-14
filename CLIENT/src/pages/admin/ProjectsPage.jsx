@@ -297,7 +297,7 @@ const ProjectsPage = () => {
       label: 'Ana Görsel',
       render: (value) => value ? (
         <img
-          src={value}
+          src={publicService.getImageURL(value)}
           alt="Proje görseli"
           className="w-16 h-16 object-cover rounded-lg"
         />
@@ -501,7 +501,7 @@ const ProjectExpandedView = ({
               {projectImages.map((imageURL, index) => (
                 <div key={index} className="relative group">
                   <img
-                    src={imageURL || '/api/placeholder/400/300'}
+                    src={publicService.getImageURL(imageURL) || '/api/placeholder/400/300'}
                     alt={`Proje görseli ${index + 1}`}
                     className={`w-full h-20 object-cover rounded border-2 cursor-pointer transition-all ${project.url === imageURL
                         ? 'border-blue-500 ring-2 ring-blue-200'

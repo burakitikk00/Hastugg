@@ -2,6 +2,8 @@ import { useState } from 'react';
 import FormButtons from './FormButtons';
 import LoadingImage from '../common/LoadingImage';
 import adminService from '../../services/adminService';
+import publicService from '../../services/publicService';
+import logger from '../../utils/logger';
 import API_CONFIG from '../../config/api';
 
 const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
@@ -168,7 +170,7 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
                           </div>
                           <div className="w-16 h-16 rounded-md border border-gray-200 overflow-hidden">
                             <LoadingImage 
-                              src={service.url} 
+                              src={publicService.getImageURL(service.url)} 
                               alt="Service preview" 
                               className="w-full h-full object-cover"
                               blurWhileLoading={true}
