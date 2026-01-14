@@ -501,7 +501,9 @@ const ProjectExpandedView = ({
               {projectImages.map((imageURL, index) => (
                 <div key={index} className="relative group">
                   <img
-                    src={publicService.getImageURL(imageURL)}
+                    src={imageURL && (imageURL.startsWith('http://') || imageURL.startsWith('https://')) 
+                      ? imageURL 
+                      : publicService.getImageURL(imageURL)}
                     alt={`Proje görseli ${index + 1}`}
                     className={`w-full h-20 object-cover rounded border-2 cursor-pointer transition-all ${project.url === imageURL
                         ? 'border-blue-500 ring-2 ring-blue-200'
