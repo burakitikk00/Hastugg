@@ -8,8 +8,8 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     services: (servicesData?.services || []).map(service => ({
       ...service,
-      // Eğer url relative path ise tam URL'ye çevir
-      url: service.url ? (service.url.startsWith('http') ? service.url : `${API_CONFIG.SERVER_BASE_URL}${service.url}`) : null
+      // URL'yi direkt kullan (Supabase URL'leri zaten tam URL)
+      url: service.url || null
     }))
   });
 

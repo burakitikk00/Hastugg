@@ -18,18 +18,30 @@ class PublicService {
   getImageURL(imagePath) {
     if (!imagePath) return '/api/placeholder/400/300';
     
-    // Zaten tam URL ise (Supabase Storage veya başka bir URL) - direkt döndür
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
+    // String'e çevir ve trim yap
+    let url = String(imagePath).trim();
+    
+    // Eğer URL içinde Supabase URL'i varsa, sadece Supabase URL'ini al
+    if (url.includes('supabase.co')) {
+      // Supabase URL'ini bul (https:// ile başlayan ve supabase.co içeren kısmı)
+      const supabaseMatch = url.match(/https?:\/\/[^\/]*supabase\.co[^\s"']*/);
+      if (supabaseMatch) {
+        return supabaseMatch[0];
+      }
+    }
+    
+    // Zaten tam URL ise (http:// veya https:// ile başlıyorsa) - direkt döndür
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
     }
     
     // Eski format URL'ler (/uploads/...) - artık çalışmıyor, placeholder döndür
-    if (imagePath.startsWith('/uploads/')) {
+    if (url.startsWith('/uploads/')) {
       return '/api/placeholder/400/300';
     }
     
-    // Diğer durumlar için server URL ile birleştir
-    return `${this.serverURL}${imagePath}`;
+    // Diğer durumlar için placeholder döndür (server URL ekleme)
+    return '/api/placeholder/400/300';
   }
 
   // Hero verilerini getir (herkes erişebilir)
