@@ -235,24 +235,46 @@ const ProjectsPage = () => {
         let serviceIds = [];
 
         try {
-          // service_ids parse et, hata olursa boş array kullan
-          if (row.service_ids && typeof row.service_ids === 'string') {
-            serviceIds = JSON.parse(row.service_ids);
+          // Eğer zaten array ise direkt kullan
+          if (Array.isArray(row.service_ids)) {
+            serviceIds = row.service_ids;
+          } 
+          // Eğer string ise parse et
+          else if (row.service_ids && typeof row.service_ids === 'string') {
+            // Boş string veya '[]' kontrolü
+            const trimmed = row.service_ids.trim();
+            if (trimmed === '' || trimmed === '[]') {
+              serviceIds = [];
+            } else {
+              serviceIds = JSON.parse(row.service_ids);
+            }
           }
 
-          // Array değilse boş array yap
+          // Array kontrolü
           if (!Array.isArray(serviceIds)) {
             serviceIds = [];
           }
 
-          // 0'ları filtrele
-          serviceIds = serviceIds.filter(id => id && id !== 0);
+          // Tüm ID'leri number'a çevir ve 0/null değerlerini filtrele
+          serviceIds = serviceIds
+            .map(id => {
+              const numId = typeof id === 'string' ? parseInt(id, 10) : Number(id);
+              return isNaN(numId) ? null : numId;
+            })
+            .filter(id => id !== null && id !== 0);
 
         } catch (e) {
+          console.error('service_ids parse hatası:', e, row);
           serviceIds = [];
         }
 
-        const serviceNames = services.filter(service => serviceIds.includes(service.id)).map(service => service.service);
+        // Service ID'leri ile eşleştir (tip uyumluluğu için number'a çevir)
+        const serviceNames = services
+          .filter(service => {
+            const serviceId = Number(service.id);
+            return serviceIds.includes(serviceId);
+          })
+          .map(service => service.service);
 
         return (
           <div className="flex flex-wrap gap-1">
