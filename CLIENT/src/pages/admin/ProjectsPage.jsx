@@ -421,7 +421,7 @@ const ProjectsPage = () => {
             renderExpandedRow={(project) => (
               <div className="px-6 py-4 bg-gray-50 border-t">
                 <ProjectExpandedView
-                  project={project}
+                  project={selectedProject || project}
                   services={services}
                   projectImages={projectImages}
                   newImages={newImages}
@@ -468,12 +468,18 @@ const ProjectExpandedView = ({
             description: project.description,
             service_ids: (() => {
               try {
+                // Eğer zaten array ise direkt kullan
+                if (Array.isArray(project.service_ids)) {
+                  return project.service_ids.filter(id => id && id !== 0);
+                }
+                // Eğer string ise parse et
                 if (project.service_ids && typeof project.service_ids === 'string') {
                   const parsed = JSON.parse(project.service_ids);
                   return Array.isArray(parsed) ? parsed.filter(id => id && id !== 0) : [];
                 }
                 return [];
               } catch (e) {
+                console.error('service_ids parse hatası:', e);
                 return [];
               }
             })(),

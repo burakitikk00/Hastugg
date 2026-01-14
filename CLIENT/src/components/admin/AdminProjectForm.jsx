@@ -1,11 +1,28 @@
 import { useState, useEffect } from 'react';
 import FormButtons from './FormButtons';
+import logger from '../../utils/logger';
 
 const AdminProjectForm = ({ project = null, services = [], onSave, onCancel }) => {
+  // İlk state'i doğru şekilde parse et
+  const getInitialServiceIds = () => {
+    if (!project) return [];
+    try {
+      if (Array.isArray(project.service_ids)) {
+        return project.service_ids.filter(id => id && id !== 0);
+      } else if (project.service_ids && typeof project.service_ids === 'string') {
+        const parsed = JSON.parse(project.service_ids);
+        return Array.isArray(parsed) ? parsed.filter(id => id && id !== 0) : [];
+      }
+    } catch (e) {
+      console.error('service_ids initial parse hatası:', e);
+    }
+    return [];
+  };
+
   const [formData, setFormData] = useState({
     title: project?.title || '',
     description: project?.description || '',
-    service_ids: Array.isArray(project?.service_ids) ? project.service_ids : [],
+    service_ids: getInitialServiceIds(),
     status: project?.status || 'In Progress',
   });
 
@@ -14,10 +31,24 @@ const AdminProjectForm = ({ project = null, services = [], onSave, onCancel }) =
   // Form verilerini proje değiştiğinde güncelle
   useEffect(() => {
     if (project) {
+      // service_ids'i parse et
+      let parsedServiceIds = [];
+      try {
+        if (Array.isArray(project.service_ids)) {
+          parsedServiceIds = project.service_ids.filter(id => id && id !== 0);
+        } else if (project.service_ids && typeof project.service_ids === 'string') {
+          const parsed = JSON.parse(project.service_ids);
+          parsedServiceIds = Array.isArray(parsed) ? parsed.filter(id => id && id !== 0) : [];
+        }
+      } catch (e) {
+        console.error('service_ids parse hatası:', e);
+        parsedServiceIds = [];
+      }
+
       setFormData({
         title: project.title || '',
         description: project.description || '',
-        service_ids: Array.isArray(project.service_ids) ? project.service_ids : [],
+        service_ids: parsedServiceIds,
         status: project.status || 'In Progress',
       });
     } else {
