@@ -66,16 +66,24 @@ router.post('/add-project', verifyToken, upload.array('images', 10), async (req,
         // Veritabanına görsel URL'lerini kaydet
         try {
             for (const imageURL of imageURLs) {
+                // URL'in tam Supabase URL'i olduğundan emin ol
+                const cleanUrl = imageURL.trim();
+                if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+                    logger.error(`❌ Geçersiz URL formatı: ${cleanUrl}`);
+                    throw new Error(`Geçersiz URL formatı: ${cleanUrl}`);
+                }
+                
                 await client.query(
                     'INSERT INTO "Images" (projectid, "imageURL") VALUES ($1, $2)',
-                    [projectId, imageURL]
+                    [projectId, cleanUrl]
                 );
-                logger.log(`✅ Görsel veritabanına kaydedildi: ${imageURL}`);
+                logger.log(`✅ Görsel veritabanına kaydedildi: ${cleanUrl}`);
             }
 
             if (firstImageURL) {
-                await client.query('UPDATE "Projects" SET url = $1 WHERE id = $2', [firstImageURL, projectId]);
-                logger.log(`✅ Proje ana görseli güncellendi: ${firstImageURL}`);
+                const cleanFirstUrl = firstImageURL.trim();
+                await client.query('UPDATE "Projects" SET url = $1 WHERE id = $2', [cleanFirstUrl, projectId]);
+                logger.log(`✅ Proje ana görseli güncellendi: ${cleanFirstUrl}`);
             }
         } catch (dbError) {
             // Veritabanı hatası durumunda Supabase Storage'dan görselleri sil
@@ -239,14 +247,22 @@ router.post('/projects/:id/images', verifyToken, upload.array('images', 10), asy
         // Veritabanına görsel URL'lerini kaydet
         try {
             for (const imageURL of imageURLs) {
-                await client.query('INSERT INTO "Images" (projectid, "imageURL") VALUES ($1, $2)', [id, imageURL]);
-                logger.log(`✅ Görsel veritabanına kaydedildi: ${imageURL}`);
+                // URL'in tam Supabase URL'i olduğundan emin ol
+                const cleanUrl = imageURL.trim();
+                if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+                    logger.error(`❌ Geçersiz URL formatı: ${cleanUrl}`);
+                    throw new Error(`Geçersiz URL formatı: ${cleanUrl}`);
+                }
+                
+                await client.query('INSERT INTO "Images" (projectid, "imageURL") VALUES ($1, $2)', [id, cleanUrl]);
+                logger.log(`✅ Görsel veritabanına kaydedildi: ${cleanUrl}`);
             }
 
             const projectHasMain = await client.query('SELECT url FROM "Projects" WHERE id = $1', [id]);
             if (projectHasMain.rowCount > 0 && !projectHasMain.rows[0].url && firstImageURL) {
-                await client.query('UPDATE "Projects" SET url = $1 WHERE id = $2', [firstImageURL, id]);
-                logger.log(`✅ Proje ana görseli güncellendi: ${firstImageURL}`);
+                const cleanFirstUrl = firstImageURL.trim();
+                await client.query('UPDATE "Projects" SET url = $1 WHERE id = $2', [cleanFirstUrl, id]);
+                logger.log(`✅ Proje ana görseli güncellendi: ${cleanFirstUrl}`);
             }
         } catch (dbError) {
             // Veritabanı hatası durumunda Supabase Storage'dan görselleri sil
@@ -353,10 +369,21 @@ router.post('/upload-image', verifyToken, upload.single('image'), async (req, re
         }
         const { uploadImageToSupabase } = require('../../upload');
         const imageURL = await uploadImageToSupabase(req.file, 'general');
-        logger.log(`✅ Genel görsel Supabase Storage'a yüklendi: ${imageURL}`);
+        
+        // URL'in tam Supabase URL'i olduğundan emin ol
+        const cleanUrl = imageURL.trim();
+        if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+            logger.error(`❌ Geçersiz URL formatı: ${cleanUrl}`);
+            return res.status(500).json({ 
+                message: 'Geçersiz URL formatı', 
+                error: 'Görsel URL\'si geçersiz format' 
+            });
+        }
+        
+        logger.log(`✅ Genel görsel Supabase Storage'a yüklendi: ${cleanUrl}`);
         res.status(200).json({ 
             message: 'Görsel Supabase Storage\'a yüklendi', 
-            imageURL,
+            imageURL: cleanUrl,
             note: 'Bu görsel veritabanına kaydedilmedi. İlgili tabloya manuel olarak eklemeniz gerekiyor.'
         });
     } catch (error) {

@@ -52,11 +52,21 @@ router.post('/team', verifyToken, upload.single('image'), async (req, res) => {
         
         // Veritabanına kaydet
         try {
+            // URL'in tam Supabase URL'i olduğundan emin ol
+            const cleanImageURL = imageURL ? imageURL.trim() : null;
+            if (cleanImageURL && !cleanImageURL.startsWith('http://') && !cleanImageURL.startsWith('https://')) {
+                logger.error(`❌ Geçersiz URL formatı: ${cleanImageURL}`);
+                throw new Error(`Geçersiz URL formatı: ${cleanImageURL}`);
+            }
+            
             await client.query(
                 'INSERT INTO "Team" (namesurname, position, url, "LinkedIn") VALUES ($1, $2, $3, $4)',
-                [namesurname, position, imageURL, LinkedIn || null]
+                [namesurname, position, cleanImageURL, LinkedIn || null]
             );
             logger.log(`✅ Team üyesi veritabanına kaydedildi: ${namesurname}`);
+            if (cleanImageURL) {
+                logger.log(`✅ Team görsel URL'i: ${cleanImageURL}`);
+            }
         } catch (dbError) {
             // Veritabanı hatası durumunda Supabase Storage'dan görseli sil
             await client.query('ROLLBACK');
@@ -130,11 +140,21 @@ router.put('/team/:id', verifyToken, upload.single('image'), async (req, res) =>
 
         // Veritabanını güncelle
         try {
+            // URL'in tam Supabase URL'i olduğundan emin ol
+            const cleanImageURL = imageURL ? imageURL.trim() : null;
+            if (cleanImageURL && !cleanImageURL.startsWith('http://') && !cleanImageURL.startsWith('https://')) {
+                logger.error(`❌ Geçersiz URL formatı: ${cleanImageURL}`);
+                throw new Error(`Geçersiz URL formatı: ${cleanImageURL}`);
+            }
+            
             await client.query(
                 'UPDATE "Team" SET namesurname = $1, position = $2, url = $3, "LinkedIn" = $4 WHERE id = $5',
-                [namesurname, position, imageURL, LinkedIn || null, id]
+                [namesurname, position, cleanImageURL, LinkedIn || null, id]
             );
             logger.log(`✅ Team üyesi veritabanında güncellendi: ${namesurname}`);
+            if (cleanImageURL) {
+                logger.log(`✅ Team görsel URL'i güncellendi: ${cleanImageURL}`);
+            }
         } catch (dbError) {
             // Veritabanı hatası durumunda yeni görseli sil, eski görseli geri yükle
             await client.query('ROLLBACK');

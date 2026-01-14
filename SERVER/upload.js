@@ -82,9 +82,22 @@ const uploadImageToSupabase = async (file, folder = '') => {
             throw new Error('Public URL alınamadı. Bucket\'ın Public olduğundan emin olun.');
         }
 
+        // URL'in tam Supabase URL'i olduğundan emin ol (server URL eklenmemeli)
+        const finalUrl = urlData.publicUrl.trim();
+        
+        // Eğer URL yanlış birleştirilmişse düzelt
+        if (finalUrl.includes('https://') && finalUrl.split('https://').length > 2) {
+            const parts = finalUrl.split('https://');
+            const correctedUrl = 'https://' + parts[parts.length - 1];
+            logger.warn(`⚠️ Yanlış birleştirilmiş URL düzeltildi: ${finalUrl} -> ${correctedUrl}`);
+            logger.log(`✅ Görsel Supabase Storage'a yüklendi: ${fileName}`);
+            logger.log(`🔗 Public URL: ${correctedUrl}`);
+            return correctedUrl;
+        }
+
         logger.log(`✅ Görsel Supabase Storage'a yüklendi: ${fileName}`);
-        logger.log(`🔗 Public URL: ${urlData.publicUrl}`);
-        return urlData.publicUrl;
+        logger.log(`🔗 Public URL: ${finalUrl}`);
+        return finalUrl;
     } catch (error) {
         logger.error('Görsel yüklenirken hata:', {
             message: error.message,
