@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa'
 import { useState, useEffect } from 'react'
 import publicService from '../../services/publicService'
+import logger from '../../utils/logger'
 import './Hero.css'
 
 const Hero = () => {

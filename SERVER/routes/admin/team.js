@@ -3,7 +3,7 @@ const router = express.Router();
 const logger = require('../../utils/logger');
 const { pool } = require('../dbConfig');
 const verifyToken = require('../middleware/authMiddleware');
-const { upload, deleteImage } = require('../../upload');
+const { upload, uploadImageToSupabase, deleteImage } = require('../../upload');
 
 // Team listele
 router.get('/team', verifyToken, async (_req, res) => {
@@ -33,7 +33,10 @@ router.post('/team', verifyToken, upload.single('image'), async (req, res) => {
         }
 
         await client.query('BEGIN');
-        const imageURL = req.file ? `/uploads/${req.file.filename}` : null;
+        let imageURL = null;
+        if (req.file) {
+            imageURL = await uploadImageToSupabase(req.file, 'team');
+        }
         await client.query(
             'INSERT INTO "Team" (namesurname, position, url, "LinkedIn") VALUES ($1, $2, $3, $4)',
             [namesurname, position, imageURL, LinkedIn || null]
@@ -70,7 +73,7 @@ router.put('/team/:id', verifyToken, upload.single('image'), async (req, res) =>
         let imageURL = current.rows[0].url;
         if (req.file) {
             if (imageURL) await deleteImage(imageURL);
-            imageURL = `/uploads/${req.file.filename}`;
+            imageURL = await uploadImageToSupabase(req.file, 'team');
         }
 
         await client.query(

@@ -10,20 +10,25 @@ const port = process.env.PORT || 5000;
 const db = require('./routes/dbConfig');
 
 // Middleware - CORS ayarları
-const defaultOrigins = [
-    'https://hastugg-fov4.vercel.app',
-    'https://hastugg-fov4-mjqyah1j4-buraks-projects-0138e460.vercel.app',
-    'https://hastugg-2.onrender.com',
-    'http://localhost:5173',
-    'http://127.0.0.1:5173'
-];
-
+// Environment variable'dan allowed origins al
 const envOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()).filter(Boolean)
     : [];
 
-const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
+// Development için default local origins
+const defaultLocalOrigins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+];
+
 const isProduction = process.env.NODE_ENV === 'production';
+
+// Production'da sadece env'den gelen origins, development'da local origins + env origins
+const allowedOrigins = isProduction 
+    ? envOrigins 
+    : [...new Set([...defaultLocalOrigins, ...envOrigins])];
 
 const baseCorsOptions = {
     credentials: true,
@@ -59,8 +64,7 @@ app.options('*', cors(activeCorsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Statik dosya servisi - uploads klasöründeki görselleri erişilebilir yap
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Not: Statik dosya servisi kaldırıldı - artık görseller Supabase Storage'da
 
 const adminRoutes = require('./routes/admin');
 const publicRoutes = require('./routes/public');
@@ -78,6 +82,25 @@ app.get('/health', (req, res) => {
     });
 });
 
-app.listen(port, '0.0.0.0', () => {
-    logger.log(`Server is running on port ${port} and bound to 0.0.0.0`);
+const server = app.listen(port, '0.0.0.0', () => {
+    logger.log(`✅ Server is running on port ${port} and bound to 0.0.0.0`);
+});
+
+// Port kullanımda hatası için özel yönetim
+server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+        logger.error(`❌ Port ${port} zaten kullanımda!`);
+        logger.error(`📝 Çözüm:`);
+        logger.error(`   1. Çalışan Node.js süreçlerini durdurun:`);
+        logger.error(`      Windows: Get-Process node | Stop-Process -Force`);
+        logger.error(`      Mac/Linux: pkill -f node`);
+        logger.error(`   2. Veya farklı bir port kullanın: PORT=5001 npm run dev`);
+        logger.error(`   3. Port ${port}'i kullanan süreci bulun:`);
+        logger.error(`      Windows: netstat -ano | findstr :${port}`);
+        logger.error(`      Mac/Linux: lsof -i :${port}`);
+        process.exit(1);
+    } else {
+        logger.error('❌ Sunucu başlatılırken hata:', error);
+        process.exit(1);
+    }
 });

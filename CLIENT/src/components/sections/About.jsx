@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import publicService from '../../services/publicService'
+import logger from '../../utils/logger'
 import './About.css'
 
 const About = () => {

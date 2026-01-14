@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import ServiceProjectsModal from '../ServiceProjectsModal'
 import LoadingImage from '../common/LoadingImage'
 import publicService from '../../services/publicService'
+import logger from '../../utils/logger'
 import './Services.css'
 
 const Services = () => {

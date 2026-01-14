@@ -1,14 +1,15 @@
-const PRODUCTION_BASE_URL = 'https://hastugg-2.onrender.com';
 const LOCAL_BASE_URL = 'http://localhost';
 const DEFAULT_LOCAL_PORT = '5000';
 
 // Belirlenen önceliğe göre backend adresini çözümle
 const resolveBaseUrl = () => {
+  // Öncelik 1: Environment variable'dan al (Vercel, Render, local için set edilmeli)
   const envUrl = import.meta?.env?.VITE_API_BASE_URL;
   if (envUrl) {
     return envUrl;
   }
 
+  // Öncelik 2: Local development için otomatik tespit
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     const isLocalHost = ['localhost', '127.0.0.1'].includes(hostname);
@@ -19,7 +20,18 @@ const resolveBaseUrl = () => {
     }
   }
 
-  return PRODUCTION_BASE_URL;
+  // Fallback: Eğer hiçbir environment variable set edilmemişse hata ver
+  console.error('❌ VITE_API_BASE_URL environment variable tanımlı değil!');
+  console.error('📝 Lütfen CLIENT/.env dosyasında VITE_API_BASE_URL değişkenini tanımlayın.');
+  console.error('   Local: VITE_API_BASE_URL=http://localhost:5000');
+  console.error('   Production: VITE_API_BASE_URL=https://your-backend.onrender.com');
+  
+  // Development'da localhost'a fallback, production'da hata
+  if (import.meta?.env?.MODE === 'development') {
+    return `${LOCAL_BASE_URL}:${DEFAULT_LOCAL_PORT}`;
+  }
+  
+  throw new Error('VITE_API_BASE_URL environment variable must be set for production');
 };
 
 // API Configuration

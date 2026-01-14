@@ -3,7 +3,7 @@ const router = express.Router();
 const logger = require('../../utils/logger');
 const { pool } = require('../dbConfig');
 const verifyToken = require('../middleware/authMiddleware');
-const { upload, deleteImage, deleteMultipleImages, cleanupUnusedImages } = require('../../upload');
+const { upload, uploadMultipleImagesToSupabase, deleteImage, deleteMultipleImages, cleanupUnusedImages } = require('../../upload');
 
 // Proje ekleme
 router.post('/add-project', verifyToken, upload.array('images', 10), async (req, res) => {
@@ -45,10 +45,12 @@ router.post('/add-project', verifyToken, upload.array('images', 10), async (req,
         );
         const projectId = projectResult.rows[0].id;
 
-        let firstImageURL = null;
-        for (const file of files) {
-            const imageURL = `/uploads/${file.filename}`;
-            if (!firstImageURL) firstImageURL = imageURL;
+        // Görselleri Supabase Storage'a yükle
+        const imageURLs = await uploadMultipleImagesToSupabase(files, 'projects');
+        const firstImageURL = imageURLs[0] || null;
+
+        // Veritabanına görsel URL'lerini kaydet
+        for (const imageURL of imageURLs) {
             await client.query(
                 'INSERT INTO "Images" (projectid, "imageURL") VALUES ($1, $2)',
                 [projectId, imageURL]
@@ -63,7 +65,7 @@ router.post('/add-project', verifyToken, upload.array('images', 10), async (req,
         res.status(201).json({
             message: 'Proje ve görselleri başarıyla eklendi!',
             projectId,
-            uploadedImages: files.map(f => `/uploads/${f.filename}`)
+            uploadedImages: imageURLs
         });
     } catch (error) {
         await client.query('ROLLBACK');
@@ -182,10 +184,13 @@ router.post('/projects/:id/images', verifyToken, upload.array('images', 10), asy
         }
 
         await client.query('BEGIN');
-        let firstImageURL = null;
-        for (const file of files) {
-            const imageURL = `/uploads/${file.filename}`;
-            if (!firstImageURL) firstImageURL = imageURL;
+        
+        // Görselleri Supabase Storage'a yükle
+        const imageURLs = await uploadMultipleImagesToSupabase(files, 'projects');
+        const firstImageURL = imageURLs[0] || null;
+
+        // Veritabanına görsel URL'lerini kaydet
+        for (const imageURL of imageURLs) {
             await client.query('INSERT INTO "Images" (projectid, "imageURL") VALUES ($1, $2)', [id, imageURL]);
         }
 
@@ -197,7 +202,7 @@ router.post('/projects/:id/images', verifyToken, upload.array('images', 10), asy
         await client.query('COMMIT');
         res.status(201).json({
             message: 'Görseller başarıyla eklendi!',
-            uploadedImages: files.map(f => `/uploads/${f.filename}`)
+            uploadedImages: imageURLs
         });
     } catch (error) {
         await client.query('ROLLBACK');
@@ -280,11 +285,12 @@ router.post('/upload-image', verifyToken, upload.single('image'), async (req, re
         if (!req.file) {
             return res.status(400).json({ message: 'Görsel yüklenmedi' });
         }
-        const imageURL = `/uploads/${req.file.filename}`;
-        res.status(200).json({ message: 'Görsel yüklendi', imageURL, filename: req.file.filename });
+        const { uploadImageToSupabase } = require('../../upload');
+        const imageURL = await uploadImageToSupabase(req.file, 'general');
+        res.status(200).json({ message: 'Görsel yüklendi', imageURL });
     } catch (error) {
         logger.error('Yükleme hatası:', error);
-        res.status(500).send('Sunucu hatası');
+        res.status(500).json({ message: 'Sunucu hatası', error: error.message });
     }
 });
 

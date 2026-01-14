@@ -1,69 +1,83 @@
 const { Pool } = require('pg');
-const logger = require('../utils/logger');
 require('dotenv').config();
 
-// PostgreSQL bağlantı yapılandırma ayarları
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Bağlantı havuzu (pool) oluştur
-const pool = new Pool(
-    process.env.DATABASE_URL
-        ? {
+// DATABASE_URL kontrolü
+if (!process.env.DATABASE_URL) {
+    const errorMsg = '❌ DATABASE_URL environment variable tanımlı değil!';
+    console.error(errorMsg);
+    console.error('📝 Lütfen SERVER/.env dosyasında DATABASE_URL değişkenini tanımlayın.');
+    
+    if (isProduction) {
+        console.error('⚠️  Production modunda çalışıyorsunuz. Sunucu kapatılıyor...');
+        process.exit(1);
+    } else {
+        console.warn('⚠️  Development modunda çalışıyorsunuz. Sunucu başlatılıyor ancak veritabanı işlemleri çalışmayacak.');
+    }
+}
+
+// Pool oluşturmayı try-catch ile sarmala
+let pool = null;
+
+try {
+    if (process.env.DATABASE_URL) {
+        pool = new Pool({
             connectionString: process.env.DATABASE_URL,
             ssl: { rejectUnauthorized: false },
-            // Bağlantı sorunlarını gidermek için ek ayarlar
-            keepAlive: true,
-            keepAliveInitialDelayMillis: 10000,
-            // IPv4'ü zorla (Supabase bazen IPv6 ile sorun yaşıyor)
-            options: '-c search_path=public'
-        }
-        : {
-            host: process.env.DB_HOST || 'localhost',
-            port: process.env.DB_PORT || 5432,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_DATABASE,
-            max: 10,                            // Maksimum bağlantı sayısı
-            idleTimeoutMillis: 30000,           // Boşta kalma süresi
-            connectionTimeoutMillis: 30000,     // Bağlantı zaman aşımı
-            ssl: isProduction ? { rejectUnauthorized: false } : false,
-            keepAlive: true,
-            keepAliveInitialDelayMillis: 10000
-        }
-);
+            max: 10,
+            idleTimeoutMillis: 30000,
+            connectionTimeoutMillis: 30000
+        });
 
-// Bağlantı testi
-pool.connect()
-    .then(client => {
-        logger.log(' PostgreSQL veritabanına başarıyla bağlanıldı.');
-        client.release();
-    })
-    .catch(err => {
-        logger.error(' PostgreSQL veritabanı bağlantı hatası: ', err.message);
-        if (isProduction) {
-            process.exit(1);
-        }
-    });
+        // Bağlantı testi
+        pool.connect()
+            .then(client => {
+                console.log('✅ PostgreSQL veritabanına başarıyla bağlanıldı.');
+                client.release();
+            })
+            .catch(err => {
+                console.error('❌ PostgreSQL bağlantı hatası:', err.message);
+                if (err.code === 'ENOTFOUND') {
+                    console.error('⚠️  DNS hatası: Hostname çözümlenemiyor. DATABASE_URL değerini kontrol edin.');
+                } else if (err.code === 'ECONNREFUSED') {
+                    console.error('⚠️  Bağlantı reddedildi. Veritabanı sunucusu çalışıyor mu?');
+                } else if (err.code === '28P01') {
+                    console.error('⚠️  Authentication hatası: Kullanıcı adı veya şifre yanlış.');
+                }
+                
+                if (isProduction) {
+                    console.error('⚠️  Production modunda çalışıyorsunuz. Sunucu kapatılıyor...');
+                    process.exit(1);
+                } else {
+                    console.warn('⚠️  Development modunda çalışıyorsunuz. Sunucu başlatılıyor ancak veritabanı işlemleri çalışmayacak.');
+                }
+            });
+    } else {
+        // DATABASE_URL yoksa null pool oluştur
+        console.warn('⚠️  Pool oluşturulmadı - DATABASE_URL tanımlı değil.');
+    }
+} catch (error) {
+    console.error('❌ Pool oluşturulurken hata:', error.message);
+    if (isProduction) {
+        process.exit(1);
+    }
+}
 
-// Yardımcı sorgu fonksiyonu
 const query = async (text, params) => {
-    const start = Date.now();
+    if (!pool) {
+        throw new Error('Veritabanı bağlantısı yok. DATABASE_URL environment variable\'ını kontrol edin.');
+    }
+    
     try {
         const result = await pool.query(text, params);
-        const duration = Date.now() - start;
-        logger.info('Sorgu çalıştırıldı', {
-            text: text.substring(0, 80),
-            duration: `${duration}ms`,
-            rows: result.rowCount
-        });
         return result;
     } catch (error) {
-        logger.error('Sorgu hatası:', error.message);
+        console.error('Sorgu hatası:', error.message);
         throw error;
     }
 };
 
-// Diğer dosyalarda kullanmak için 'pool' ve yardımcı fonksiyonları export et
 module.exports = {
     pool,
     query

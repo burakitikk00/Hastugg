@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import LoadingImage from '../common/LoadingImage'
 import publicService from '../../services/publicService'
+import logger from '../../utils/logger'
 import './Team.css'
 
 const Team = () => {

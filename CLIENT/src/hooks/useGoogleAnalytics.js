@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import publicService from '../services/publicService';
+import logger from '../utils/logger';
 
 export const useGoogleAnalytics = () => {
   const [analyticsSettings, setAnalyticsSettings] = useState({

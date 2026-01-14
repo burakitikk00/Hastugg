@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import publicService from '../../services/publicService'
 import API_CONFIG from '../../config/api'
 import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics'
+import logger from '../../utils/logger'
 import './Contact.css'
 
 const Contact = () => {

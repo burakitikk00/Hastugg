@@ -4,6 +4,7 @@ import hastugLogo from '../../assets/hastuglogo.png'
 import './Footer.css'
 import { useEffect, useState } from 'react'
 import publicService from '../../services/publicService'
+import logger from '../../utils/logger'
 
 const Footer = () => {
   const [contact, setContact] = useState({ address: '', phone: '', email: '' })

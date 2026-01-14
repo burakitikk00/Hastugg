@@ -32,11 +32,14 @@ class PublicService {
       });
 
       if (!response.ok) {
-        throw new Error('Hero verileri getirilemedi');
+        const errorText = await response.text();
+        console.error('Hero API hatası:', response.status, errorText);
+        throw new Error(`Hero verileri getirilemedi: ${response.status}`);
       }
 
       return await response.json();
     } catch (error) {
+      console.error('Hero fetch hatası:', error);
       throw error;
     }
   }
@@ -52,11 +55,14 @@ class PublicService {
       });
 
       if (!response.ok) {
-        throw new Error('About verileri getirilemedi');
+        const errorText = await response.text();
+        console.error('About API hatası:', response.status, errorText);
+        throw new Error(`About verileri getirilemedi: ${response.status}`);
       }
 
       return await response.json();
     } catch (error) {
+      console.error('About fetch hatası:', error);
       throw error;
     }
   }
@@ -72,11 +78,14 @@ class PublicService {
       });
 
       if (!response.ok) {
-        throw new Error('İletişim bilgileri getirilemedi');
+        const errorText = await response.text();
+        console.error('Contact API hatası:', response.status, errorText);
+        throw new Error(`İletişim bilgileri getirilemedi: ${response.status}`);
       }
 
       return await response.json();
     } catch (error) {
+      console.error('Contact fetch hatası:', error);
       throw error;
     }
   }
@@ -92,11 +101,14 @@ class PublicService {
       });
 
       if (!response.ok) {
-        throw new Error('Projeler getirilemedi');
+        const errorText = await response.text();
+        console.error('Projects API hatası:', response.status, errorText);
+        throw new Error(`Projeler getirilemedi: ${response.status}`);
       }
 
       return await response.json();
     } catch (error) {
+      console.error('Projects fetch hatası:', error);
       throw error;
     }
   }
@@ -112,11 +124,14 @@ class PublicService {
       });
 
       if (!response.ok) {
-        throw new Error('Hizmetler getirilemedi');
+        const errorText = await response.text();
+        console.error('Services API hatası:', response.status, errorText);
+        throw new Error(`Hizmetler getirilemedi: ${response.status}`);
       }
 
       return await response.json();
     } catch (error) {
+      console.error('Services fetch hatası:', error);
       throw error;
     }
   }
@@ -132,11 +147,14 @@ class PublicService {
       });
 
       if (!response.ok) {
-        throw new Error('Team üyeleri getirilemedi');
+        const errorText = await response.text();
+        console.error('Team API hatası:', response.status, errorText);
+        throw new Error(`Team üyeleri getirilemedi: ${response.status}`);
       }
 
       return await response.json();
     } catch (error) {
+      console.error('Team fetch hatası:', error);
       throw error;
     }
   }
