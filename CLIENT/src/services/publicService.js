@@ -21,13 +21,42 @@ class PublicService {
     // String'e çevir ve trim yap
     let url = String(imagePath).trim();
     
+    // Render öneki temizleme: Eğer URL'de birden fazla https:// varsa, son https://'den başla
+    // Örnek: https://hastugg-2.onrender.comhttps://ancyfbusyllkwekachls.supabase.co/...
+    const httpsMatches = url.match(/https?:\/\//g);
+    if (httpsMatches && httpsMatches.length > 1) {
+      // Son https://'in pozisyonunu bul
+      let lastHttpsIndex = url.lastIndexOf('https://');
+      if (lastHttpsIndex === -1) {
+        lastHttpsIndex = url.lastIndexOf('http://');
+      }
+      if (lastHttpsIndex !== -1 && lastHttpsIndex > 0) {
+        // Son https://'den başlayarak URL'yi al
+        url = url.substring(lastHttpsIndex);
+      }
+    }
+    
     // Eğer URL içinde Supabase URL'i varsa, sadece Supabase URL'ini al
-    // Bu, yanlış birleştirilmiş URL'leri (örn: hastugg-2.onrender.comhttps://...) düzeltir
+    // Bu, yanlış birleştirilmiş URL'leri düzeltir
     if (url.includes('supabase.co')) {
-      // Supabase URL'ini bul (https:// ile başlayan ve supabase.co içeren kısmı)
-      const supabaseMatch = url.match(/https?:\/\/[^\/]*supabase\.co[^\s"']*/);
+      // Supabase URL'ini bul (https:// ile başlayan, supabase.co içeren ve tam path'i içeren)
+      // Regex: https:// ile başla, supabase.co'ya kadar olan domain'i al, sonra tüm path'i al
+      // Path: / karakterinden sonra boşluk, tırnak, apostrof veya string sonuna kadar
+      const supabaseMatch = url.match(/https?:\/\/[^\/]*supabase\.co\/[^\s"']*/);
       if (supabaseMatch) {
-        return supabaseMatch[0];
+        // Eğer match sonunda boşluk, tırnak veya apostrof varsa temizle
+        let cleanUrl = supabaseMatch[0].trim();
+        // Son karakteri kontrol et ve gerekiyorsa temizle
+        while (cleanUrl.endsWith('"') || cleanUrl.endsWith("'") || cleanUrl.endsWith(' ')) {
+          cleanUrl = cleanUrl.slice(0, -1).trim();
+        }
+        return cleanUrl;
+      }
+      
+      // Eğer path yoksa (sadece domain), yine de döndür
+      const supabaseDomainMatch = url.match(/https?:\/\/[^\/]*supabase\.co/);
+      if (supabaseDomainMatch) {
+        return supabaseDomainMatch[0];
       }
     }
     
