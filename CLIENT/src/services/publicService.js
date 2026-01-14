@@ -22,6 +22,7 @@ class PublicService {
     let url = String(imagePath).trim();
     
     // Eğer URL içinde Supabase URL'i varsa, sadece Supabase URL'ini al
+    // Bu, yanlış birleştirilmiş URL'leri (örn: hastugg-2.onrender.comhttps://...) düzeltir
     if (url.includes('supabase.co')) {
       // Supabase URL'ini bul (https:// ile başlayan ve supabase.co içeren kısmı)
       const supabaseMatch = url.match(/https?:\/\/[^\/]*supabase\.co[^\s"']*/);
@@ -31,17 +32,21 @@ class PublicService {
     }
     
     // Zaten tam URL ise (http:// veya https:// ile başlıyorsa) - direkt döndür
+    // Bu, tüm tam URL'leri destekler (Supabase, CDN, vb.)
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
     
     // Eski format URL'ler (/uploads/...) - artık çalışmıyor, placeholder döndür
     if (url.startsWith('/uploads/')) {
+      console.warn('Eski format URL tespit edildi (local storage):', url, '- Lütfen görseli yeniden yükleyin');
       return '/api/placeholder/400/300';
     }
     
-    // Diğer durumlar için placeholder döndür (server URL ekleme)
-    return '/api/placeholder/400/300';
+    // Diğer durumlar için: Geriye dönük uyumluluk için server URL ile birleştirmeyi dene
+    // Ancak bu durumda console'a uyarı yazdır çünkü bu format artık desteklenmiyor
+    console.warn('Tanınmayan URL formatı:', url, '- Server URL ile birleştiriliyor (geriye dönük uyumluluk)');
+    return `${this.serverURL}${url}`;
   }
 
   // Hero verilerini getir (herkes erişebilir)
