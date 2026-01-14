@@ -6,6 +6,123 @@ const verifyToken = require('../middleware/authMiddleware');
 const fs = require('fs-extra');
 const path = require('path');
 
+// Veritabanındaki yanlış birleştirilmiş URL'leri temizle
+router.post('/fix-urls', verifyToken, async (_req, res) => {
+    const client = await pool.connect();
+    try {
+        logger.log('🔧 URL düzeltme işlemi başlatılıyor...');
+
+        const results = {
+            projects: { fixed: 0, errors: [] },
+            images: { fixed: 0, errors: [] },
+            team: { fixed: 0, errors: [] }
+        };
+
+        // Projects tablosundaki yanlış URL'leri düzelt
+        const projectsResult = await pool.query('SELECT id, url FROM "Projects" WHERE url LIKE \'%https://%https://%\' OR url LIKE \'%http://%http://%\'');
+        for (const project of projectsResult.rows) {
+            try {
+                // URL'den yanlış birleştirilmiş kısmı çıkar
+                let fixedUrl = project.url;
+                // Eğer URL içinde iki kez https:// varsa, ilk kısmı çıkar
+                if (fixedUrl.includes('https://') && fixedUrl.split('https://').length > 2) {
+                    const parts = fixedUrl.split('https://');
+                    fixedUrl = 'https://' + parts[parts.length - 1];
+                } else if (fixedUrl.includes('http://') && fixedUrl.split('http://').length > 2) {
+                    const parts = fixedUrl.split('http://');
+                    fixedUrl = 'http://' + parts[parts.length - 1];
+                }
+
+                // Eğer hala yanlış birleştirilmişse, Supabase URL'ini bul
+                if (fixedUrl.includes('supabase.co')) {
+                    const supabaseIndex = fixedUrl.indexOf('https://');
+                    if (supabaseIndex > 0) {
+                        fixedUrl = fixedUrl.substring(supabaseIndex);
+                    }
+                }
+
+                await client.query('UPDATE "Projects" SET url = $1 WHERE id = $2', [fixedUrl, project.id]);
+                results.projects.fixed++;
+                logger.log(`✅ Project ${project.id} URL düzeltildi: ${fixedUrl}`);
+            } catch (error) {
+                results.projects.errors.push(`Project ${project.id}: ${error.message}`);
+            }
+        }
+
+        // Images tablosundaki yanlış URL'leri düzelt
+        const imagesResult = await pool.query('SELECT id, "imageURL" FROM "Images" WHERE "imageURL" LIKE \'%https://%https://%\' OR "imageURL" LIKE \'%http://%http://%\'');
+        for (const image of imagesResult.rows) {
+            try {
+                let fixedUrl = image.imageURL;
+                if (fixedUrl.includes('https://') && fixedUrl.split('https://').length > 2) {
+                    const parts = fixedUrl.split('https://');
+                    fixedUrl = 'https://' + parts[parts.length - 1];
+                } else if (fixedUrl.includes('http://') && fixedUrl.split('http://').length > 2) {
+                    const parts = fixedUrl.split('http://');
+                    fixedUrl = 'http://' + parts[parts.length - 1];
+                }
+
+                if (fixedUrl.includes('supabase.co')) {
+                    const supabaseIndex = fixedUrl.indexOf('https://');
+                    if (supabaseIndex > 0) {
+                        fixedUrl = fixedUrl.substring(supabaseIndex);
+                    }
+                }
+
+                await client.query('UPDATE "Images" SET "imageURL" = $1 WHERE id = $2', [fixedUrl, image.id]);
+                results.images.fixed++;
+                logger.log(`✅ Image ${image.id} URL düzeltildi: ${fixedUrl}`);
+            } catch (error) {
+                results.images.errors.push(`Image ${image.id}: ${error.message}`);
+            }
+        }
+
+        // Team tablosundaki yanlış URL'leri düzelt
+        const teamResult = await pool.query('SELECT id, url FROM "Team" WHERE url LIKE \'%https://%https://%\' OR url LIKE \'%http://%http://%\'');
+        for (const team of teamResult.rows) {
+            try {
+                let fixedUrl = team.url;
+                if (fixedUrl.includes('https://') && fixedUrl.split('https://').length > 2) {
+                    const parts = fixedUrl.split('https://');
+                    fixedUrl = 'https://' + parts[parts.length - 1];
+                } else if (fixedUrl.includes('http://') && fixedUrl.split('http://').length > 2) {
+                    const parts = fixedUrl.split('http://');
+                    fixedUrl = 'http://' + parts[parts.length - 1];
+                }
+
+                if (fixedUrl.includes('supabase.co')) {
+                    const supabaseIndex = fixedUrl.indexOf('https://');
+                    if (supabaseIndex > 0) {
+                        fixedUrl = fixedUrl.substring(supabaseIndex);
+                    }
+                }
+
+                await client.query('UPDATE "Team" SET url = $1 WHERE id = $2', [fixedUrl, team.id]);
+                results.team.fixed++;
+                logger.log(`✅ Team ${team.id} URL düzeltildi: ${fixedUrl}`);
+            } catch (error) {
+                results.team.errors.push(`Team ${team.id}: ${error.message}`);
+            }
+        }
+
+        res.json({
+            success: true,
+            message: 'URL düzeltme tamamlandı',
+            results
+        });
+
+    } catch (error) {
+        logger.error('URL düzeltme hatası:', error);
+        res.status(500).json({
+            success: false,
+            error: 'URL düzeltme sırasında hata oluştu',
+            details: error.message
+        });
+    } finally {
+        client.release();
+    }
+});
+
 // Eski görselleri Supabase Storage'a migrate et
 router.post('/migrate-images', verifyToken, async (_req, res) => {
     const client = await pool.connect();

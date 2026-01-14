@@ -18,8 +18,19 @@ class PublicService {
   getImageURL(imagePath) {
     if (!imagePath) return '/api/placeholder/400/300';
     
+    // Yanlış birleştirilmiş URL'leri düzelt (iki kez https:// veya http:// varsa)
+    if (imagePath.includes('https://') && imagePath.split('https://').length > 2) {
+      const parts = imagePath.split('https://');
+      imagePath = 'https://' + parts[parts.length - 1];
+      console.warn('Yanlış birleştirilmiş URL düzeltildi:', imagePath);
+    } else if (imagePath.includes('http://') && imagePath.split('http://').length > 2) {
+      const parts = imagePath.split('http://');
+      imagePath = 'http://' + parts[parts.length - 1];
+      console.warn('Yanlış birleştirilmiş URL düzeltildi:', imagePath);
+    }
+    
     // Zaten tam URL ise (Supabase Storage veya başka bir URL)
-    if (imagePath.startsWith('http')) {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
     

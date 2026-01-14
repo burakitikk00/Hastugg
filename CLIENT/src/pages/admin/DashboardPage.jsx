@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaEnvelope, FaEnvelopeOpen, FaPaperPlane, FaChartLine } from 'react-icons/fa';
+import { FaEnvelope, FaEnvelopeOpen, FaPaperPlane, FaChartLine, FaTools, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import AdminLayout from '../../components/admin/AdminLayout';
 import adminService from '../../services/adminService';
+import logger from '../../utils/logger';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ const DashboardPage = () => {
     lastUpdated: null
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isFixingUrls, setIsFixingUrls] = useState(false);
+  const [fixUrlsResult, setFixUrlsResult] = useState(null);
 
   useEffect(() => {
     loadMessageStats();
@@ -52,6 +55,34 @@ const DashboardPage = () => {
   const handleMessagesClick = () => {
     // Mesajlar sayfasına yönlendir
     navigate('/admin/contact-messages');
+  };
+
+  const handleFixUrls = async () => {
+    if (!window.confirm('URL\'leri düzeltmek istediğinizden emin misiniz?\n\nBu işlem veritabanındaki yanlış birleştirilmiş URL\'leri düzeltecektir.')) {
+      return;
+    }
+
+    setIsFixingUrls(true);
+    setFixUrlsResult(null);
+
+    try {
+      const result = await adminService.fixUrls();
+      setFixUrlsResult(result);
+      logger.log('URL düzeltme başarılı:', result);
+      
+      // 2 saniye sonra sonucu temizle
+      setTimeout(() => {
+        setFixUrlsResult(null);
+      }, 5000);
+    } catch (error) {
+      logger.error('URL düzeltme hatası:', error);
+      setFixUrlsResult({
+        success: false,
+        error: error.message
+      });
+    } finally {
+      setIsFixingUrls(false);
+    }
   };
 
   return (
@@ -165,6 +196,69 @@ const DashboardPage = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* URL Düzeltme Butonu - Geçici */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                <FaTools className="w-6 h-6" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">URL Düzeltme Aracı</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Veritabanındaki yanlış birleştirilmiş görsel URL'lerini düzeltir
+                </p>
+                {fixUrlsResult && (
+                  <div className={`mt-3 p-3 rounded-lg ${fixUrlsResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                    {fixUrlsResult.success ? (
+                      <div className="flex items-start">
+                        <FaCheckCircle className="text-green-600 mt-0.5 mr-2" />
+                        <div>
+                          <p className="text-sm font-medium text-green-800">URL'ler başarıyla düzeltildi!</p>
+                          <div className="text-xs text-green-700 mt-1">
+                            <p>• Projects: {fixUrlsResult.results?.projects?.fixed || 0} düzeltildi</p>
+                            <p>• Images: {fixUrlsResult.results?.images?.fixed || 0} düzeltildi</p>
+                            <p>• Team: {fixUrlsResult.results?.team?.fixed || 0} düzeltildi</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-start">
+                        <FaExclamationTriangle className="text-red-600 mt-0.5 mr-2" />
+                        <div>
+                          <p className="text-sm font-medium text-red-800">Hata oluştu</p>
+                          <p className="text-xs text-red-700 mt-1">{fixUrlsResult.error}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={handleFixUrls}
+              disabled={isFixingUrls}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                isFixingUrls
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-yellow-600 text-white hover:bg-yellow-700'
+              }`}
+            >
+              {isFixingUrls ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Düzeltiliyor...
+                </span>
+              ) : (
+                'URL\'leri Düzelt'
+              )}
+            </button>
           </div>
         </div>
       </div>

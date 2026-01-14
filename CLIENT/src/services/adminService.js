@@ -400,6 +400,44 @@ class AdminService {
     }
   }
 
+  // URL'leri düzelt (yanlış birleştirilmiş URL'leri temizle)
+  async fixUrls() {
+    try {
+      const response = await fetch(`${this.baseURL}/fix-urls`, {
+        method: 'POST',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Eski görselleri Supabase Storage'a migrate et
+  async migrateImages() {
+    try {
+      const response = await fetch(`${this.baseURL}/migrate-images`, {
+        method: 'POST',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Projenin belirli bir görselini sil
   async deleteProjectImage(projectId, imageURL) {
     try {
