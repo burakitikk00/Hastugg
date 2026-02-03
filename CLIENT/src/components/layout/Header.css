@@ -98,6 +98,10 @@
     display: block;
     background-color: white;
     border-top: 1px solid #e5e7eb;
+    position: relative;
+    /* Pozisyon eklendi */
+    z-index: 100;
+    /* Z-index eklendi */
 }
 
 .mobile-nav-content {
@@ -117,6 +121,12 @@
     font-weight: 500;
     transition: color 0.3s;
     color: #4b5563;
+    cursor: pointer;
+    /* Cursor eklendi */
+    pointer-events: auto !important;
+    /* Tıklama garantisi */
+    position: relative;
+    z-index: 101;
 }
 
 .mobile-nav-button:hover {

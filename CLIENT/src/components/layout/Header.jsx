@@ -13,26 +13,47 @@ const Header = ({ activeSection, onSectionChange }) => {
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
     const scrollToSection = (sectionId) => {
+        // Önce menüyü kapat
+        setIsMenuOpen(false)
+
         // Eğer ana sayfada değilsek, önce ana sayfaya git
         if (location.pathname !== '/') {
             navigate('/')
+
             // Sayfa yüklendikten sonra scroll yap
             setTimeout(() => {
                 const element = document.getElementById(sectionId)
                 if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' })
+                    const headerOffset = 80 // Header yüksekliği kadar pay bırak
+                    const elementPosition = element.getBoundingClientRect().top
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    })
                 }
                 if (onSectionChange) onSectionChange(sectionId)
-            }, 150)
+            }, 300)
         } else {
-            // Ana sayfadaysak direkt scroll yap
-            const element = document.getElementById(sectionId)
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth' })
-                if (onSectionChange) onSectionChange(sectionId)
-            }
+            // Ana sayfadaysak, menü kapanma animasyonunu bekle (300ms) sonra scroll yap
+            setTimeout(() => {
+                const element = document.getElementById(sectionId)
+                if (element) {
+                    // scrollIntoView bazen mobilde header altında kalabiliyor, elle hesaplama daha güvenli
+                    const headerOffset = 80
+                    const elementPosition = element.getBoundingClientRect().top
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    })
+
+                    if (onSectionChange) onSectionChange(sectionId)
+                }
+            }, 350)
         }
-        setIsMenuOpen(false)
     }
 
     const navigationItems = [
