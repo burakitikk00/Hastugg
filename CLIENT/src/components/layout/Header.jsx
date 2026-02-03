@@ -86,29 +86,49 @@ const Header = ({ activeSection, onSectionChange }) => {
                 </div>
 
                 {/* Mobile Navigation */}
-                {isMenuOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mobile-nav"
-                    >
-                        <div className="mobile-nav-content">
-                            {navigationItems.map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => scrollToSection(item.id)}
-                                    className={`mobile-nav-button ${activeSection === item.id ? 'active' : ''}`}
-                                >
-                                    {item.label}
-                                </button>
-                            ))}
-                            <button className="mobile-cta-button">
-                                İLETİŞİM FORMU
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
+                <motion.div
+                    initial={false}
+                    animate={isMenuOpen ? "open" : "closed"}
+                    variants={{
+                        open: {
+                            height: "auto",
+                            opacity: 1,
+                            transition: {
+                                type: "tween",
+                                duration: 0.4,
+                                ease: "easeOut",
+                                staggerChildren: 0.1,
+                                delayChildren: 0.1
+                            }
+                        },
+                        closed: {
+                            height: 0,
+                            opacity: 0,
+                            transition: {
+                                duration: 0.3,
+                                ease: "easeInOut"
+                            }
+                        }
+                    }}
+                    className="mobile-nav"
+                    style={{ overflow: 'hidden' }}
+                >
+                    <div className="mobile-nav-content">
+                        {navigationItems.map((item) => (
+                            <motion.button
+                                key={item.id}
+                                variants={{
+                                    open: { y: 0, opacity: 1 },
+                                    closed: { y: -20, opacity: 0 }
+                                }}
+                                onClick={() => scrollToSection(item.id)}
+                                className={`mobile-nav-button ${activeSection === item.id ? 'active' : ''}`}
+                            >
+                                {item.label}
+                            </motion.button>
+                        ))}
+                    </div>
+                </motion.div>
             </div>
         </header>
     )
