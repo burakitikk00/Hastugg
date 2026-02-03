@@ -80,6 +80,7 @@ const ServiceDetailPage = () => {
         }
     }
 
+    
     if (loading) {
         return (
             <div className="service-detail-page">
