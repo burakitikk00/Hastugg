@@ -51,18 +51,7 @@ function MainApp() {
     }
   }, [analyticsSettings.is_active]);
 
-  // Hash-based scroll handling (from detail pages)
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash) {
-      const element = document.querySelector(hash);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      }
-    }
-  }, []);
+
 
   return (
     <div className="app">
