@@ -8,6 +8,9 @@ const logger = require('./utils/logger');
 const app = express();
 const port = process.env.PORT || 5000;
 
+// Render/Proxy desteği için IP güven ayarı
+app.set('trust proxy', 1);
+
 const db = require('./routes/dbConfig');
 
 // Middleware - CORS ayarları
