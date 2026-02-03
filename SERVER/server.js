@@ -69,10 +69,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ============ RATE LIMITING ============
-// Genel API rate limiter - 15 dakikada 100 istek
+// Genel API rate limiter - 15 dakikada 500 istek
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 dakika
-    max: 100, // 15 dakikada maksimum 100 istek
+    max: 500, // 15 dakikada maksimum 500 istek
     message: {
         error: 'Çok fazla istek. Lütfen 15 dakika sonra tekrar deneyin.',
         retryAfterMinutes: 15
