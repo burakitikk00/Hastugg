@@ -289,7 +289,17 @@
     word-break: break-word;
 }
 
+/* Metinlerin kendisinde seçim yapılmasını engelle (parent card tıklanabilir kalır) */
+.overlay-title,
+.overlay-description,
+.overlay-content {
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 .overlay-button {
+    pointer-events: auto;
     padding: 10px 25px;
     background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
     border: none;
@@ -405,13 +415,23 @@
     }
 
     .overlay-title {
-        font-size: 1.1rem;
+        font-size: 1rem;
+        /* Daha küçük font */
+        margin-bottom: 4px;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        /* Başlığı 2 satıra zorla */
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
     }
 
     .overlay-description {
         font-size: 0.7rem;
-        line-height: 1.25;
+        line-height: 1.2;
+        margin-bottom: 8px;
         -webkit-line-clamp: 3;
+        /* Açıklamayı 3 satıra zorla */
         line-clamp: 3;
     }
 }

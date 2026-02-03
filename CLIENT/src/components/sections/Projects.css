@@ -171,6 +171,15 @@
     overflow-wrap: break-word;
 }
 
+/* Metinlerin kendisinde seçim yapılmasını engelle */
+.overlay-title,
+.overlay-description,
+.overlay-content {
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 @media (min-width: 768px) {
     .overlay-title {
         font-size: 1.5rem;
@@ -197,6 +206,7 @@
 }
 
 .overlay-button {
+    pointer-events: auto;
     background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
     color: white;
     font-weight: 600;
