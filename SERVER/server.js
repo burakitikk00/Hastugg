@@ -109,11 +109,9 @@ const loginLimiter = rateLimit({
 // Genel rate limiting uygula
 app.use('/api', generalLimiter);
 
-// İletişim formu için özel limit
-app.post('/api/contact', contactFormLimiter);
-
-// Login için özel limit
-app.post('/api/admin/login', loginLimiter);
+// Rate limiter'ları export et (route dosyalarında kullanılacak)
+module.exports.contactFormLimiter = contactFormLimiter;
+module.exports.loginLimiter = loginLimiter;
 
 // ============ GÜVENLİK BAŞLIKLARI ============
 app.use((req, res, next) => {

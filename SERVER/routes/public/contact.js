@@ -64,8 +64,11 @@ async function sendContactEmail(message) {
     }
 }
 
+// İletişim formu rate limiter'ı import et
+const { contactFormLimiter } = require('../../server');
+
 // İletişim formu gönderimi
-router.post('/contact', async (req, res) => {
+router.post('/contact', contactFormLimiter, async (req, res) => {
     try {
         const { firstName, lastName, email, phone, message } = req.body;
 

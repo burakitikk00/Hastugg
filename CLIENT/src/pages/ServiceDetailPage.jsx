@@ -64,7 +64,7 @@ const ServiceDetailPage = () => {
     }
 
     const handleBackClick = () => {
-        navigate(-1) // Önceki sayfaya dön
+        navigate('/#services') // Ana sayfaya dön ve Hizmetler bölümüne scroll yap
     }
 
     const getStatusText = (status) => {
@@ -76,13 +76,7 @@ const ServiceDetailPage = () => {
             case 'in_progress':
             case 'inprogress':
                 return 'Devam Ediyor'
-            case 'Planned':
-            case 'planned':
-                return 'Planlandı'
-            case 'On Hold':
-            case 'on_hold':
-            case 'onhold':
-                return 'Beklemede'
+                
             default:
                 return status
         }

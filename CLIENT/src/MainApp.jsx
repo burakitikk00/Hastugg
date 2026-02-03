@@ -35,7 +35,7 @@ function MainApp() {
 
   const handleSectionChange = (sectionId) => {
     setActiveSection(sectionId);
-    
+
     // Google Analytics ile sayfa görüntüleme takibi
     if (analyticsSettings.is_active) {
       trackPageView(`/${sectionId}`);
@@ -50,6 +50,19 @@ function MainApp() {
       trackEvent('page_view', 'navigation', 'home');
     }
   }, [analyticsSettings.is_active]);
+
+  // Hash-based scroll handling (from detail pages)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const element = document.querySelector(hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, []);
 
   return (
     <div className="app">

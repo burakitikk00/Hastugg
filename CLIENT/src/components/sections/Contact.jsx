@@ -252,7 +252,7 @@ const Contact = () => {
                                 className="form-submit"
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? 'GÖNDERİLİYOR...' : 'İLETİŞİM FORMU'}
+                                {isSubmitting ? 'GÖNDERİLİYOR...' : 'İLETİŞİM FORMUNU GÖNDER'}
                             </button>
                         </form>
                     </motion.div>

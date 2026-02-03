@@ -29,8 +29,11 @@ router.post('/register', async (req, res) => {
     }
 });
 
+// Login rate limiter'ı import et
+const { loginLimiter } = require('../../server');
+
 // Admin login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
         if (!username || !password) {

@@ -72,7 +72,7 @@ const ProjectDetailPage = () => {
     }, [project])
 
     const handleBackClick = () => {
-        navigate(-1) // Önceki sayfaya dön
+        navigate('/#projects') // Ana sayfaya dön ve Projeler bölümüne scroll yap
     }
 
     const openLightbox = () => {
