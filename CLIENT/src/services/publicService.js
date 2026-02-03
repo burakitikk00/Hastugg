@@ -78,212 +78,84 @@ class PublicService {
     return `${this.serverURL}${url}`;
   }
 
-  // Hero verilerini getir (herkes erişebilir)
+  // Merkezi istek yönetimi
+  async request(endpoint, options = {}) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        },
+        ...options
+      });
+
+      if (response.status === 429) {
+        console.warn('Rate limit aşıldı:', endpoint);
+        const error = new Error('Çok fazla istek yapıldı. Lütfen biraz bekleyin.');
+        error.isRateLimit = true;
+        throw error;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`API hatası (${endpoint}):`, response.status, errorText);
+        throw new Error(`Veri getirilemedi: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`Fetch hatası (${endpoint}):`, error);
+      throw error;
+    }
+  }
+
+  // Hero verilerini getir
   async getHero() {
-    try {
-      const response = await fetch(`${this.baseURL}/hero`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Hero API hatası:', response.status, errorText);
-        throw new Error(`Hero verileri getirilemedi: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Hero fetch hatası:', error);
-      throw error;
-    }
+    return this.request('/hero');
   }
 
-  // About verilerini getir (herkes erişebilir)
+  // About verilerini getir
   async getAbout() {
-    try {
-      const response = await fetch(`${this.baseURL}/about`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('About API hatası:', response.status, errorText);
-        throw new Error(`About verileri getirilemedi: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('About fetch hatası:', error);
-      throw error;
-    }
+    return this.request('/about');
   }
 
-  // İletişim bilgilerini getir (herkes erişebilir)
+  // İletişim bilgilerini getir
   async getContact() {
-    try {
-      const response = await fetch(`${this.baseURL}/contact`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Contact API hatası:', response.status, errorText);
-        throw new Error(`İletişim bilgileri getirilemedi: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Contact fetch hatası:', error);
-      throw error;
-    }
+    return this.request('/contact');
   }
 
-  // Projeleri getir (herkes erişebilir)
+  // Projeleri getir
   async getProjects() {
-    try {
-      const response = await fetch(`${this.baseURL}/projects`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Projects API hatası:', response.status, errorText);
-        throw new Error(`Projeler getirilemedi: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Projects fetch hatası:', error);
-      throw error;
-    }
+    return this.request('/projects');
   }
 
-  // Hizmetleri getir (herkes erişebilir)
+  // Hizmetleri getir
   async getServices() {
-    try {
-      const response = await fetch(`${this.baseURL}/services`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Services API hatası:', response.status, errorText);
-        throw new Error(`Hizmetler getirilemedi: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Services fetch hatası:', error);
-      throw error;
-    }
+    return this.request('/services');
   }
 
-  // Team üyelerini getir (herkes erişebilir)
+  // Team üyelerini getir
   async getTeam() {
-    try {
-      const response = await fetch(`${this.baseURL}/team`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Team API hatası:', response.status, errorText);
-        throw new Error(`Team üyeleri getirilemedi: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Team fetch hatası:', error);
-      throw error;
-    }
+    return this.request('/team');
   }
 
-  // Analytics ayarlarını getir (herkes erişebilir)
+  // Analytics ayarlarını getir
   async getAnalyticsSettings() {
     try {
-      const response = await fetch(`${this.baseURL}/analytics-settings`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Analytics ayarları getirilemedi');
-      }
-
-      return await response.json();
+      return await this.request('/analytics-settings');
     } catch (error) {
-      // Analytics ayarları yüklenemezse varsayılan değer döndür
-      return {
-        measurement_id: null,
-        is_active: false
-      };
+      return { measurement_id: null, is_active: false };
     }
   }
 
-  // Tek bir hizmeti getir (herkes erişebilir)
+  // Tek bir hizmeti getir
   async getServiceById(id) {
-    try {
-      const response = await fetch(`${this.baseURL}/services/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Service API hatası:', response.status, errorText);
-        throw new Error(`Hizmet getirilemedi: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Service fetch hatası:', error);
-      throw error;
-    }
+    return this.request(`/services/${id}`);
   }
 
-  // Tek bir projeyi getir (herkes erişebilir)
+  // Tek bir projeyi getir
   async getProjectById(id) {
-    try {
-      const response = await fetch(`${this.baseURL}/projects/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Project API hatası:', response.status, errorText);
-        throw new Error(`Proje getirilemedi: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Project fetch hatası:', error);
-      throw error;
-    }
+    return this.request(`/projects/${id}`);
   }
 }
 

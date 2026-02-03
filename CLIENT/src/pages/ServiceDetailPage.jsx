@@ -47,7 +47,17 @@ const ServiceDetailPage = () => {
                 setError(null)
             } catch (err) {
                 console.error('Veri yüklenirken hata:', err)
-                setError('Hizmet bilgileri yüklenirken bir hata oluştu.')
+                if (err.isRateLimit) {
+                    setError({
+                        type: 'rate_limit',
+                        message: 'Sunucu şu an çok yoğun. Lütfen kısa bir süre bekleyip tekrar deneyiniz.'
+                    })
+                } else {
+                    setError({
+                        type: 'general',
+                        message: 'Hizmet bilgileri yüklenirken bir hata oluştu.'
+                    })
+                }
             } finally {
                 setLoading(false)
             }
@@ -80,7 +90,7 @@ const ServiceDetailPage = () => {
         }
     }
 
-    
+
     if (loading) {
         return (
             <div className="service-detail-page">
@@ -97,16 +107,29 @@ const ServiceDetailPage = () => {
     }
 
     if (error || !service) {
+        const isRateLimit = error?.type === 'rate_limit'
+
         return (
             <div className="service-detail-page">
                 <Header activeSection={activeSection} onSectionChange={setActiveSection} />
                 <main className="service-detail-main">
                     <div className="error-container">
-                        <h2>Hata</h2>
-                        <p>{error || 'Hizmet bulunamadı.'}</p>
-                        <button onClick={handleBackClick} className="back-button">
-                            Ana Sayfaya Dön
-                        </button>
+                        <h2>{isRateLimit ? 'Sunucu Meşgul' : 'Hata'}</h2>
+                        <p>{error?.message || 'Hizmet bulunamadı.'}</p>
+
+                        {isRateLimit ? (
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="back-button retry-button"
+                                style={{ backgroundColor: '#0284c7', color: 'white', marginTop: '1rem' }}
+                            >
+                                Tekrar Dene
+                            </button>
+                        ) : (
+                            <button onClick={handleBackClick} className="back-button">
+                                Ana Sayfaya Dön
+                            </button>
+                        )}
                     </div>
                 </main>
                 <Footer />

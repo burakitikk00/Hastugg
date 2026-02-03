@@ -30,7 +30,17 @@ const ProjectDetailPage = () => {
                 setError(null)
             } catch (err) {
                 console.error('Proje yüklenirken hata:', err)
-                setError('Proje bilgileri yüklenirken bir hata oluştu.')
+                if (err.isRateLimit) {
+                    setError({
+                        type: 'rate_limit',
+                        message: 'Sunucu şu an çok yoğun. Lütfen kısa bir süre bekleyip tekrar deneyiniz.'
+                    })
+                } else {
+                    setError({
+                        type: 'general',
+                        message: 'Proje bilgileri yüklenirken bir hata oluştu.'
+                    })
+                }
             } finally {
                 setLoading(false)
             }
@@ -112,16 +122,44 @@ const ProjectDetailPage = () => {
     }
 
     if (error || !project) {
+        const isRateLimit = error?.type === 'rate_limit'
+
         return (
             <div className="project-detail-page">
                 <Header activeSection={activeSection} onSectionChange={setActiveSection} />
                 <main className="project-detail-main">
                     <div className="error-container">
-                        <h2>Hata</h2>
-                        <p>{error || 'Proje bulunamadı.'}</p>
-                        <button onClick={handleHomeClick} className="back-button">
-                            Ana Sayfaya Dön
-                        </button>
+                        <h2>{isRateLimit ? 'Sunucu Meşgul' : 'Hata'}</h2>
+                        <p>{error?.message || 'Proje bulunamadı.'}</p>
+
+                        {isRateLimit ? (
+                            <button
+                                onClick={() => {
+                                    setLoading(true);
+                                    setError(null);
+                                    // Sayfayı yenilemeden yeniden fetch işlemini tetiklemek için
+                                    // useEffect'i tekrar tetiklememiz gerekir veya fonksiyonu dışarı çıkarıp çağırmalıyız.
+                                    // Ancak en temizi window.location.reload() yerine fonksiyonu çağırmaktır.
+                                    // useEffect içindeki fetchProject fonksiyonunu dışarı taşıyarak erişilebilir yapalım.
+                                    // Şimdilik hızlı çözüm: sayfayı yenilemek yerine id'yi değiştirip geri almak (hacky)
+                                    // Ya da fetchProject'i useCallback ile tanımlayıp dependency array'e ekleyelim.
+                                    // Daha basit çözüm: window.location.reload() kullanıcı deneyimi için acceptable ise. 
+                                    // Ama "tekrar dene" butonu fetch yapsın istiyoruz.
+                                    // En iyisi fetchProject'i useEffect dışına çıkarmaktı ama çok kod değişir.
+                                    // Basitçe window.location.reload() yapalım şimdilik, ya da id'yi trigger olarak kullanalım.
+                                    // ID değişince zaten çalışıyor.
+                                    window.location.reload();
+                                }}
+                                className="back-button retry-button"
+                                style={{ backgroundColor: '#0284c7', color: 'white', marginTop: '1rem' }}
+                            >
+                                Tekrar Dene
+                            </button>
+                        ) : (
+                            <button onClick={() => navigate('/')} className="back-button">
+                                Ana Sayfaya Dön
+                            </button>
+                        )}
                     </div>
                 </main>
                 <Footer />
