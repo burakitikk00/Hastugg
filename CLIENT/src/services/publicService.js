@@ -3,6 +3,7 @@ import API_CONFIG from '../config/api.js';
 class PublicService {
   constructor() {
     // URL'leri her seferinde dinamik olarak al
+    this.cache = {};
   }
 
   // Dinamik URL getter'ları
@@ -126,17 +127,32 @@ class PublicService {
 
   // Projeleri getir
   async getProjects() {
-    return this.request('/projects');
+    if (this.cache.projects) {
+      return this.cache.projects;
+    }
+    const data = await this.request('/projects');
+    this.cache.projects = data;
+    return data;
   }
 
   // Hizmetleri getir
   async getServices() {
-    return this.request('/services');
+    if (this.cache.services) {
+      return this.cache.services;
+    }
+    const data = await this.request('/services');
+    this.cache.services = data;
+    return data;
   }
 
   // Team üyelerini getir
   async getTeam() {
-    return this.request('/team');
+    if (this.cache.team) {
+      return this.cache.team;
+    }
+    const data = await this.request('/team');
+    this.cache.team = data;
+    return data;
   }
 
   // Analytics ayarlarını getir
