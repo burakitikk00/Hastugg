@@ -71,9 +71,7 @@ const ProjectDetailPage = () => {
         )
     }, [project])
 
-    const handleBackClick = () => {
-        navigate('/#projects') // Ana sayfaya dön ve Projeler bölümüne scroll yap
-    }
+
 
     const openLightbox = () => {
         setIsLightboxOpen(true)
@@ -92,13 +90,7 @@ const ProjectDetailPage = () => {
             case 'in_progress':
             case 'inprogress':
                 return 'Devam Ediyor'
-            case 'Planned':
-            case 'planned':
-                return 'Planlandı'
-            case 'On Hold':
-            case 'on_hold':
-            case 'onhold':
-                return 'Beklemede'
+
             default:
                 return status
         }
@@ -144,20 +136,8 @@ const ProjectDetailPage = () => {
             <Header activeSection={activeSection} onSectionChange={setActiveSection} />
 
             <main className="project-detail-main">
-                {/* Navigation Button */}
-                <div className="nav-buttons">
-                    <motion.button
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="back-nav-button"
-                        onClick={handleBackClick}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        Geri
-                    </motion.button>
-                </div>
+                {/* Navigation Button removed */}
+
 
                 {/* Image Slider Section */}
                 {images.length > 0 && (

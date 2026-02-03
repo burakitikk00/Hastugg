@@ -63,9 +63,7 @@ const ServiceDetailPage = () => {
         navigate(`/proje/${projectId}`)
     }
 
-    const handleBackClick = () => {
-        navigate('/#services') // Ana sayfaya dön ve Hizmetler bölümüne scroll yap
-    }
+
 
     const getStatusText = (status) => {
         switch (status) {
@@ -76,7 +74,7 @@ const ServiceDetailPage = () => {
             case 'in_progress':
             case 'inprogress':
                 return 'Devam Ediyor'
-                
+
             default:
                 return status
         }
@@ -120,18 +118,8 @@ const ServiceDetailPage = () => {
             <Header activeSection={activeSection} onSectionChange={setActiveSection} />
 
             <main className="service-detail-main">
-                {/* Back Button */}
-                <motion.button
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="back-nav-button"
-                    onClick={handleBackClick}
-                >
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Geri
-                </motion.button>
+                {/* Back Button removed */}
+
 
                 {/* Service Header */}
                 <motion.div
