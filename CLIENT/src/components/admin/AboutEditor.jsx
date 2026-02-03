@@ -52,9 +52,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
 
   const handleFeatureChange = (index, field, value) => {
     const newFeatures = [...formData.features];
-    // Boşlukları temizle (sadece başta ve sonda)
-    const cleanedValue = field === 'icon' ? value : value.trim();
-    newFeatures[index] = { ...newFeatures[index], [field]: cleanedValue };
+    newFeatures[index] = { ...newFeatures[index], [field]: value };
     setFormData(prev => ({ ...prev, features: newFeatures }));
   };
 

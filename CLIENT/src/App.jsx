@@ -12,6 +12,8 @@ import ProjectsPage from './pages/admin/ProjectsPage';
 import EmailSettingsPage from './pages/admin/EmailSettingsPage';
 import AnalyticsPage from './pages/admin/AnalyticsPage';
 import ChangePasswordPage from './pages/admin/ChangePasswordPage';
+import ServiceDetailPage from './pages/ServiceDetailPage';
+import ProjectDetailPage from './pages/ProjectDetailPage';
 import MainApp from './MainApp';
 import './App.css';
 
@@ -105,6 +107,10 @@ function App() {
 
           {/* Redirect /admin to /admin/dashboard */}
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+
+          {/* Public Detail Pages */}
+          <Route path="/hizmet/:id" element={<ServiceDetailPage />} />
+          <Route path="/proje/:id" element={<ProjectDetailPage />} />
 
           {/* Main App Route */}
           <Route path="/*" element={<MainApp />} />

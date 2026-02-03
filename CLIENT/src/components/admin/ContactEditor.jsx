@@ -21,16 +21,16 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // Telefonu "x xxx xxx xx xx" formatına çevir
+  // Telefonu "+90 xxx xxx xx xx" formatına çevir (10 hane + ülke kodu)
   const formatPhone = (value) => {
-    const digits = (value || '').replace(/\D/g, '').slice(0, 11);
+    // +90'ı temizle ve sadece rakamları al
+    const digits = (value || '').replace(/\D/g, '').replace(/^90/, '').slice(0, 10);
     const parts = [];
-    if (digits.length > 0) parts.push(digits.slice(0, 1));
-    if (digits.length > 1) parts.push(digits.slice(1, 4));
-    if (digits.length > 4) parts.push(digits.slice(4, 7));
-    if (digits.length > 7) parts.push(digits.slice(7, 9));
-    if (digits.length > 9) parts.push(digits.slice(9, 11));
-    return parts.join(' ');
+    if (digits.length > 0) parts.push(digits.slice(0, 3));
+    if (digits.length > 3) parts.push(digits.slice(3, 6));
+    if (digits.length > 6) parts.push(digits.slice(6, 8));
+    if (digits.length > 8) parts.push(digits.slice(8, 10));
+    return parts.length > 0 ? '+90 ' + parts.join(' ') : '';
   };
 
   const handleChange = (e) => {
@@ -47,11 +47,21 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
   };
 
   const handleSocialLinkChange = (platform, value) => {
+    let finalValue = value;
+
+    // Eğer mapEmbedUrl için tam iframe kodu yapıştırıldıysa, sadece src URL'sini çıkar
+    if (platform === 'mapEmbedUrl' && value.includes('<iframe')) {
+      const srcMatch = value.match(/src=["']([^"']+)["']/);
+      if (srcMatch && srcMatch[1]) {
+        finalValue = srcMatch[1];
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
       socialLinks: {
         ...prev.socialLinks,
-        [platform]: value
+        [platform]: finalValue
       }
     }));
   };
@@ -59,7 +69,7 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       const payload = { ...formData, phone: formatPhone(formData.phone) };
       await onSave(payload);
@@ -76,7 +86,7 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
         <h3 className="text-lg font-medium text-gray-900">Contact Section Düzenle</h3>
         <p className="text-sm text-gray-600 mt-1">İletişim bölümünü özelleştirin</p>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         {/* İletişim Bilgileri */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -108,9 +118,9 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
               onChange={handleChange}
               required
               inputMode="numeric"
-              maxLength={14}
+              maxLength={17}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="5 555 555 55 55"
+              placeholder="+90 555 555 55 55"
             />
           </div>
 
@@ -129,7 +139,7 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
               placeholder="info@example.com"
             />
           </div>
-          
+
 
           <div>
             <label htmlFor="workingHours" className="block text-sm font-medium text-gray-700 mb-2">
@@ -153,7 +163,7 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
           <label className="block text-sm font-medium text-gray-700 mb-3">
             Sosyal Medya Linkleri
           </label>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs text-gray-600 mb-1">Facebook</label>
@@ -165,7 +175,7 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
                 placeholder="Facebook URL"
               />
             </div>
-            
+
             <div>
               <label className="block text-xs text-gray-600 mb-1">Twitter</label>
               <input
@@ -176,7 +186,7 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
                 placeholder="Twitter URL"
               />
             </div>
-            
+
             <div>
               <label className="block text-xs text-gray-600 mb-1">Instagram</label>
               <input
@@ -187,7 +197,7 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
                 placeholder="Instagram URL"
               />
             </div>
-            
+
             <div>
               <label className="block text-xs text-gray-600 mb-1">LinkedIn</label>
               <input

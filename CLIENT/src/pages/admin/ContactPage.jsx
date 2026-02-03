@@ -3,6 +3,7 @@ import ContactEditor from '../../components/admin/ContactEditor';
 import { useState, useEffect } from 'react';
 import publicService from '../../services/publicService';
 import adminService from '../../services/adminService';
+import logger from '../../utils/logger';
 
 const ContactPage = () => {
   const [contactData, setContactData] = useState(null);
@@ -28,7 +29,7 @@ const ContactPage = () => {
               linkedin: c.linkedin || '',
               mapEmbedUrl: c.mapEmbedUrl || ''
             },
-            
+
           });
         } else {
           setContactData({

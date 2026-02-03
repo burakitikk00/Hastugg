@@ -60,7 +60,7 @@ const Contact = () => {
                     phone: '',
                     message: ''
                 })
-                
+
                 // Google Analytics ile form gönderimini takip et
                 trackEvent('form_submit', 'contact', 'contact_form', 1)
             } else {
@@ -106,6 +106,7 @@ const Contact = () => {
                         instagram: contact.instagram || '',
                         linkedin: contact.linkedin || ''
                     })
+                    setMapEmbedUrl(contact.mapEmbedUrl || '')
                 }
             } catch (error) {
                 logger.error('Contact bilgileri getirilemedi:', error)
@@ -134,6 +135,7 @@ const Contact = () => {
     }, [])
 
     const [socialLinks, setSocialLinks] = useState({ facebook: '', twitter: '', instagram: '', linkedin: '' })
+    const [mapEmbedUrl, setMapEmbedUrl] = useState('')
 
 
 
@@ -232,7 +234,7 @@ const Contact = () => {
                                 className="form-textarea"
                                 required
                             ></textarea>
-                            
+
                             {/* Status mesajları */}
                             {submitStatus === 'success' && (
                                 <div className="success-message">
@@ -244,9 +246,9 @@ const Contact = () => {
                                     Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.
                                 </div>
                             )}
-                            
-                            <button 
-                                type="submit" 
+
+                            <button
+                                type="submit"
                                 className="form-submit"
                                 disabled={isSubmitting}
                             >
@@ -280,7 +282,7 @@ const Contact = () => {
 
                             {/* Harita Bölümü */}
                             <div className="map-section" style={{ marginTop: '20px' }}>
-                                <div 
+                                <div
                                     className="map-container"
                                     style={{
                                         border: '2px solid #e5e7eb',
@@ -291,7 +293,7 @@ const Contact = () => {
                                     }}
                                 >
                                     <iframe
-                                        src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d96367.57945231683!2d29.056833771775768!3d40.99271593126424!3m2!1i1024!2i768!4f13.1!5e0!3m2!1str!2str!4v1756399286094!5m2!1str!2str"
+                                        src={mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d96367.57945231683!2d29.056833771775768!3d40.99271593126424!3m2!1i1024!2i768!4f13.1!5e0!3m2!1str!2str!4v1756399286094!5m2!1str!2str"}
                                         width="100%"
                                         height="100%"
                                         style={{ border: 0 }}

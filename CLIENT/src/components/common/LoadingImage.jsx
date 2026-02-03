@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
-import useImageLoading from '../../hooks/useImageLoading';
+import { useState, useEffect, useRef } from 'react';
 
-const LoadingImage = ({ 
-  src, 
-  alt, 
-  className = '', 
+const LoadingImage = ({
+  src,
+  alt,
+  className = '',
   fallbackSrc = null,
   showLoadingSpinner = true,
   blurWhileLoading = true,
-  ...props 
+  ...props
 }) => {
   const [currentSrc, setCurrentSrc] = useState(src);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const imgRef = useRef(null);
 
   useEffect(() => {
     if (src) {
@@ -21,6 +21,16 @@ const LoadingImage = ({
       setHasError(false);
     }
   }, [src]);
+
+  // Cache'den yüklenen görseller için - onLoad tetiklenmeyebilir
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth > 0) {
+      // Görsel zaten cache'den yüklenmiş
+      setIsLoading(false);
+      setHasError(false);
+    }
+  }, [currentSrc]);
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -59,6 +69,7 @@ const LoadingImage = ({
         </div>
       )}
       <img
+        ref={imgRef}
         src={currentSrc}
         alt={alt}
         className={imageClasses}
@@ -71,3 +82,4 @@ const LoadingImage = ({
 };
 
 export default LoadingImage;
+

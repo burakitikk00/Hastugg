@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import ProjectDetailModal from '../ProjectDetailModal'
 import LoadingImage from '../common/LoadingImage'
 import publicService from '../../services/publicService'
 import logger from '../../utils/logger'
 import './Projects.css'
 
 const Projects = () => {
-    const [selectedProject, setSelectedProject] = useState(null)
-    const [showProjectDetail, setShowProjectDetail] = useState(false)
+    const navigate = useNavigate()
     const [projects, setProjects] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -33,13 +32,7 @@ const Projects = () => {
     }, [])
 
     const handleProjectClick = (project) => {
-        setSelectedProject(project)
-        setShowProjectDetail(true)
-    }
-
-    const handleCloseModal = () => {
-        setShowProjectDetail(false)
-        setSelectedProject(null)
+        navigate(`/proje/${project.id}`)
     }
 
     const getStatusText = (status) => {
@@ -184,15 +177,6 @@ const Projects = () => {
                     </div>
                 </div>
             </section>
-
-            {/* Project Detail Modal */}
-            <ProjectDetailModal
-                isOpen={showProjectDetail}
-                onClose={handleCloseModal}
-                project={selectedProject}
-                onBackToProjects={() => setShowProjectDetail(false)}
-                getStatusText={getStatusText}
-            />
         </>
     )
 }

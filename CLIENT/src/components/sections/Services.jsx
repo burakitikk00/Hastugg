@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import ServiceProjectsModal from '../ServiceProjectsModal'
 import LoadingImage from '../common/LoadingImage'
 import publicService from '../../services/publicService'
 import logger from '../../utils/logger'
 import './Services.css'
 
 const Services = () => {
-    const [selectedService, setSelectedService] = useState(null)
-    const [showServiceProjects, setShowServiceProjects] = useState(false)
+    const navigate = useNavigate()
     const [services, setServices] = useState([])
-    const [allProjects, setAllProjects] = useState([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -30,72 +28,8 @@ const Services = () => {
         fetchServices()
     }, [])
 
-    // Tüm projeleri çek
-    useEffect(() => {
-        const fetchAllProjects = async () => {
-            try {
-                const projectsData = await publicService.getProjects()
-                setAllProjects(projectsData)
-            } catch (error) {
-                logger.error('Projeler yüklenirken hata:', error)
-            }
-        }
-
-        fetchAllProjects()
-    }, [])
-
-    // Hizmete göre projeleri filtrele
-    const getProjectsForService = (serviceTitle) => {
-        // service_ids alanına göre filtreleme yap
-        const filteredProjects = allProjects.filter(project => {
-            if (!project.service_ids) return false
-
-            try {
-                // service_ids'yi parse et
-                let serviceIds = project.service_ids
-
-                // Eğer string ise parse et
-                if (typeof serviceIds === 'string') {
-                    // Boş string kontrolü
-                    if (serviceIds.trim() === '' || serviceIds.trim() === '[]') return false
-                    serviceIds = JSON.parse(serviceIds)
-                }
-
-                // Array kontrolü
-                if (!Array.isArray(serviceIds)) return false
-
-                // 0 ve null değerleri filtrele
-                serviceIds = serviceIds.filter(id => id && id !== 0)
-
-                if (serviceIds.length === 0) return false
-
-                // Hizmet adına göre eşleştirme yap
-                const matchingService = services.find(service =>
-                    service.service === serviceTitle
-                )
-
-                if (matchingService && serviceIds.includes(matchingService.id)) {
-                    return true
-                }
-            } catch (error) {
-                // Parse hatası durumunda sessizce atla
-                logger.log('service_ids parse atlandı:', project.title, error.message)
-            }
-
-            return false
-        })
-
-        return filteredProjects
-    }
-
     const handleServiceClick = (service) => {
-        setSelectedService(service)
-        setShowServiceProjects(true)
-    }
-
-    const handleCloseModal = () => {
-        setShowServiceProjects(false)
-        setSelectedService(null)
+        navigate(`/hizmet/${service.id}`)
     }
 
     // Status çevirisi için fonksiyon
@@ -226,15 +160,6 @@ const Services = () => {
                     </div>
                 </div>
             </section>
-
-            {/* Service Projects Modal */}
-            <ServiceProjectsModal
-                isOpen={showServiceProjects}
-                onClose={handleCloseModal}
-                service={selectedService}
-                projects={selectedService ? getProjectsForService(selectedService.service) : []}
-                getStatusText={getStatusText}
-            />
         </>
     )
 }

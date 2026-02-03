@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { FaInstagram, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa'
+import { useNavigate, useLocation } from 'react-router-dom'
 import hastugLogo from '../../assets/hastuglogo.png'
 import './Footer.css'
 import { useEffect, useState } from 'react'
@@ -7,6 +8,8 @@ import publicService from '../../services/publicService'
 import logger from '../../utils/logger'
 
 const Footer = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [contact, setContact] = useState({ address: '', phone: '', email: '' })
   const [socialLinks, setSocialLinks] = useState({ instagram: '', facebook: '', twitter: '', linkedin: '' })
   const [services, setServices] = useState([])
@@ -56,25 +59,29 @@ const Footer = () => {
   ]
 
   const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
+    // Eğer ana sayfada değilsek, önce ana sayfaya git
+    if (location.pathname !== '/') {
+      navigate('/')
+      // Sayfa yüklendikten sonra scroll yap
+      setTimeout(() => {
+        const element = document.getElementById(sectionId)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 150)
+    } else {
+      // Ana sayfadaysak direkt scroll yap
+      const element = document.getElementById(sectionId)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
     }
   }
 
   // Hizmete tıklandığında yapılacak işlem
   const handleServiceClick = (service) => {
-    // Önce hizmetler bölümüne git
-    scrollToSection('services')
-    
-    // Kısa bir gecikme sonrası modal'ı açmak için global event tetikle
-    setTimeout(() => {
-      // Custom event ile Services bileşenine bildir
-      const event = new CustomEvent('openServiceModal', { 
-        detail: { service: service } 
-      })
-      window.dispatchEvent(event)
-    }, 1000) // Scroll tamamlandıktan sonra modal aç
+    // Detay sayfasına yönlendir
+    navigate(`/hizmet/${service.id}`)
   }
 
   return (
@@ -88,7 +95,7 @@ const Footer = () => {
                 alt="Hastugg Logo"
                 className="footer-logo-image"
               />
-              <span className="footer-logo-text">Hastugg</span>
+              <span className="footer-logo-text">Hastuğ İnşaat</span>
             </div>
             <p className="footer-description">
               Siz İsteyin, Biz İnşa Edelim. Profesyonel ekibimizle kaliteli projeler.

@@ -12,29 +12,29 @@ router.get('/analytics-settings', verifyToken, async (_req, res) => {
             SELECT EXISTS (
                 SELECT FROM information_schema.tables 
                 WHERE table_schema = 'public' 
-                AND table_name = 'analytics_settings'
+                AND table_name = 'AnalyticsSettings'
             );
         `);
-        
+
         if (!tableCheck.rows[0].exists) {
             // Tablo yok, kullanıcıya bilgi ver
             logger.warn('Analytics settings tablosu bulunamadı. Lütfen SQL script\'ini çalıştırın.');
-            return res.status(503).json({ 
-                error: 'Analytics tablosu bulunamadı', 
-                message: 'Lütfen SERVER/scripts/create_analytics_table.sql dosyasını veritabanınızda çalıştırın.' 
+            return res.status(503).json({
+                error: 'Analytics tablosu bulunamadı',
+                message: 'Lütfen SERVER/scripts/create_analytics_table.sql dosyasını veritabanınızda çalıştırın.'
             });
         }
 
         // Tablo varsa sorguyu çalıştır
         const result = await pool.query(
-            'SELECT measurement_id, is_active, created_at, updated_at FROM analytics_settings ORDER BY created_at DESC LIMIT 1'
+            'SELECT measurement_id, is_active, updated_at FROM "AnalyticsSettings" ORDER BY id DESC LIMIT 1'
         );
-        
+
         if (result.rowCount > 0) {
             res.json(result.rows[0]);
         } else {
             // Tablo var ama kayıt yok - bu normal, varsayılan değer döndür
-            res.json({ measurement_id: 'G-XXXXXXXXXX', is_active: false, created_at: null, updated_at: null });
+            res.json({ measurement_id: 'G-XXXXXXXXXX', is_active: false, updated_at: null });
         }
     } catch (error) {
         logger.error('Analytics getirme hatası:', error);
@@ -52,15 +52,15 @@ router.post('/analytics-settings', verifyToken, async (req, res) => {
 
         // Önce tabloyu kontrol et, yoksa oluştur
         try {
-            const exists = await pool.query('SELECT COUNT(*) FROM analytics_settings');
+            const exists = await pool.query('SELECT COUNT(*) FROM "AnalyticsSettings"');
             if (Number(exists.rows[0].count) > 0) {
                 await pool.query(
-                    'UPDATE analytics_settings SET measurement_id = $1, is_active = $2, updated_at = CURRENT_TIMESTAMP',
+                    'UPDATE "AnalyticsSettings" SET measurement_id = $1, is_active = $2, updated_at = CURRENT_TIMESTAMP',
                     [measurement_id, !!is_active]
                 );
             } else {
                 await pool.query(
-                    'INSERT INTO analytics_settings (measurement_id, is_active) VALUES ($1, $2)',
+                    'INSERT INTO "AnalyticsSettings" (measurement_id, is_active) VALUES ($1, $2)',
                     [measurement_id, !!is_active]
                 );
             }
@@ -68,7 +68,7 @@ router.post('/analytics-settings', verifyToken, async (req, res) => {
             if (tableError.code === '42P01') {
                 // Tablo yoksa oluştur
                 await pool.query(`
-                    CREATE TABLE IF NOT EXISTS analytics_settings (
+                    CREATE TABLE IF NOT EXISTS "AnalyticsSettings" (
                         id SERIAL PRIMARY KEY,
                         measurement_id VARCHAR(50),
                         is_active BOOLEAN DEFAULT FALSE,
@@ -78,7 +78,7 @@ router.post('/analytics-settings', verifyToken, async (req, res) => {
                 `);
                 // Tekrar insert et
                 await pool.query(
-                    'INSERT INTO analytics_settings (measurement_id, is_active) VALUES ($1, $2)',
+                    'INSERT INTO "AnalyticsSettings" (measurement_id, is_active) VALUES ($1, $2)',
                     [measurement_id, !!is_active]
                 );
                 logger.log('Analytics settings tablosu otomatik olarak oluşturuldu.');

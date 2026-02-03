@@ -28,13 +28,12 @@ const Sidebar = ({ onLogout, isOpen, onClose }) => {
   };
 
   return (
-    <div className={`w-64 bg-white shadow-lg h-screen fixed left-0 top-0 z-50 transform transition-transform duration-300 ease-in-out ${
-      isOpen ? 'translate-x-0' : '-translate-x-full'
-    } lg:translate-x-0`}>
+    <div className={`w-64 bg-white shadow-lg h-screen fixed left-0 top-0 z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+      } lg:translate-x-0`}>
       {/* Logo */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-800">Hastugg Admin</h1>
+          <h1 className="text-xl font-bold text-gray-800">Hastuğ Yönetici Paneli</h1>
           {/* Close button for mobile */}
           <button
             onClick={onClose}
@@ -53,11 +52,10 @@ const Sidebar = ({ onLogout, isOpen, onClose }) => {
           <button
             key={item.path}
             onClick={() => handleMenuClick(item.path)}
-            className={`w-full text-left px-6 py-3 flex items-center space-x-3 transition-colors duration-200 ${
-              isActive(item.path)
-                ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-            }`}
+            className={`w-full text-left px-6 py-3 flex items-center space-x-3 transition-colors duration-200 ${isActive(item.path)
+              ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`}
           >
             <span className="text-lg">{item.icon}</span>
             <span className="font-medium">{item.label}</span>

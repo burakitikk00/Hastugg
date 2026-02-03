@@ -100,7 +100,7 @@ const AnalyticsPage = () => {
         {/* Analytics Settings Form */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Analytics Ayarları</h2>
-          
+
           <div className="space-y-4">
             {/* Measurement ID */}
             <div>
@@ -139,14 +139,12 @@ const AnalyticsPage = () => {
 
           {/* Test Result */}
           {testResult && (
-            <div className={`mt-4 p-4 rounded-md ${
-              testResult.success 
-                ? 'bg-green-50 border border-green-200' 
+            <div className={`mt-4 p-4 rounded-md ${testResult.success
+                ? 'bg-green-50 border border-green-200'
                 : 'bg-red-50 border border-red-200'
-            }`}>
-              <div className={`text-sm ${
-                testResult.success ? 'text-green-700' : 'text-red-700'
               }`}>
+              <div className={`text-sm ${testResult.success ? 'text-green-700' : 'text-red-700'
+                }`}>
                 {testResult.message}
               </div>
             </div>
@@ -161,7 +159,7 @@ const AnalyticsPage = () => {
             >
               {isLoading ? 'Kaydediliyor...' : 'Kaydet'}
             </button>
-            
+
             <button
               onClick={handleTest}
               disabled={isLoading || !analyticsData.measurement_id}
@@ -169,7 +167,7 @@ const AnalyticsPage = () => {
             >
               {isLoading ? 'Test Ediliyor...' : 'Test Et'}
             </button>
-            
+
             <button
               onClick={handleCancel}
               disabled={isLoading}

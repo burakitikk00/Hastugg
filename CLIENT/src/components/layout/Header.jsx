@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FaBars, FaTimes } from 'react-icons/fa'
 import hastugLogo from '../../assets/hastuglogo.png'
@@ -6,16 +7,32 @@ import './Header.css'
 
 const Header = ({ activeSection, onSectionChange }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
     const scrollToSection = (sectionId) => {
-        const element = document.getElementById(sectionId)
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' })
-            onSectionChange(sectionId)
-            setIsMenuOpen(false)
+        // Eğer ana sayfada değilsek, önce ana sayfaya git
+        if (location.pathname !== '/') {
+            navigate('/')
+            // Sayfa yüklendikten sonra scroll yap
+            setTimeout(() => {
+                const element = document.getElementById(sectionId)
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' })
+                }
+                if (onSectionChange) onSectionChange(sectionId)
+            }, 150)
+        } else {
+            // Ana sayfadaysak direkt scroll yap
+            const element = document.getElementById(sectionId)
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' })
+                if (onSectionChange) onSectionChange(sectionId)
+            }
         }
+        setIsMenuOpen(false)
     }
 
     const navigationItems = [

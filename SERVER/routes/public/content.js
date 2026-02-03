@@ -142,6 +142,92 @@ router.get('/team', async (req, res) => {
     }
 });
 
+// Tek bir hizmeti getir (herkes erişebilir)
+router.get('/services/:id', async (req, res) => {
+    try {
+        if (!pool) {
+            logger.error('Veritabanı bağlantısı yok');
+            return res.status(503).json({ error: 'Veritabanı bağlantısı yok' });
+        }
+
+        const { id } = req.params;
+        const result = await pool.query(
+            'SELECT id, service, description, url FROM "Services" WHERE id = $1',
+            [id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Hizmet bulunamadı' });
+        }
+
+        res.status(200).json(result.rows[0]);
+    } catch (error) {
+        logger.error('Service getirme hatası:', error);
+        res.status(500).json({ error: 'Sunucu hatası', details: error.message });
+    }
+});
+
+// Tek bir projeyi getir (herkes erişebilir)
+router.get('/projects/:id', async (req, res) => {
+    try {
+        if (!pool) {
+            logger.error('Veritabanı bağlantısı yok');
+            return res.status(503).json({ error: 'Veritabanı bağlantısı yok' });
+        }
+
+        const { id } = req.params;
+
+        // Proje verisini getir
+        const projectResult = await pool.query(
+            'SELECT * FROM "Projects" WHERE id = $1',
+            [id]
+        );
+
+        if (projectResult.rows.length === 0) {
+            return res.status(404).json({ message: 'Proje bulunamadı' });
+        }
+
+        const project = projectResult.rows[0];
+
+        // Proje görsellerini getir
+        const imagesResult = await pool.query(
+            'SELECT "imageURL" FROM "Images" WHERE projectid = $1',
+            [id]
+        );
+
+        // Service bilgilerini getir
+        let services = [];
+        let serviceIds = [];
+        try {
+            if (Array.isArray(project.service_ids)) {
+                serviceIds = project.service_ids;
+            } else if (project.service_ids) {
+                serviceIds = JSON.parse(project.service_ids);
+            }
+
+            if (serviceIds.length > 0) {
+                const servicesResult = await pool.query(
+                    'SELECT id, service, description, url FROM "Services" WHERE id = ANY($1)',
+                    [serviceIds]
+                );
+                services = servicesResult.rows;
+            }
+        } catch (e) {
+            // service_ids parse hatası - sessizce atla
+        }
+
+        res.status(200).json({
+            ...project,
+            images: imagesResult.rows.map(img => img.imageurl || img.imageURL),
+            services,
+            service_ids: serviceIds
+        });
+    } catch (error) {
+        logger.error('Project getirme hatası:', error);
+        res.status(500).json({ error: 'Sunucu hatası', details: error.message });
+    }
+});
+
 // Analytics ayarlarını getir (public - frontend için)
 router.get('/analytics-settings', async (req, res) => {
     try {
@@ -150,10 +236,10 @@ router.get('/analytics-settings', async (req, res) => {
             SELECT EXISTS (
                 SELECT FROM information_schema.tables 
                 WHERE table_schema = 'public' 
-                AND table_name = 'analytics_settings'
+                AND table_name = 'AnalyticsSettings'
             );
         `);
-        
+
         if (!tableCheck.rows[0].exists) {
             // Tablo yok, sessizce fallback döndür
             logger.warn('Analytics settings tablosu bulunamadı. Tabloyu oluşturmak için SQL script\'ini çalıştırın.');
@@ -163,9 +249,9 @@ router.get('/analytics-settings', async (req, res) => {
         // Tablo varsa sorguyu çalıştır
         const result = await pool.query(`
             SELECT measurement_id, is_active 
-            FROM analytics_settings 
+            FROM "AnalyticsSettings" 
             WHERE is_active = true
-            ORDER BY created_at DESC
+            ORDER BY id DESC
             LIMIT 1
         `);
 

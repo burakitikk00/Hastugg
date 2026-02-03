@@ -17,10 +17,10 @@ class PublicService {
   // Görsel URL'ini tam URL'ye dönüştür
   getImageURL(imagePath) {
     if (!imagePath) return '/api/placeholder/400/300';
-    
+
     // String'e çevir ve trim yap
     let url = String(imagePath).trim();
-    
+
     // Render öneki temizleme: Eğer URL'de birden fazla https:// varsa, son https://'den başla
     // Örnek: https://hastugg-2.onrender.comhttps://ancyfbusyllkwekachls.supabase.co/...
     const httpsMatches = url.match(/https?:\/\//g);
@@ -35,7 +35,7 @@ class PublicService {
         url = url.substring(lastHttpsIndex);
       }
     }
-    
+
     // Eğer URL içinde Supabase URL'i varsa, sadece Supabase URL'ini al
     // Bu, yanlış birleştirilmiş URL'leri düzeltir
     if (url.includes('supabase.co')) {
@@ -52,26 +52,26 @@ class PublicService {
         }
         return cleanUrl;
       }
-      
+
       // Eğer path yoksa (sadece domain), yine de döndür
       const supabaseDomainMatch = url.match(/https?:\/\/[^\/]*supabase\.co/);
       if (supabaseDomainMatch) {
         return supabaseDomainMatch[0];
       }
     }
-    
+
     // Zaten tam URL ise (http:// veya https:// ile başlıyorsa) - direkt döndür
     // Bu, tüm tam URL'leri destekler (Supabase, CDN, vb.)
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
-    
+
     // Eski format URL'ler (/uploads/...) - artık çalışmıyor, placeholder döndür
     if (url.startsWith('/uploads/')) {
       console.warn('Eski format URL tespit edildi (local storage):', url, '- Lütfen görseli yeniden yükleyin');
       return '/api/placeholder/400/300';
     }
-    
+
     // Diğer durumlar için: Geriye dönük uyumluluk için server URL ile birleştirmeyi dene
     // Ancak bu durumda console'a uyarı yazdır çünkü bu format artık desteklenmiyor
     console.warn('Tanınmayan URL formatı:', url, '- Server URL ile birleştiriliyor (geriye dönük uyumluluk)');
@@ -237,6 +237,52 @@ class PublicService {
         measurement_id: null,
         is_active: false
       };
+    }
+  }
+
+  // Tek bir hizmeti getir (herkes erişebilir)
+  async getServiceById(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/services/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Service API hatası:', response.status, errorText);
+        throw new Error(`Hizmet getirilemedi: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Service fetch hatası:', error);
+      throw error;
+    }
+  }
+
+  // Tek bir projeyi getir (herkes erişebilir)
+  async getProjectById(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/projects/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Project API hatası:', response.status, errorText);
+        throw new Error(`Proje getirilemedi: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Project fetch hatası:', error);
+      throw error;
     }
   }
 }
