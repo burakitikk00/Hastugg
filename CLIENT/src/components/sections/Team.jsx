@@ -6,8 +6,8 @@ import logger from '../../utils/logger'
 import './Team.css'
 
 const Team = () => {
-    const [teamMembers, setTeamMembers] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [teamMembers, setTeamMembers] = useState(publicService.getCachedTeam() || [])
+    const [loading, setLoading] = useState(!publicService.getCachedTeam())
     const [error, setError] = useState(null)
 
     useEffect(() => {

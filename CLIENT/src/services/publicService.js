@@ -135,6 +135,11 @@ class PublicService {
     return data;
   }
 
+  // Cache'den senkron olarak projeleri al
+  getCachedProjects() {
+    return this.cache.projects;
+  }
+
   // Hizmetleri getir
   async getServices() {
     if (this.cache.services) {
@@ -145,6 +150,11 @@ class PublicService {
     return data;
   }
 
+  // Cache'den senkron olarak hizmetleri al
+  getCachedServices() {
+    return this.cache.services;
+  }
+
   // Team üyelerini getir
   async getTeam() {
     if (this.cache.team) {
@@ -153,6 +163,11 @@ class PublicService {
     const data = await this.request('/team');
     this.cache.team = data;
     return data;
+  }
+
+  // Cache'den senkron olarak team verilerini al
+  getCachedTeam() {
+    return this.cache.team;
   }
 
   // Analytics ayarlarını getir

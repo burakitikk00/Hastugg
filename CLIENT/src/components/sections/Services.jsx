@@ -8,8 +8,8 @@ import './Services.css'
 
 const Services = () => {
     const navigate = useNavigate()
-    const [services, setServices] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [services, setServices] = useState(publicService.getCachedServices() || [])
+    const [loading, setLoading] = useState(!publicService.getCachedServices())
 
     useEffect(() => {
         const fetchServices = async () => {

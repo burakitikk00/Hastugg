@@ -8,8 +8,8 @@ import './Projects.css'
 
 const Projects = () => {
     const navigate = useNavigate()
-    const [projects, setProjects] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [projects, setProjects] = useState(publicService.getCachedProjects() || [])
+    const [loading, setLoading] = useState(!publicService.getCachedProjects())
     const [error, setError] = useState(null)
 
     // Projeleri veritabanından çek
