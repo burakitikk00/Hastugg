@@ -11,16 +11,17 @@
 
 /* Custom Architectural Scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
+  width: 6px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #07090e;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

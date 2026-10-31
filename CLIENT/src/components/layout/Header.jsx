@@ -23,57 +23,57 @@ const Header = ({ activeSection, onSectionChange }) => {
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
     const scrollToSection = (sectionId) => {
-        // Önce menüyü kapat
-        setIsMenuOpen(false)
+        const wasMenuOpen = isMenuOpen;
+        setIsMenuOpen(false);
 
-        // Eğer ana sayfada değilsek, önce ana sayfaya git
+        // Eğer ana sayfada değilsek, hash yönlendirmesi ile ana sayfaya git
         if (location.pathname !== '/') {
-            navigate('/')
+            if (sectionId === 'home') {
+                navigate('/');
+            } else {
+                navigate(`/#${sectionId}`);
+            }
+            if (onSectionChange) onSectionChange(sectionId);
+            return;
+        }
 
-            // Sayfa yüklendikten sonra scroll yap
-            setTimeout(() => {
-                const element = document.getElementById(sectionId)
-                if (element) {
-                    const headerOffset = 80 // Header yüksekliği kadar pay bırak
-                    const elementPosition = element.getBoundingClientRect().top
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+        // Ana sayfadaysak doğrudan yumuşak kaydır
+        const performScroll = () => {
+            if (sectionId === 'home') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (onSectionChange) onSectionChange('home');
+                return;
+            }
 
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: "smooth"
-                    })
-                }
-                if (onSectionChange) onSectionChange(sectionId)
-            }, 300)
+            const element = document.getElementById(sectionId);
+            if (element) {
+                const headerOffset = 80;
+                const elementPosition = element.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                window.scrollTo({
+                    top: Math.max(0, offsetPosition),
+                    behavior: "smooth"
+                });
+            }
+            if (onSectionChange) onSectionChange(sectionId);
+        };
+
+        // Mobil menü açıksa kapanma animasyonunu bekle, masaüstünde beklemeden anında kaydır
+        if (wasMenuOpen) {
+            setTimeout(performScroll, 320);
         } else {
-            // Ana sayfadaysak, menü kapanma animasyonunu bekle (300ms) sonra scroll yap
-            setTimeout(() => {
-                const element = document.getElementById(sectionId)
-                if (element) {
-                    // scrollIntoView bazen mobilde header altında kalabiliyor, elle hesaplama daha güvenli
-                    const headerOffset = 80
-                    const elementPosition = element.getBoundingClientRect().top
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: "smooth"
-                    })
-
-                    if (onSectionChange) onSectionChange(sectionId)
-                }
-            }, 350)
+            performScroll();
         }
     }
 
     const handleLogoClick = () => {
-        setIsMenuOpen(false)
+        setIsMenuOpen(false);
         if (location.pathname !== '/') {
-            navigate('/')
-            window.scrollTo({ top: 0, behavior: 'smooth' })
+            navigate('/');
         } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-            if (onSectionChange) onSectionChange('home')
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (onSectionChange) onSectionChange('home');
         }
     }
 

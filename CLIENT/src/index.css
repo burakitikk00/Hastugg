@@ -238,3 +238,35 @@
   filter: none;
   opacity: 1;
 }
+/* ========================================================
+   MODERN ULTRA-THIN SCROLLBAR UTILITIES
+   Yatay gezinme sekmeleri ve mobil listeler için zarif 3px kaydırma çubuğu
+   ======================================================== */
+.scrollbar-none,
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d7b469 transparent;
+}
+
+.scrollbar-none::-webkit-scrollbar,
+.thin-scrollbar::-webkit-scrollbar {
+  height: 3px;
+  width: 3px;
+}
+
+.scrollbar-none::-webkit-scrollbar-track,
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.7);
+  border-radius: 9999px;
+}
+
+.scrollbar-none::-webkit-scrollbar-thumb,
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.scrollbar-none::-webkit-scrollbar-thumb:hover,
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

@@ -3,6 +3,7 @@ import { FiPlus, FiTrash2, FiArrowUp, FiArrowDown, FiBarChart2, FiEye, FiCheck }
 import FormButtons from './FormButtons';
 import adminService from '../../services/adminService';
 import logger from '../../utils/logger';
+import { scrollToAndHighlight } from '../../utils/scrollAndHighlight';
 
 const DEFAULT_METRICS = [
   { value: '150+', label: 'Tamamlanan Prestij Projesi', order_index: 1 },
@@ -70,6 +71,7 @@ const HeroEditor = ({ onSave, onCancel }) => {
 
   // Yeni Metrik Ekleme
   const handleAddMetric = () => {
+    const newIndex = metrics.length;
     setMetrics(prev => [
       ...prev,
       {
@@ -78,6 +80,12 @@ const HeroEditor = ({ onSave, onCancel }) => {
         order_index: prev.length + 1
       }
     ]);
+    scrollToAndHighlight(`hero-metric-${newIndex}`, {
+      delay: 100,
+      duration: 3400,
+      block: 'center',
+      focusInput: true
+    });
   };
 
   // Metrik Silme
@@ -221,7 +229,8 @@ const HeroEditor = ({ onSave, onCancel }) => {
             {metrics.map((metric, index) => (
               <div
                 key={metric.id || index}
-                className="p-4 bg-slate-50/70 border border-slate-200/90 rounded-xl space-y-3 relative group hover:border-amber-400/60 transition-all shadow-2xs"
+                id={`hero-metric-${index}`}
+                className="scroll-mt-10 p-4 bg-slate-50/70 border border-slate-200/90 rounded-xl space-y-3 relative group hover:border-amber-400/60 transition-all shadow-2xs"
               >
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold font-mono bg-slate-200/80 text-slate-700">

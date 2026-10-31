@@ -7,7 +7,7 @@ export const LEGAL_POLICIES = {
   kvkk: {
     title: 'KVKK Genel Aydınlatma Metni',
     badge: '6698 SAYILI KANUN KAPSAMINDA',
-    lastUpdated: '01.01.2025',
+    lastUpdated: '31.10.2026',
     sections: [
       {
         heading: '1. Veri Sorumlusunun Kimliği',
@@ -52,7 +52,7 @@ haklarına sahipsiniz. Haklarınıza ilişkin taleplerinizi yazılı olarak veya
   cerez: {
     title: 'Gizlilik ve Çerez (Cookie) Politikası',
     badge: 'ÇEREZ KULLANIM REHBERİ',
-    lastUpdated: '01.01.2025',
+    lastUpdated: '31.10.2026',
     sections: [
       {
         heading: '1. Çerez (Cookie) Nedir?',
@@ -78,7 +78,7 @@ haklarına sahipsiniz. Haklarınıza ilişkin taleplerinizi yazılı olarak veya
   iletisim: {
     title: 'İletişim ve Teklif Formu KVKK Aydınlatma Metni',
     badge: 'MİMARİ TEKLİF & İLETİŞİM FORMLARI',
-    lastUpdated: '01.01.2025',
+    lastUpdated: '31.10.2026',
     sections: [
       {
         heading: '1. Veri Sorumlusu ve Kapsam',

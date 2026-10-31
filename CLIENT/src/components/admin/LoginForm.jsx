@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiLock, FiUser, FiArrowRight } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
 import ForgotPasswordForm from './ForgotPasswordForm';
+import hastugLogo from '../../assets/hastuglogo.png';
 
 const LoginForm = () => {
   const [credentials, setCredentials] = useState({
@@ -59,12 +60,15 @@ const LoginForm = () => {
       <div className="relative z-10 max-w-md w-full bg-[#0b101b] border border-slate-800 rounded-3xl p-8 sm:p-9 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
         {/* Logo & Başlık */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center text-[#07090e] font-black text-2xl mx-auto shadow-[0_0_25px_rgba(229,169,60,0.35)] mb-4">
-            H
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center p-2.5 mx-auto shadow-[0_0_25px_rgba(229,169,60,0.35)] mb-4">
+            <img
+              src={hastugLogo}
+              alt="Hastuğ Logo"
+              className="w-full h-full object-contain brightness-0"
+            />
           </div>
-          <div className="flex items-center justify-center gap-1.5 mb-1">
+          <div className="flex items-center justify-center mb-1">
             <span className="font-bold text-white tracking-wider text-lg font-sans">HASTUĞ</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
           </div>
           <p className="text-[11px] uppercase font-mono tracking-widest text-slate-400 font-semibold">
             YÖNETİM KONTROL PANELİ

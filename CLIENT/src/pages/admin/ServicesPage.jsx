@@ -9,6 +9,7 @@ import adminService from '../../services/adminService';
 import publicService from '../../services/publicService';
 import logger from '../../utils/logger';
 import { getServiceIcon } from '../../utils/serviceIcons';
+import { scrollToAndHighlight } from '../../utils/scrollAndHighlight';
 
 const ServicesPage = () => {
   const [services, setServices] = useState([]);
@@ -42,14 +43,14 @@ const ServicesPage = () => {
   const handleAdd = () => {
     setSelectedService(null);
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToAndHighlight('service-form-container', { delay: 80, duration: 3200, block: 'start' });
   };
 
   // Düzenleme butonuna basıldığında
   const handleEdit = (service) => {
     setSelectedService(service);
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToAndHighlight('service-form-container', { delay: 80, duration: 3200, block: 'start' });
   };
 
   // Formdan iptal edildiğinde
@@ -64,20 +65,58 @@ const ServicesPage = () => {
     setError('');
     setSuccessMessage('');
 
+    let targetServiceId = selectedService?.id || null;
+
     try {
+      const payload = { ...serviceFormData };
+      const coverFile = payload._coverFile;
+      const isCoverRemoved = payload._isCoverRemoved;
+      delete payload._coverFile;
+      delete payload._isCoverRemoved;
+
+      // 1. Yeni kapak görseli seçildiyse yalnızca şimdi Supabase'e yükle
+      if (coverFile) {
+        const uploadResult = await adminService.uploadImage(coverFile);
+        payload.url = uploadResult.imageURL;
+
+        // Eğer eski görsel vardıysa ve Supabase Storage URL'i ise eski görseli sil
+        if (selectedService?.url && selectedService.url !== uploadResult.imageURL && selectedService.url.includes('supabase.co')) {
+          try {
+            await adminService.deleteImage(selectedService.url);
+          } catch (delErr) {
+            logger.warn('Eski hizmet görseli silinirken uyarı:', delErr);
+          }
+        }
+      } else if (isCoverRemoved) {
+        // Kapak görseli arayüzden silindiyse eski görseli Supabase'den sil
+        if (selectedService?.url && selectedService.url.includes('supabase.co')) {
+          try {
+            await adminService.deleteImage(selectedService.url);
+          } catch (delErr) {
+            logger.warn('Eski hizmet görseli silinirken uyarı:', delErr);
+          }
+        }
+        payload.url = null;
+      }
+
       if (selectedService && selectedService.id) {
         // Mevcut hizmet güncelleme
-        await adminService.updateService(selectedService.id, serviceFormData);
-        setSuccessMessage(`"${serviceFormData.service}" hizmeti başarıyla güncellendi.`);
+        await adminService.updateService(selectedService.id, payload);
+        setSuccessMessage(`"${payload.service}" hizmeti başarıyla güncellendi.`);
       } else {
         // Yeni hizmet oluşturma
-        await adminService.createService(serviceFormData);
-        setSuccessMessage(`"${serviceFormData.service}" hizmeti başarıyla oluşturuldu.`);
+        const createResult = await adminService.createService(payload);
+        targetServiceId = createResult?.id || createResult?.service?.id || null;
+        setSuccessMessage(`"${payload.service}" hizmeti başarıyla oluşturuldu.`);
       }
 
       await loadServices();
       setShowForm(false);
       setSelectedService(null);
+
+      if (targetServiceId) {
+        scrollToAndHighlight(`service-card-${targetServiceId}`, { delay: 180, duration: 3500, block: 'center' });
+      }
     } catch (err) {
       logger.error('Hizmet kaydetme hatası:', err);
       alert('Kaydetme sırasında bir hata oluştu: ' + (err.message || 'Bilinmeyen hata'));
@@ -165,12 +204,14 @@ const ServicesPage = () => {
           <AdminLoadingState type="cards" message="Hizmetler listesi yükleniyor..." />
         ) : showForm ? (
           /* Düzenleme / Ekleme Formu */
-          <AdminServiceForm
-            service={selectedService}
-            onSave={handleSave}
-            onCancel={handleCancel}
-            isLoading={isSaving}
-          />
+          <div id="service-form-container" className="scroll-mt-8">
+            <AdminServiceForm
+              service={selectedService}
+              onSave={handleSave}
+              onCancel={handleCancel}
+              isLoading={isSaving}
+            />
+          </div>
         ) : (
           /* Hizmetler Kart Listesi */
           <div className="space-y-4">
@@ -185,7 +226,8 @@ const ServicesPage = () => {
                 return (
                   <div
                     key={item.id || index}
-                    className="p-5 sm:p-6 rounded-2xl border border-slate-200/90 bg-white hover:border-slate-300 transition-all shadow-xs space-y-4 relative flex flex-col justify-between group"
+                    id={`service-card-${item.id}`}
+                    className="p-5 sm:p-6 rounded-2xl border border-slate-200/90 bg-white hover:border-slate-300 transition-all shadow-xs space-y-4 relative flex flex-col justify-between group scroll-mt-12"
                   >
                     <div>
                       {/* Üst Kısım: Sıra, Kategori & Durum */}

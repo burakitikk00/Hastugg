@@ -4,6 +4,7 @@ import LoadingImage from '../common/LoadingImage';
 import adminService from '../../services/adminService';
 import publicService from '../../services/publicService';
 import logger from '../../utils/logger';
+import { scrollToAndHighlight } from '../../utils/scrollAndHighlight';
 import {
   SERVICE_ICON_OPTIONS,
   getServiceIcon
@@ -31,15 +32,6 @@ const CATEGORY_PRESETS = [
   'Kentsel Dönüşüm',
   'Statik & Güçlendirme',
   'Danışmanlık & Ruhsat'
-];
-
-const STAMP_PRESETS = [
-  'A+ MİMARİ STANDART',
-  'ŞANTİYE GÜVENCESİ',
-  'DEPREME TAM GÜVENCE',
-  'TSE ONAYLI MÜHENDİSLİK',
-  'BIM SIFIR HATA',
-  'ANAHTAR TESLİM GÜVENCESİ'
 ];
 
 const AdminServiceForm = ({
@@ -71,7 +63,7 @@ const AdminServiceForm = ({
     service: service?.service || '',
     category: service?.category || 'Projelendirme & Tasarım',
     icon: service?.icon || 'compass',
-    stamp: service?.stamp || 'A+ MİMARİ STANDART',
+    stamp: service?.stamp || '',
     url: service?.url || '',
     short_description: service?.short_description || service?.description || '',
     detailed_description: service?.detailed_description || service?.description || '',
@@ -85,7 +77,9 @@ const AdminServiceForm = ({
 
   // Yeni etiket girişi için geçici input state'i
   const [newTagInput, setNewTagInput] = useState('');
-  const [uploadingCover, setUploadingCover] = useState(false);
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState(null);
+  const [isCoverRemoved, setIsCoverRemoved] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
     service: false,
     short_description: false
@@ -98,24 +92,35 @@ const AdminServiceForm = ({
     }
   };
 
-  // Görsel yükleme (Supabase Storage)
-  const handleCoverUpload = async (file) => {
+  // Görsel seçimi (Hemen yüklemez, local state'te bekletir)
+  const handleCoverUpload = (file) => {
     if (!file) return;
-    setUploadingCover(true);
-    try {
-      const result = await adminService.uploadImage(file);
-      handleChange('url', result.imageURL);
-      setToast({
-        show: true,
-        title: 'Görsel Yüklendi',
-        message: 'Kapak görseli başarıyla depolandı.'
-      });
-    } catch (err) {
-      logger.error('Görsel yükleme hatası:', err);
-      alert('Görsel yüklenirken hata oluştu: ' + err.message);
-    } finally {
-      setUploadingCover(false);
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Görsel boyutu en fazla 10MB olabilir.');
+      return;
     }
+    setCoverFile(file);
+    setIsCoverRemoved(false);
+    setCoverPreviewUrl(URL.createObjectURL(file));
+    setToast({
+      show: true,
+      title: 'Görsel Seçildi',
+      message: 'Kapak görseli belirlendi. Kaydet butonuna basınca sunucuya yüklenecektir.'
+    });
+    scrollToAndHighlight('service-cover-preview', { delay: 100, duration: 3200, block: 'center' });
+  };
+
+  // Kapak görselini kaldırma
+  const handleRemoveCover = () => {
+    setCoverFile(null);
+    setCoverPreviewUrl(null);
+    setIsCoverRemoved(true);
+    handleChange('url', '');
+    setToast({
+      show: true,
+      title: 'Görsel Kaldırıldı',
+      message: 'Kapak görseli kaldırıldı. Kaydet butonuna basınca silinecektir.'
+    });
   };
 
   // Etiket (Scope Tags) İşlemleri
@@ -126,11 +131,17 @@ const AdminServiceForm = ({
       alert('Bu etiket zaten ekli.');
       return;
     }
+    const newIndex = formData.scope_tags.length;
     setFormData(prev => ({
       ...prev,
       scope_tags: [...prev.scope_tags, trimmed]
     }));
     setNewTagInput('');
+    scrollToAndHighlight(`service-tag-${newIndex}`, {
+      delay: 80,
+      duration: 3000,
+      className: 'impeccable-highlight-badge'
+    });
   };
 
   const removeTag = (indexToRemove) => {
@@ -142,6 +153,8 @@ const AdminServiceForm = ({
 
   // Çıktılar (Deliverables) İşlemleri
   const addDeliverable = () => {
+    setActiveTab('ciktilar');
+    const newIndex = formData.deliverables.length;
     setFormData(prev => ({
       ...prev,
       deliverables: [
@@ -153,6 +166,12 @@ const AdminServiceForm = ({
         }
       ]
     }));
+    scrollToAndHighlight(`deliverable-item-${newIndex}`, {
+      delay: 100,
+      duration: 3400,
+      block: 'center',
+      focusInput: true
+    });
   };
 
   const updateDeliverable = (index, field, value) => {
@@ -170,7 +189,9 @@ const AdminServiceForm = ({
 
   // İş Akışı Süreç Adımları (Process Steps) İşlemleri
   const addProcessStep = () => {
+    setActiveTab('surec');
     const nextStep = formData.process_steps.length + 1;
+    const newIndex = formData.process_steps.length;
     setFormData(prev => ({
       ...prev,
       process_steps: [
@@ -183,6 +204,12 @@ const AdminServiceForm = ({
         }
       ]
     }));
+    scrollToAndHighlight(`process-step-${newIndex}`, {
+      delay: 100,
+      duration: 3400,
+      block: 'center',
+      focusInput: true
+    });
   };
 
   const updateProcessStep = (index, field, value) => {
@@ -200,6 +227,8 @@ const AdminServiceForm = ({
 
   // SSS (FAQs) İşlemleri
   const addFaq = () => {
+    setActiveTab('sss');
+    const newIndex = formData.faqs.length;
     setFormData(prev => ({
       ...prev,
       faqs: [
@@ -210,6 +239,12 @@ const AdminServiceForm = ({
         }
       ]
     }));
+    scrollToAndHighlight(`faq-item-${newIndex}`, {
+      delay: 100,
+      duration: 3400,
+      block: 'center',
+      focusInput: true
+    });
   };
 
   const updateFaq = (index, field, value) => {
@@ -247,7 +282,9 @@ const AdminServiceForm = ({
 
     onSave({
       ...formData,
-      description: formData.short_description // geriye uyumluluk
+      description: formData.short_description, // geriye uyumluluk
+      _coverFile: coverFile,
+      _isCoverRemoved: isCoverRemoved
     });
   };
 
@@ -292,14 +329,14 @@ const AdminServiceForm = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/70 rounded-lg transition-colors"
+            className="px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300/80 rounded-lg shadow-xs transition-all active:scale-95"
           >
             Vazgeç
           </button>
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isLoading || uploadingCover}
+            disabled={isLoading}
             className="px-4 py-1.5 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-lg shadow-xs transition-all active:scale-95 disabled:opacity-50"
           >
             {isLoading ? 'Kaydediliyor...' : 'Kaydet'}
@@ -378,18 +415,12 @@ const AdminServiceForm = ({
                 </label>
                 <input
                   type="text"
-                  list="stamp-presets"
                   value={formData.stamp}
                   onChange={(e) => handleChange('stamp', e.target.value)}
                   placeholder="Örn: A+ MİMARİ STANDART"
                   className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 bg-white font-mono"
                 />
-                <datalist id="stamp-presets">
-                  {STAMP_PRESETS.map(s => (
-                    <option key={s} value={s} />
-                  ))}
-                </datalist>
-                <p className="text-[11px] text-slate-400 mt-1">Kart üzerinde teknik mimari mühür olarak görünür.</p>
+                <p className="text-[11px] text-slate-400 mt-1">Kart üzerinde ve detay sayfasında teknik mimari mühür olarak görünür.</p>
               </div>
 
               <div>
@@ -503,7 +534,10 @@ const AdminServiceForm = ({
                 type="file"
                 id="service-cover-file"
                 accept="image/*"
-                onChange={(e) => handleCoverUpload(e.target.files[0])}
+                onChange={(e) => {
+                  handleCoverUpload(e.target.files[0]);
+                  e.target.value = null;
+                }}
                 className="hidden"
               />
               <label
@@ -511,13 +545,14 @@ const AdminServiceForm = ({
                 className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-xs transition-all active:scale-95"
               >
                 <FiImage size={15} />
-                <span>Yeni Kapak Görseli Seç ve Yükle</span>
+                <span>Kapak Görseli Seç</span>
               </label>
-              <p className="text-xs text-slate-500 mt-2">Önerilen: 1920x1080px veya 1200x800px yüksek çözünürlüklü mimari fotoğraf.</p>
-              {uploadingCover && (
-                <div className="mt-3 text-xs text-amber-700 font-semibold flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                  Görsel Supabase Storage'a yükleniyor...
+              <p className="text-xs text-slate-500 mt-2">
+                Önerilen: 1920x1080px veya 1200x800px yüksek çözünürlüklü mimari fotoğraf. (Kaydet butonuna basınca depolanır).
+              </p>
+              {coverFile && (
+                <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-800 text-xs font-semibold">
+                  <span>Seçili Dosya: {coverFile.name}</span>
                 </div>
               )}
             </div>
@@ -526,23 +561,52 @@ const AdminServiceForm = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 font-mono">
-                  Görsel Doğrudan URL'si
+                  Görsel Doğrudan URL'si (İsteğe Bağlı)
                 </label>
                 <input
                   type="text"
                   value={formData.url || ''}
-                  onChange={(e) => handleChange('url', e.target.value)}
+                  onChange={(e) => {
+                    handleChange('url', e.target.value);
+                    setCoverFile(null);
+                    setCoverPreviewUrl(null);
+                    setIsCoverRemoved(false);
+                  }}
                   placeholder="https://..."
                   className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 bg-white font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 font-mono">
-                  Mevcut Önizleme
-                </label>
-                {formData.url ? (
-                  <div className="relative aspect-video rounded-xl overflow-hidden border border-slate-200 shadow-2xs">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 font-mono">
+                    Önizleme
+                  </label>
+                  {(coverPreviewUrl || (formData.url && !isCoverRemoved)) && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveCover}
+                      className="text-xs font-semibold text-rose-600 hover:text-rose-800 flex items-center gap-1 transition-colors"
+                    >
+                      <FiTrash2 size={13} />
+                      <span>Görseli Kaldır</span>
+                    </button>
+                  )}
+                </div>
+
+                {coverPreviewUrl ? (
+                  <div id="service-cover-preview" className="relative aspect-video rounded-xl overflow-hidden border-2 border-amber-400 shadow-sm scroll-mt-10 group">
+                    <img
+                      src={coverPreviewUrl}
+                      alt="Yeni seçilen kapak"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-2 left-2 bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow">
+                      Yeni Görsel (Kaydedilmeyi Bekliyor)
+                    </div>
+                  </div>
+                ) : formData.url && !isCoverRemoved ? (
+                  <div id="service-cover-preview" className="relative aspect-video rounded-xl overflow-hidden border border-slate-200 shadow-2xs scroll-mt-10">
                     <LoadingImage
                       src={publicService.getImageURL(formData.url)}
                       alt="Service preview"
@@ -551,8 +615,8 @@ const AdminServiceForm = ({
                     />
                   </div>
                 ) : (
-                  <div className="aspect-video rounded-xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-xs text-slate-400">
-                    Henüz görsel yüklenmedi
+                  <div id="service-cover-preview" className="aspect-video rounded-xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-xs text-slate-400 scroll-mt-10">
+                    {isCoverRemoved ? 'Görsel kaldırıldı (Kaydedilince silinecektir)' : 'Henüz görsel seçilmedi'}
                   </div>
                 )}
               </div>
@@ -604,7 +668,8 @@ const AdminServiceForm = ({
                 {formData.scope_tags.map((tag, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-900 rounded-lg text-xs font-mono font-semibold border border-amber-200"
+                    id={`service-tag-${idx}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-900 rounded-lg text-xs font-mono font-semibold border border-amber-200 transition-all scroll-mt-8"
                   >
                     <span>{tag}</span>
                     <button
@@ -650,7 +715,8 @@ const AdminServiceForm = ({
                   {formData.deliverables.map((deliv, dIdx) => (
                     <div
                       key={dIdx}
-                      className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3 relative group"
+                      id={`deliverable-item-${dIdx}`}
+                      className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3 relative group transition-all scroll-mt-10"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-slate-700 font-mono">ÇIKTI #{dIdx + 1}</span>
@@ -719,7 +785,8 @@ const AdminServiceForm = ({
                 {formData.process_steps.map((step, sIdx) => (
                   <div
                     key={sIdx}
-                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row gap-4 items-start"
+                    id={`process-step-${sIdx}`}
+                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row gap-4 items-start transition-all scroll-mt-10"
                   >
                     <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-800 font-mono font-bold text-xs flex items-center justify-center shrink-0 border border-amber-500/20">
                       0{step.step || sIdx + 1}
@@ -798,7 +865,8 @@ const AdminServiceForm = ({
                 {formData.faqs.map((faq, fIdx) => (
                   <div
                     key={fIdx}
-                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2 relative"
+                    id={`faq-item-${fIdx}`}
+                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2 relative transition-all scroll-mt-10"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-700 font-mono">SORU #{fIdx + 1}</span>
@@ -837,8 +905,7 @@ const AdminServiceForm = ({
           onSave={handleSubmit}
           onCancel={onCancel}
           saveText={service ? 'Hizmet Değişikliklerini Kaydet' : 'Yeni Hizmeti Oluştur'}
-          isLoading={isLoading || uploadingCover}
-          isDisabled={uploadingCover}
+          isLoading={isLoading}
         />
       </form>
     </div>

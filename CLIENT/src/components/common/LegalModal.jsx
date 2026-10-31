@@ -126,9 +126,9 @@ const LegalModal = () => {
           </div>
 
           <div className="legal-modal-footer-note">
-            <FiInfo size={14} className="shrink-0 text-amber-400" />
+            <FiInfo size={14} className="shrink-0 text-amber-400" aria-hidden="true" />
             <span>
-              Son Güncelleme: {currentPolicy.lastUpdated} — Hastuğ İnşaat & Mimarlık Yasal Uyumluluk Birimi
+              Son Güncelleme: {currentPolicy.lastUpdated || '31.10.2026'} — Hastuğ İnşaat & Mimarlık Yasal Uyumluluk Birimi
             </span>
           </div>
         </div>

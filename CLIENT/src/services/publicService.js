@@ -110,106 +110,233 @@ class PublicService {
     }
   }
 
+  CACHE_PREFIX = 'hastug_cache_';
+  DEFAULT_TTL = 15 * 60 * 1000; // 15 dakika
+
+  // Yerel veya bellek içi önbellekten oku
+  getCache(key) {
+    // 1. Önce RAM (bellek içi) kontrolü
+    if (this.cache[key] !== undefined) {
+      return this.cache[key];
+    }
+    // 2. LocalStorage kontrolü
+    try {
+      const item = localStorage.getItem(`${this.CACHE_PREFIX}${key}`);
+      if (!item) return null;
+      const parsed = JSON.parse(item);
+      if (!parsed || parsed.data === undefined) return null;
+      // RAM'e de al
+      this.cache[key] = parsed.data;
+      return parsed.data;
+    } catch {
+      return null;
+    }
+  }
+
+  // Önbellek süresinin dolup dolmadığını kontrol et
+  isCacheStale(key, maxAge = this.DEFAULT_TTL) {
+    try {
+      const item = localStorage.getItem(`${this.CACHE_PREFIX}${key}`);
+      if (!item) return true;
+      const parsed = JSON.parse(item);
+      if (!parsed || !parsed.timestamp) return true;
+      return Date.now() - parsed.timestamp > maxAge;
+    } catch {
+      return true;
+    }
+  }
+
+  // Önbelleğe yaz (hem RAM hem localStorage)
+  setCache(key, data) {
+    this.cache[key] = data;
+    try {
+      localStorage.setItem(`${this.CACHE_PREFIX}${key}`, JSON.stringify({
+        timestamp: Date.now(),
+        data
+      }));
+    } catch (e) {
+      console.warn('LocalStorage yazma hatası:', e);
+    }
+  }
+
+  // Önbelleği temizle (belirli bir anahtar veya tamamı)
   clearCache(key = null) {
     if (key) {
       delete this.cache[key];
+      try {
+        localStorage.removeItem(`${this.CACHE_PREFIX}${key}`);
+      } catch (e) {}
     } else {
       this.cache = {};
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith(this.CACHE_PREFIX)) {
+            keysToRemove.push(k);
+          }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+      } catch (e) {}
     }
   }
 
-  // Hero verilerini getir
-  async getHero() {
-    if (this.cache.hero) {
-      return this.cache.hero;
-    }
-    const data = await this.request('/hero');
-    this.cache.hero = data;
+  // İsteği yap ve önbelleğe kaydet
+  async fetchAndCache(endpoint, cacheKey) {
+    const data = await this.request(endpoint);
+    this.setCache(cacheKey, data);
     return data;
   }
 
-  // About verilerini getir
-  async getAbout() {
-    if (this.cache.about) {
-      return this.cache.about;
+  // Hero verilerini getir (SWR destekli)
+  async getHero(forceRefresh = false) {
+    if (!forceRefresh) {
+      const cached = this.getCache('hero');
+      if (cached) {
+        if (this.isCacheStale('hero')) {
+          this.fetchAndCache('/hero', 'hero').catch(() => {});
+        }
+        return cached;
+      }
     }
-    const data = await this.request('/about');
-    this.cache.about = data;
-    return data;
+    return this.fetchAndCache('/hero', 'hero');
   }
 
-  // İletişim bilgilerini getir
-  async getContact() {
-    if (this.cache.contact) {
-      return this.cache.contact;
+  // About verilerini getir (SWR destekli)
+  async getAbout(forceRefresh = false) {
+    if (!forceRefresh) {
+      const cached = this.getCache('about');
+      if (cached) {
+        if (this.isCacheStale('about')) {
+          this.fetchAndCache('/about', 'about').catch(() => {});
+        }
+        return cached;
+      }
     }
-    const data = await this.request('/contact');
-    this.cache.contact = data;
-    return data;
+    return this.fetchAndCache('/about', 'about');
   }
 
-  // Projeleri getir
-  async getProjects() {
-    if (this.cache.projects) {
-      return this.cache.projects;
+  // İletişim bilgilerini getir (SWR destekli)
+  async getContact(forceRefresh = false) {
+    if (!forceRefresh) {
+      const cached = this.getCache('contact');
+      if (cached) {
+        if (this.isCacheStale('contact')) {
+          this.fetchAndCache('/contact', 'contact').catch(() => {});
+        }
+        return cached;
+      }
     }
-    const data = await this.request('/projects');
-    this.cache.projects = data;
-    return data;
+    return this.fetchAndCache('/contact', 'contact');
+  }
+
+  // Projeleri getir (SWR destekli)
+  async getProjects(forceRefresh = false) {
+    if (!forceRefresh) {
+      const cached = this.getCache('projects');
+      if (cached) {
+        if (this.isCacheStale('projects')) {
+          this.fetchAndCache('/projects', 'projects').catch(() => {});
+        }
+        return cached;
+      }
+    }
+    return this.fetchAndCache('/projects', 'projects');
   }
 
   // Cache'den senkron olarak projeleri al
   getCachedProjects() {
-    return this.cache.projects;
+    return this.getCache('projects');
   }
 
-  // Hizmetleri getir
-  async getServices() {
-    if (this.cache.services) {
-      return this.cache.services;
+  // Hizmetleri getir (SWR destekli)
+  async getServices(forceRefresh = false) {
+    if (!forceRefresh) {
+      const cached = this.getCache('services');
+      if (cached) {
+        if (this.isCacheStale('services')) {
+          this.fetchAndCache('/services', 'services').catch(() => {});
+        }
+        return cached;
+      }
     }
-    const data = await this.request('/services');
-    this.cache.services = data;
-    return data;
+    return this.fetchAndCache('/services', 'services');
   }
 
   // Cache'den senkron olarak hizmetleri al
   getCachedServices() {
-    return this.cache.services;
+    return this.getCache('services');
   }
 
-  // Team üyelerini getir
-  async getTeam() {
-    if (this.cache.team) {
-      return this.cache.team;
+  // Team üyelerini getir (SWR destekli)
+  async getTeam(forceRefresh = false) {
+    if (!forceRefresh) {
+      const cached = this.getCache('team');
+      if (cached) {
+        if (this.isCacheStale('team')) {
+          this.fetchAndCache('/team', 'team').catch(() => {});
+        }
+        return cached;
+      }
     }
-    const data = await this.request('/team');
-    this.cache.team = data;
-    return data;
+    return this.fetchAndCache('/team', 'team');
   }
 
   // Cache'den senkron olarak team verilerini al
   getCachedTeam() {
-    return this.cache.team;
+    return this.getCache('team');
   }
 
   // Analytics ayarlarını getir
-  async getAnalyticsSettings() {
+  async getAnalyticsSettings(forceRefresh = false) {
+    if (!forceRefresh) {
+      const cached = this.getCache('analytics_settings');
+      if (cached) {
+        if (this.isCacheStale('analytics_settings', 30 * 60 * 1000)) {
+          this.request('/analytics-settings')
+            .then(data => this.setCache('analytics_settings', data))
+            .catch(() => {});
+        }
+        return cached;
+      }
+    }
     try {
-      return await this.request('/analytics-settings');
+      const data = await this.request('/analytics-settings');
+      this.setCache('analytics_settings', data);
+      return data;
     } catch (error) {
       return { measurement_id: null, is_active: false };
     }
   }
 
-  // Tek bir hizmeti getir
-  async getServiceById(id) {
-    return this.request(`/services/${id}`);
+  // Tek bir hizmeti getir (Önbellekli)
+  async getServiceById(id, forceRefresh = false) {
+    const cacheKey = `service_${id}`;
+    if (!forceRefresh) {
+      const cached = this.getCache(cacheKey);
+      if (cached) {
+        if (this.isCacheStale(cacheKey)) {
+          this.fetchAndCache(`/services/${id}`, cacheKey).catch(() => {});
+        }
+        return cached;
+      }
+    }
+    return this.fetchAndCache(`/services/${id}`, cacheKey);
   }
 
-  // Tek bir projeyi getir
-  async getProjectById(id) {
-    return this.request(`/projects/${id}`);
+  // Tek bir projeyi getir (Önbellekli)
+  async getProjectById(id, forceRefresh = false) {
+    const cacheKey = `project_${id}`;
+    if (!forceRefresh) {
+      const cached = this.getCache(cacheKey);
+      if (cached) {
+        if (this.isCacheStale(cacheKey)) {
+          this.fetchAndCache(`/projects/${id}`, cacheKey).catch(() => {});
+        }
+        return cached;
+      }
+    }
+    return this.fetchAndCache(`/projects/${id}`, cacheKey);
   }
 
   // İletişim formu mesajı gönder

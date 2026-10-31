@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import hastugLogo from '../../assets/hastuglogo.png';
 import {
   FiGrid,
   FiFileText,
@@ -50,16 +51,22 @@ const Sidebar = ({ onLogout, isOpen, onClose }) => {
       {/* Üst Kısım: Marka Başlığı */}
       <div>
         <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center text-[#07090e] font-black text-lg shadow-[0_0_15px_rgba(229,169,60,0.3)]">
-              H
+          <div
+            onClick={() => handleMenuClick('/admin/dashboard')}
+            className="flex items-center gap-3 cursor-pointer group"
+          >
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center p-1.5 shadow-[0_0_15px_rgba(229,169,60,0.3)] shrink-0 transition-transform duration-200 group-hover:scale-105">
+              <img
+                src={hastugLogo}
+                alt="Hastuğ Logo"
+                className="w-full h-full object-contain brightness-0"
+              />
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-white tracking-wider text-base">HASTUĞ</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-              </div>
-              <p className="text-[10px] uppercase font-mono tracking-widest text-slate-400 font-semibold">
+            <div className="flex flex-col justify-center">
+              <span className="font-bold text-white tracking-wider text-base leading-none transition-colors group-hover:text-amber-400">
+                HASTUĞ
+              </span>
+              <p className="text-[10px] uppercase font-mono tracking-widest text-slate-400 font-semibold mt-1">
                 YÖNETİM PANELİ
               </p>
             </div>

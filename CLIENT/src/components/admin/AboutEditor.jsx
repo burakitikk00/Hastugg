@@ -3,6 +3,7 @@ import FormButtons from './FormButtons';
 import logger from '../../utils/logger';
 import adminService from '../../services/adminService';
 import { AVAILABLE_ADMIN_ICONS, getArchitecturalIcon } from '../../utils/architecturalIcons';
+import { scrollToAndHighlight } from '../../utils/scrollAndHighlight';
 
 const AboutEditor = ({ onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -52,6 +53,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
   };
 
   const addFeature = () => {
+    const newIndex = formData.features.length;
     setFormData(prev => ({
       ...prev,
       features: [...prev.features, {
@@ -61,6 +63,12 @@ const AboutEditor = ({ onSave, onCancel }) => {
         icon: 'compass'
       }]
     }));
+    scrollToAndHighlight(`about-feature-${newIndex}`, {
+      delay: 100,
+      duration: 3400,
+      block: 'center',
+      focusInput: true
+    });
   };
 
   const removeFeature = (index) => {
@@ -176,7 +184,11 @@ const AboutEditor = ({ onSave, onCancel }) => {
             {formData.features.map((feature, index) => {
               const IconComponent = getArchitecturalIcon(feature.icon, feature.feature);
               return (
-                <div key={index} className="p-4 sm:p-5 rounded-2xl border border-slate-200/90 bg-slate-50/40 hover:bg-white hover:border-slate-300 transition-all shadow-2xs">
+                <div
+                  key={index}
+                  id={`about-feature-${index}`}
+                  className="scroll-mt-10 p-4 sm:p-5 rounded-2xl border border-slate-200/90 bg-slate-50/40 hover:bg-white hover:border-slate-300 transition-all shadow-2xs"
+                >
                   <div className="flex items-start gap-4">
                     {/* Vektör Simge Seçici */}
                     <div className="shrink-0 text-center">

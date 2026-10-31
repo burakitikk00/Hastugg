@@ -156,16 +156,7 @@ const Services = () => {
                                             )}
                                         </div>
 
-                                        {/* Eyleme Çağrı Butonu */}
-                                        <button
-                                            type="button"
-                                            onClick={() => handleServiceClick(item.id)}
-                                            className="service-action-btn"
-                                            aria-label={`${item.service} hizmet detaylarını inceleyin`}
-                                        >
-                                            <span>HİZMET KAPSAMINI İNCELE</span>
-                                            <FaArrowRight size={13} />
-                                        </button>
+                                        
                                     </div>
 
                                     {/* Sağ Taraf: Yüksek Çözünürlüklü Mimari Görsel */}
@@ -183,7 +174,18 @@ const Services = () => {
                                             <FaCheckCircle size={11} />
                                             <span>{item.stamp || 'A+ MİMARİ STANDART'}</span>
                                         </div>
+                                        
                                     </div>
+                                    {/* Eyleme Çağrı Butonu */}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleServiceClick(item.id)}
+                                            className="service-action-btn"
+                                            aria-label={`${item.service} hizmet detaylarını inceleyin`}
+                                        >
+                                            <span>HİZMET KAPSAMINI İNCELE</span>
+                                            <FaArrowRight size={13} />
+                                        </button>
                                 </div>
                             </motion.article>
                         );

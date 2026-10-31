@@ -77,17 +77,21 @@ const Footer = () => {
 
     const scrollToSection = (sectionId) => {
         if (location.pathname !== '/') {
-            navigate('/');
-            setTimeout(() => {
-                const element = document.getElementById(sectionId);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 150);
+            if (sectionId === 'home') {
+                navigate('/');
+            } else {
+                navigate(`/#${sectionId}`);
+            }
         } else {
             const element = document.getElementById(sectionId);
             if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
+                const headerOffset = 80;
+                const elementPosition = element.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                window.scrollTo({
+                    top: Math.max(0, offsetPosition),
+                    behavior: 'smooth'
+                });
             }
         }
     };
@@ -255,7 +259,7 @@ const Footer = () => {
                             title="Burak İtik - Dijital Çözüm Ortağı & Web Geliştirme"
                         >
                             <span className="footer-dev-label">Dijital Çözüm Ortağı:</span>
-                            <span className="footer-dev-sig font-signature text-xl sm:text-3xl font-semibold tracking-wide text-[#94a3b8] hover:opacity-75 transition-opacity whitespace-nowrap">
+                            <span className="footer-dev-sig font-signature text-xl sm:text-3xl font-semibold tracking-wide text-[#94a3b8] group-hover:text-white hover:text-white transition-all duration-300 whitespace-nowrap">
                                 burak itik
                             </span>
                         </a>

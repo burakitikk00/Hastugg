@@ -19,21 +19,52 @@ import {
     FiCheck,
     FiImage
 } from 'react-icons/fi';
+import {
+    FaLocationDot,
+    FaPhone,
+    FaEnvelope,
+    FaClock,
+    FaPaperPlane,
+    FaCheck,
+    FaCircleExclamation,
+    FaLinkedinIn,
+    FaInstagram,
+    FaXTwitter,
+    FaFacebookF
+} from 'react-icons/fa6';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import LoadingImage from '../components/common/LoadingImage';
 import publicService from '../services/publicService';
 import { getServiceIcon } from '../utils/serviceIcons';
+import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
 import './ServiceDetailPage.css';
+import '../components/sections/Contact.css';
 
 const ServiceDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { trackEvent } = useGoogleAnalytics();
 
     const [service, setService] = useState(null);
     const [allServices, setAllServices] = useState([]);
     const [projects, setProjects] = useState([]);
-    const [contactInfo, setContactInfo] = useState({ phone: '', email: '' });
+    const [contactData, setContactData] = useState({
+        address: '',
+        phone: '',
+        email: '',
+        facebook: '',
+        twitter: '',
+        instagram: '',
+        linkedin: '',
+        mapEmbedUrl: ''
+    });
+    const contactInfo = contactData;
+    const [workingHours, setWorkingHours] = useState([
+        'Pazartesi - Cuma: 10:00 - 18:00',
+        'Cumartesi: 10:00 - 15:00',
+        'Pazar: Randevu ile'
+    ]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeSection, setActiveSection] = useState('services');
@@ -41,16 +72,18 @@ const ServiceDetailPage = () => {
     // SSS Accordion state
     const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
-    // Hizmet Teklif Formu state
-    const [inquiryForm, setInquiryForm] = useState({
-        name: '',
+    // Hizmet İletişim / Teklif Terminali Formu state
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
         email: '',
         phone: '',
-        message: ''
+        message: '',
+        kvkkConsent: false
     });
-    const [formSubmitting, setFormSubmitting] = useState(false);
-    const [formSuccess, setFormSuccess] = useState(false);
-    const [formError, setFormError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitStatus, setSubmitStatus] = useState(null); // 'success' | 'error' | null
+    const [statusMessage, setStatusMessage] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -81,13 +114,27 @@ const ServiceDetailPage = () => {
                 });
                 setProjects(filteredProjects);
 
-                // İletişim bilgilerini getir
-                const contactData = await publicService.getContact();
-                if (Array.isArray(contactData) && contactData.length > 0) {
-                    setContactInfo({
-                        phone: contactData[0].phone || '',
-                        email: contactData[0].email || ''
+                // İletişim ve merkez ofis bilgilerini getir
+                const contactRes = await publicService.getContact();
+                if (Array.isArray(contactRes) && contactRes.length > 0) {
+                    const c = contactRes[0];
+                    setContactData({
+                        address: c.address || '',
+                        phone: c.phone || '',
+                        email: c.email || '',
+                        facebook: c.facebook || '',
+                        twitter: c.twitter || '',
+                        instagram: c.instagram || '',
+                        linkedin: c.linkedin || '',
+                        mapEmbedUrl: c.mapEmbedUrl || ''
                     });
+                }
+
+                // Admin çalışma saatleri
+                const storedHours = localStorage.getItem('workingHours');
+                if (storedHours && typeof storedHours === 'string') {
+                    const lines = storedHours.split(/\r?\n/).filter(l => l.trim().length > 0);
+                    if (lines.length > 0) setWorkingHours(lines);
                 }
 
                 setError(null);
@@ -124,38 +171,68 @@ const ServiceDetailPage = () => {
         }
     };
 
-    // Teklif Formu Gönderimi
-    const handleInquiryChange = (e) => {
-        const { name, value } = e.target;
-        setInquiryForm(prev => ({ ...prev, [name]: value }));
+    // İletişim Formu Input Değişimi
+    const handleInputChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+        if (submitStatus) {
+            setSubmitStatus(null);
+            setStatusMessage('');
+        }
     };
 
-    const handleInquirySubmit = async (e) => {
+    // İletişim Formu Gönderimi
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setFormSubmitting(true);
-        setFormError('');
 
-        const nameParts = (inquiryForm.name || '').trim().split(' ');
-        const firstName = nameParts[0] || 'Ziyaretçi';
-        const lastName = nameParts.slice(1).join(' ') || '-';
+        if (!formData.kvkkConsent) {
+            setSubmitStatus('error');
+            setStatusMessage("Lütfen devam etmek için İletişim Formu Aydınlatma Metni'ni okuyup onaylayınız.");
+            return;
+        }
 
-        const fullMessage = `[HİZMET DANIŞMANLIK & TEKLİF TALEBİ: ${service?.service || 'Genel Hizmet'}]\n${inquiryForm.message || 'Hizmet kapsamı ve uygulama süreci hakkında teknik bilgi almak istiyorum.'}`;
+        setIsSubmitting(true);
+        setSubmitStatus(null);
+        setStatusMessage('');
+
+        const serviceName = service?.service || service?.title || 'Hizmet';
+        const fullMessage = `[HİZMET DANIŞMANLIK & TEKLİF TALEBİ: ${serviceName}]\n${formData.message || `${serviceName} kapsamında fizibilite ve teknik danışmanlık talep ediyorum.`}`;
 
         try {
-            await publicService.submitContact({
-                first_name: firstName,
-                last_name: lastName,
-                email: inquiryForm.email,
-                phone: inquiryForm.phone,
-                message: fullMessage
+            const result = await publicService.submitContact({
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                first_name: formData.firstName,
+                last_name: formData.lastName,
+                email: formData.email,
+                phone: formData.phone,
+                message: fullMessage,
+                kvkkConsent: formData.kvkkConsent
             });
-            setFormSuccess(true);
-            setInquiryForm({ name: '', email: '', phone: '', message: '' });
+
+            setSubmitStatus('success');
+            setStatusMessage(result.message || 'Talebiniz başarıyla kaydedildi. Teknik ekibimiz en kısa sürede sizinle iletişime geçecektir.');
+            setFormData({
+                firstName: '',
+                lastName: '',
+                email: '',
+                phone: '',
+                message: '',
+                kvkkConsent: false
+            });
+
+            if (trackEvent) {
+                trackEvent('form_submit', 'service_inquiry', serviceName, 1);
+            }
         } catch (err) {
-            console.error('Teklif formu hatası:', err);
-            setFormError('Talebiniz gönderilirken bir hata oluştu. Lütfen doğrudan telefon veya e-posta ile iletişime geçiniz.');
+            console.error('Hizmet teklif formu hatası:', err);
+            setSubmitStatus('error');
+            setStatusMessage(err.message || 'Talebiniz gönderilirken bir hata oluştu. Lütfen doğrudan telefon veya e-posta ile iletişime geçiniz.');
         } finally {
-            setFormSubmitting(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -260,10 +337,12 @@ const ServiceDetailPage = () => {
                 >
                     <div className="hero-header-left">
                         <div className="service-badge-strip">
-                            <span className="service-stamp-badge">
-                                <span className="stamp-pulse-dot" />
-                                {service.stamp || 'A+ MİMARİ STANDART'}
-                            </span>
+                            {service.stamp && (
+                                <span className="service-stamp-badge">
+                                    <span className="stamp-pulse-dot" />
+                                    {service.stamp}
+                                </span>
+                            )}
                             {service.category && (
                                 <span className="service-category-tag">
                                     {service.category}
@@ -288,14 +367,14 @@ const ServiceDetailPage = () => {
                             <span>Hizmet Teklifi Al</span>
                         </button>
 
-                        {contactInfo.phone && (
+                        {contactData.phone && (
                             <a
-                                href={`tel:${contactInfo.phone.replace(/\s+/g, '')}`}
+                                href={`tel:${contactData.phone.replace(/\s+/g, '')}`}
                                 className="btn-service-call"
                                 title="Doğrudan Danışmanlık Hattı"
                             >
                                 <FiPhone className="btn-icon" />
-                                <span>{contactInfo.phone}</span>
+                                <span>{contactData.phone}</span>
                             </a>
                         )}
                     </div>
@@ -337,10 +416,7 @@ const ServiceDetailPage = () => {
                                 blurWhileLoading={true}
                                 showLoadingSpinner={true}
                             />
-                            <div className="blueprint-overlay-meta">
-                                <span className="bp-meta-code">HASTUGG // {service.stamp || 'SPEC-STD'}</span>
-                                <span className="bp-meta-status">DOĞRULANMIŞ HİZMET KAPSAMI</span>
-                            </div>
+
                         </div>
 
                         {/* Kapsam Etiketleri (Scope Tags) */}
@@ -558,101 +634,7 @@ const ServiceDetailPage = () => {
                     </section>
                 )}
 
-                {/* 9. DOĞRUDAN HİZMET DANIŞMANLIK & TEKLİF FORMU */}
-                <section id="hizmet-teklif" className="service-inquiry-section">
-                    <div className="inquiry-container">
-                        <div className="inquiry-header">
-                            <span className="blueprint-tag">MİMARİ DANIŞMANLIK & İLETİŞİM</span>
-                            <h2 className="inquiry-title">
-                                {service.service} İçin Teklif Alın
-                            </h2>
-                            <p className="inquiry-sub">
-                                Arsanız veya mevcut yapınız için ihtiyaç duyduğunuz mühendislik ve mimari çözümleri birlikte planlayalım. Formu doldurduğunuzda teknik ekibimiz 24 saat içinde sizinle iletişime geçer.
-                            </p>
-                        </div>
-
-                        {formSuccess ? (
-                            <div className="inquiry-success-box">
-                                <FiCheckCircle className="success-icon" />
-                                <h3>Talebiniz Alındı</h3>
-                                <p>Teklif talebiniz mimari danışmanımıza başarıyla iletildi. En kısa sürede sizinle irtibata geçilecektir.</p>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormSuccess(false)}
-                                    className="btn-new-inquiry"
-                                >
-                                    Yeni Mesaj Gönder
-                                </button>
-                            </div>
-                        ) : (
-                            <form onSubmit={handleInquirySubmit} className="inquiry-form-grid">
-                                {formError && (
-                                    <div className="inquiry-error-msg">{formError}</div>
-                                )}
-
-                                <div className="form-group">
-                                    <label>Ad Soyad *</label>
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={inquiryForm.name}
-                                        onChange={handleInquiryChange}
-                                        placeholder="Adınız ve Soyadınız"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Telefon Numarası *</label>
-                                    <input
-                                        type="tel"
-                                        name="phone"
-                                        value={inquiryForm.phone}
-                                        onChange={handleInquiryChange}
-                                        placeholder="05XX XXX XX XX"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="form-group full-width">
-                                    <label>E-posta Adresi *</label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={inquiryForm.email}
-                                        onChange={handleInquiryChange}
-                                        placeholder="ornek@alanadi.com"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="form-group full-width">
-                                    <label>Proje / Talep Detayları</label>
-                                    <textarea
-                                        name="message"
-                                        value={inquiryForm.message}
-                                        onChange={handleInquiryChange}
-                                        rows={4}
-                                        placeholder={`Arsanızın konumu, imar durumu veya ${service.service} kapsamındaki beklentileriniz...`}
-                                    />
-                                </div>
-
-                                <div className="form-group full-width">
-                                    <button
-                                        type="submit"
-                                        disabled={formSubmitting}
-                                        className="btn-submit-inquiry"
-                                    >
-                                        <FiSend />
-                                        <span>{formSubmitting ? 'Gönderiliyor...' : 'Teklif Talebini İlet'}</span>
-                                    </button>
-                                </div>
-                            </form>
-                        )}
-                    </div>
-                </section>
-
-                {/* 10. DİĞER HİZMETLERİMİZİ KEŞFEDİN */}
+                {/* 9. DİĞER HİZMETLERİMİZİ KEŞFEDİN */}
                 {otherServices.length > 0 && (
                     <section className="other-services-section">
                         <div className="section-header-left">
@@ -692,6 +674,345 @@ const ServiceDetailPage = () => {
                         </div>
                     </section>
                 )}
+
+                {/* 10. DOĞRUDAN HİZMET DANIŞMANLIK & TEKLİF FORMU (CONTACT HUD) - EN ALT */}
+                <section id="hizmet-teklif" className="contact-section-container service-inquiry-section" aria-label="Hizmet Teklif ve İletişim">
+                    {/* Arka Plan Mimari Işıma */}
+                    <div className="contact-ambient-glow" aria-hidden="true" />
+
+                    <div className="contact-inner-wrapper">
+                        {/* Üst Başlık & Açıklama */}
+                        <div className="contact-top-bar">
+                            <h2 className="contact-main-title">
+                                {service.service || service.title} İçin Bilgi ve Teklif Alın
+                            </h2>
+                            <p className="contact-subtext">
+                                "{service.service || service.title}" hizmetimizin mimari detayları, teknik şartnameleri veya benzeri taahhüt talepleriniz için formu doldurabilir ya da teknik ekibimizle doğrudan iletişime geçebilirsiniz.
+                            </p>
+                        </div>
+
+                        <div className="contact-grid-layout">
+                            {/* Sol Kolon: Mimari Teklif Terminali (Inquiry Form) */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6 }}
+                                viewport={{ once: true }}
+                                className="contact-terminal-card"
+                            >
+                                <div className="terminal-header">
+                                    <h3 className="terminal-title">Hizmet Brifinginizi İletin</h3>
+                                    <p className="terminal-subtext">
+                                        Uzman mühendislerimiz ve mimarlarımız talebinizi inceleyerek en geç 24 saat içinde fizibilite dönüşü sağlayacaktır.
+                                    </p>
+                                </div>
+
+                                <form onSubmit={handleSubmit} className="contact-terminal-form" noValidate>
+                                    {/* İsim & Soyisim Satırı */}
+                                    <div className="form-input-row">
+                                        <div className="form-field-group">
+                                            <label htmlFor="service-contact-firstName" className="form-field-label">
+                                                Adınız *
+                                            </label>
+                                            <input
+                                                id="service-contact-firstName"
+                                                type="text"
+                                                name="firstName"
+                                                value={formData.firstName}
+                                                onChange={handleInputChange}
+                                                placeholder="Örn: Ahmet"
+                                                className="terminal-input"
+                                                required
+                                                autoComplete="given-name"
+                                            />
+                                        </div>
+
+                                        <div className="form-field-group">
+                                            <label htmlFor="service-contact-lastName" className="form-field-label">
+                                                Soyadınız *
+                                            </label>
+                                            <input
+                                                id="service-contact-lastName"
+                                                type="text"
+                                                name="lastName"
+                                                value={formData.lastName}
+                                                onChange={handleInputChange}
+                                                placeholder="Örn: Yılmaz"
+                                                className="terminal-input"
+                                                required
+                                                autoComplete="family-name"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* E-posta & Telefon Satırı */}
+                                    <div className="form-input-row">
+                                        <div className="form-field-group">
+                                            <label htmlFor="service-contact-email" className="form-field-label">
+                                                E-posta Adresiniz *
+                                            </label>
+                                            <input
+                                                id="service-contact-email"
+                                                type="email"
+                                                name="email"
+                                                value={formData.email}
+                                                onChange={handleInputChange}
+                                                placeholder="ahmet@example.com"
+                                                className="terminal-input"
+                                                required
+                                                autoComplete="email"
+                                            />
+                                        </div>
+
+                                        <div className="form-field-group">
+                                            <label htmlFor="service-contact-phone" className="form-field-label">
+                                                Telefon Numaranız *
+                                            </label>
+                                            <input
+                                                id="service-contact-phone"
+                                                type="tel"
+                                                name="phone"
+                                                value={formData.phone}
+                                                onChange={handleInputChange}
+                                                placeholder="+90 (5XX) XXX XX XX"
+                                                className="terminal-input"
+                                                required
+                                                autoComplete="tel"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Proje Mesajı & Detayları */}
+                                    <div className="form-field-group">
+                                        <label htmlFor="service-contact-message" className="form-field-label">
+                                            Proje Açıklaması & Teknik İhtiyaçlarınız *
+                                        </label>
+                                        <textarea
+                                            id="service-contact-message"
+                                            name="message"
+                                            value={formData.message}
+                                            onChange={handleInputChange}
+                                            placeholder={`"${service.service || service.title}" hizmeti kapsamında yapı/arsa durumu, lokasyon, tahmini metrekare ve teknik beklentilerinizi yazınız...`}
+                                            rows={4}
+                                            className="terminal-textarea"
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* KVKK Aydınlatma & Açık Rıza Onay Kutusu */}
+                                    <div className="contact-kvkk-group">
+                                        <label className="kvkk-checkbox-label">
+                                            <input
+                                                id="service-contact-kvkkConsent"
+                                                type="checkbox"
+                                                name="kvkkConsent"
+                                                checked={formData.kvkkConsent}
+                                                onChange={(e) => {
+                                                    const checked = e.target.checked;
+                                                    setFormData(prev => ({ ...prev, kvkkConsent: checked }));
+                                                    if (submitStatus === 'error') {
+                                                        setSubmitStatus(null);
+                                                        setStatusMessage('');
+                                                    }
+                                                }}
+                                                required
+                                                className="kvkk-checkbox-native"
+                                            />
+                                            <span className={`kvkk-checkbox-visual ${formData.kvkkConsent ? 'checked' : ''}`} aria-hidden="true">
+                                                {formData.kvkkConsent && <FaCheck size={9} />}
+                                            </span>
+                                            <span className="kvkk-text-content">
+                                                Kişisel verilerimin,{' '}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        window.dispatchEvent(
+                                                            new CustomEvent('hastug_open_legal_modal', { detail: { tab: 'iletisim' } })
+                                                        );
+                                                    }}
+                                                    className="kvkk-modal-trigger-btn"
+                                                >
+                                                    İletişim Formu Aydınlatma Metni
+                                                </button>
+                                                {' '}kapsamında işlenmesini ve tarafımla iletişime geçilmesini kabul ediyorum. *
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    {/* Geribildirim HUD Kartı */}
+                                    {submitStatus === 'success' && (
+                                        <div className="form-status-alert success" role="alert">
+                                            <FaCheck className="status-icon" size={16} />
+                                            <span>{statusMessage}</span>
+                                        </div>
+                                    )}
+
+                                    {submitStatus === 'error' && (
+                                        <div className="form-status-alert error" role="alert">
+                                            <FaCircleExclamation className="status-icon" size={16} />
+                                            <span>{statusMessage}</span>
+                                        </div>
+                                    )}
+
+                                    {/* Gönderim Butonu & SLA Notu */}
+                                    <div className="form-action-group">
+                                        <button
+                                            type="submit"
+                                            className="terminal-submit-btn"
+                                            disabled={isSubmitting}
+                                        >
+                                            <span>{isSubmitting ? 'İLETİLİYOR...' : 'MİMARİ BRİFİNGİ GÖNDER'}</span>
+                                            <FaPaperPlane size={13} />
+                                        </button>
+
+                                        <span className="terminal-sla-note">
+                                            24 SAATTE DÖNÜŞ // GİZLİLİK GÜVENCESİ
+                                        </span>
+                                    </div>
+                                </form>
+                            </motion.div>
+
+                            {/* Sağ Kolon: Genel Merkez & Koordinatlar (Headquarters HUD) */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.15 }}
+                                viewport={{ once: true }}
+                                className="contact-info-column"
+                            >
+                                {/* İletişim Kanalları Kartı */}
+                                <div className="headquarters-info-card">
+                                    <div className="info-card-header">
+                                        <h3 className="info-card-title">Merkez Ofis & İletişim</h3>
+                                    </div>
+
+                                    <ul className="coordinates-list">
+                                        {contactData.address && (
+                                            <li className="coordinate-item">
+                                                <div className="coordinate-icon-box">
+                                                    <FaLocationDot size={15} />
+                                                </div>
+                                                <div className="coordinate-content">
+                                                    <span className="coordinate-label">GENEL MERKEZ ADRESİ</span>
+                                                    <span className="coordinate-value">{contactData.address}</span>
+                                                </div>
+                                            </li>
+                                        )}
+
+                                        {contactData.phone && (
+                                            <li className="coordinate-item">
+                                                <div className="coordinate-icon-box">
+                                                    <FaPhone size={14} />
+                                                </div>
+                                                <div className="coordinate-content">
+                                                    <span className="coordinate-label">TELEFON HATTI</span>
+                                                    <a href={`tel:${contactData.phone.replace(/\s+/g, '')}`} className="coordinate-link">
+                                                        {contactData.phone}
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        )}
+
+                                        {contactData.email && (
+                                            <li className="coordinate-item">
+                                                <div className="coordinate-icon-box">
+                                                    <FaEnvelope size={14} />
+                                                </div>
+                                                <div className="coordinate-content">
+                                                    <span className="coordinate-label">KURUMSAL E-POSTA</span>
+                                                    <a href={`mailto:${contactData.email}`} className="coordinate-link">
+                                                        {contactData.email}
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        )}
+                                    </ul>
+
+                                    {/* Sosyal Medya İkonları */}
+                                    <div className="contact-socials-row" aria-label="Sosyal Medya Kanalları">
+                                        {contactData.linkedin && (
+                                            <a
+                                                href={contactData.linkedin}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="contact-social-btn"
+                                                aria-label="Hastuğ İnşaat LinkedIn"
+                                            >
+                                                <FaLinkedinIn size={14} />
+                                            </a>
+                                        )}
+                                        {contactData.instagram && (
+                                            <a
+                                                href={contactData.instagram}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="contact-social-btn"
+                                                aria-label="Hastuğ İnşaat Instagram"
+                                            >
+                                                <FaInstagram size={14} />
+                                            </a>
+                                        )}
+                                        {contactData.twitter && (
+                                            <a
+                                                href={contactData.twitter}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="contact-social-btn"
+                                                aria-label="Hastuğ İnşaat X"
+                                            >
+                                                <FaXTwitter size={14} />
+                                            </a>
+                                        )}
+                                        {contactData.facebook && (
+                                            <a
+                                                href={contactData.facebook}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="contact-social-btn"
+                                                aria-label="Hastuğ İnşaat Facebook"
+                                            >
+                                                <FaFacebookF size={14} />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Çalışma Saatleri & Harita */}
+                                <div className="headquarters-map-card">
+                                    <div className="hours-row">
+                                        <div className="hours-icon-box">
+                                            <FaClock size={14} />
+                                        </div>
+                                        <div className="hours-content">
+                                            <span className="coordinate-label">ÇALIŞMA SAATLERİ</span>
+                                            <div className="hours-tags">
+                                                {workingHours.map((hour, idx) => (
+                                                    <span key={idx} className="hour-badge">
+                                                        {hour}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {contactData.mapEmbedUrl && (
+                                        <div className="map-embed-wrapper">
+                                            <iframe
+                                                src={contactData.mapEmbedUrl}
+                                                title="Hastuğ İnşaat Genel Merkez"
+                                                loading="lazy"
+                                                className="map-iframe"
+                                                allowFullScreen=""
+                                                referrerPolicy="no-referrer-when-downgrade"
+                                            />
+                                            <div className="map-glass-border" />
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
             </main>
 
             <Footer />

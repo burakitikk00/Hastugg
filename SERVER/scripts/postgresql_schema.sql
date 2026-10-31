@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS "ContactMessages" (
     message TEXT NOT NULL,
     is_read BOOLEAN DEFAULT FALSE,
     is_sent BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -107,6 +108,7 @@ CREATE TABLE IF NOT EXISTS analytics_settings (
 CREATE INDEX IF NOT EXISTS idx_images_projectid ON "Images"(projectid);
 CREATE INDEX IF NOT EXISTS idx_contactmessages_created ON "ContactMessages"(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_contactmessages_read ON "ContactMessages"(is_read);
+CREATE INDEX IF NOT EXISTS idx_contactmessages_active ON "ContactMessages"(is_active);
 CREATE INDEX IF NOT EXISTS idx_projects_status ON "Projects"(status);
 
 -- ============ Varsayılan admin (isteğe bağlı) ============

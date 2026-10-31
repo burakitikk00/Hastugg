@@ -136,6 +136,17 @@ router.put('/team/:id', verifyToken, upload.single('image'), async (req, res) =>
                     error: uploadError.message 
                 });
             }
+        } else if (req.body.removeImage === 'true' || req.body.removeImage === true) {
+            // Kullanıcı görseli kaldırdıysa eski görseli sil
+            if (oldImageURL) {
+                try {
+                    await deleteImage(oldImageURL);
+                    logger.log(`🗑️ Team görseli kaldırıldı ve silindi: ${oldImageURL}`);
+                } catch (delError) {
+                    logger.warn('Team görsel silme uyarısı:', delError);
+                }
+            }
+            imageURL = null;
         }
 
         // Veritabanını güncelle

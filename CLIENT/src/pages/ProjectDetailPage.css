@@ -23,7 +23,7 @@
 
 .project-detail-main {
     flex: 1;
-    padding: 130px 5% 100px;
+    padding: 130px 5% 70px;
     max-width: 1280px;
     margin: 0 auto;
     width: 100%;
@@ -961,269 +961,22 @@
 }
 
 /* --------------------------------------------------------------------------
-   8. Project Inquiry Section (Doğrudan Başvuru Formu)
+   8. Project Inquiry Section (Contact Terminal & Headquarters HUD Layout)
    -------------------------------------------------------------------------- */
-.project-inquiry-section {
-    margin-top: 30px;
-}
-
-.inquiry-container {
-    background: linear-gradient(135deg, #0d121c 0%, #141b27 100%);
-    border: 1px solid rgba(229, 169, 60, 0.25);
-    border-radius: 20px;
-    padding: 48px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-    position: relative;
-    overflow: hidden;
-}
-
-.inquiry-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #e5a93c, rgba(229, 169, 60, 0.1));
-}
-
-.inquiry-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
-    align-items: center;
-}
-
-.inquiry-info-col {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.inquiry-heading {
-    font-family: 'Syne', sans-serif;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #f8fafc;
-    line-height: 1.25;
-    margin: 0;
-}
-
-.inquiry-subtext {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: #94a3b8;
-    margin: 0;
-}
-.inquiry-subtext strong {
-    color: #f8fafc;
-}
-
-.inquiry-contact-chips {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 10px;
-}
-.contact-chip {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    text-decoration: none;
-    color: inherit;
-    transition: all 0.2s ease;
-}
-.contact-chip:hover .chip-val {
-    color: #e5a93c;
-}
-.contact-chip:hover .chip-icon-box {
-    background: #e5a93c;
-    color: #07090e;
-    transform: scale(1.05);
-}
-.chip-icon-box {
-    width: 38px;
-    height: 38px;
-    border-radius: 8px;
-    background: rgba(229, 169, 60, 0.1);
-    border: 1px solid rgba(229, 169, 60, 0.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #e5a93c;
-    flex-shrink: 0;
-    transition: all 0.2s ease;
-}
-.chip-details {
-    display: flex;
-    flex-direction: column;
-}
-.chip-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: #64748b;
-    text-transform: uppercase;
-}
-.chip-val {
-    font-size: 0.95rem;
-    color: #f8fafc;
-    font-weight: 500;
-}
-
-/* Sağ Form Alanı */
-.inquiry-form-col {
-    background: rgba(7, 9, 14, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 32px;
-    backdrop-filter: blur(12px);
-}
-
-.project-inquiry-form {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.form-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #f8fafc;
-    margin: 0 0 4px;
-}
-
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.field-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #94a3b8;
-}
-
-.form-fields-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-}
-
-.hud-input {
-    background: rgba(13, 18, 28, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
-    padding: 12px 16px;
-    color: #f8fafc;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.95rem;
-    outline: none;
+.project-inquiry-section.contact-section-container {
+    background-color: transparent;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 3.5rem 0 1rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    scroll-margin-top: 90px;
     width: 100%;
-    box-sizing: border-box;
-    transition: all 0.25s ease;
-}
-.hud-input:focus {
-    border-color: #e5a93c;
-    box-shadow: 0 0 0 3px rgba(229, 169, 60, 0.18);
-}
-.hud-input::placeholder {
-    color: #475569;
 }
 
-.btn-submit-inquiry {
-    margin-top: 6px;
-    padding: 14px 24px;
-    background: #e5a93c;
-    border: none;
-    border-radius: 8px;
-    color: #07090e;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    box-shadow: 0 4px 18px rgba(229, 169, 60, 0.3);
-}
-.btn-submit-inquiry:hover:not(:disabled) {
-    background: #f59e0b;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(229, 169, 60, 0.45);
-}
-.btn-submit-inquiry:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-.btn-send-icon {
-    font-size: 16px;
+.project-inquiry-section .contact-inner-wrapper {
+    max-width: 100%;
 }
 
-/* Başarı Kutusu */
-.inquiry-success-box {
-    text-align: center;
-    padding: 24px 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-}
-.success-icon-wrap {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: rgba(16, 185, 129, 0.15);
-    border: 1px solid rgba(16, 185, 129, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #10b981;
-    font-size: 26px;
-}
-.success-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #f8fafc;
-    margin: 0;
-}
-.success-desc {
-    font-size: 0.95rem;
-    color: #94a3b8;
-    line-height: 1.6;
-    max-width: 420px;
-    margin: 0;
-}
-.btn-new-inquiry {
-    margin-top: 8px;
-    padding: 10px 20px;
-    background: transparent;
-    border: 1px solid rgba(229, 169, 60, 0.4);
-    border-radius: 8px;
-    color: #e5a93c;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s ease;
-}
-.btn-new-inquiry:hover {
-    background: rgba(229, 169, 60, 0.1);
-}
-
-.form-error-alert {
-    padding: 10px 14px;
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.35);
-    border-radius: 8px;
-    color: #f87171;
-    font-size: 13px;
-}
 
 /* --------------------------------------------------------------------------
    Lightbox Modal
@@ -1432,10 +1185,7 @@
     .location-grid {
         grid-template-columns: 1fr;
     }
-    .inquiry-grid {
-        grid-template-columns: 1fr;
-        gap: 32px;
-    }
+
     .key-facts-bar {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 16px;
@@ -1743,69 +1493,6 @@
         padding: 9px 14px;
         font-size: 12px;
     }
-
-    /* 8. İletişim & Teklif Formu */
-    .project-inquiry-section {
-        margin-bottom: 30px;
-    }
-    .inquiry-container {
-        padding: 20px 16px;
-        border-radius: 14px;
-    }
-    .inquiry-heading {
-        font-size: 1.35rem;
-        line-height: 1.28;
-        letter-spacing: -0.015em;
-        margin-bottom: 8px;
-    }
-    .inquiry-subtext {
-        font-size: 0.86rem;
-        line-height: 1.55;
-        margin-bottom: 16px;
-    }
-    .inquiry-contact-chips {
-        gap: 8px;
-    }
-    .contact-chip {
-        padding: 9px 12px;
-        border-radius: 8px;
-    }
-    .contact-chip .chip-icon-box {
-        width: 32px;
-        height: 32px;
-        font-size: 13px;
-    }
-    .contact-chip .chip-label {
-        font-size: 9.5px;
-    }
-    .contact-chip .chip-val {
-        font-size: 12px;
-    }
-    .inquiry-form-col {
-        padding: 18px 14px;
-        border-radius: 12px;
-    }
-    .form-title {
-        font-size: 1.15rem;
-        margin-bottom: 14px;
-    }
-    .form-fields-row {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    .field-label {
-        font-size: 11.5px;
-        margin-bottom: 5px;
-    }
-    .hud-input {
-        padding: 10px 12px;
-        font-size: 13px;
-        border-radius: 6px;
-    }
-    .btn-submit-inquiry {
-        padding: 12px 18px;
-        font-size: 13px;
-    }
 }
 
 @media (max-width: 480px) {
@@ -1822,51 +1509,4 @@
     .slider-container {
         height: 215px;
     }
-}
-
-/* Inquiry Form KVKK Consent Styles */
-.inquiry-kvkk-group {
-    margin-top: 0.25rem;
-    margin-bottom: 0.75rem;
-}
-
-.inquiry-kvkk-label {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.65rem;
-    cursor: pointer;
-    user-select: none;
-}
-
-.inquiry-kvkk-input {
-    margin-top: 3px;
-    accent-color: #e5a93c;
-    width: 1rem;
-    height: 1rem;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.inquiry-kvkk-text {
-    font-size: 0.78rem;
-    line-height: 1.5;
-    color: #94a3b8;
-}
-
-.inquiry-kvkk-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: 600;
-    color: #e5a93c;
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    transition: color 0.2s ease;
-}
-
-.inquiry-kvkk-btn:hover {
-    color: #f0b74b;
 }

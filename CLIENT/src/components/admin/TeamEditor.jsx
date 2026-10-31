@@ -22,6 +22,7 @@ import publicService from '../../services/publicService';
 import logger from '../../utils/logger';
 import AdminPageHeader from './AdminPageHeader';
 import AdminLoadingState from './AdminLoadingState';
+import { scrollToAndHighlight } from '../../utils/scrollAndHighlight';
 import {
   ROLE_CATEGORIES,
   detectRoleCategory,
@@ -75,6 +76,7 @@ const TeamEditor = () => {
   });
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
 
   // Ekip üyelerini yükle
   const loadTeamMembers = async () => {
@@ -104,6 +106,7 @@ const TeamEditor = () => {
     setSelectedCategory('muhendis');
     setSelectedImage(null);
     setImagePreview(null);
+    setImageRemoved(false);
     setEditingMember(null);
     setIsAddingNew(false);
   };
@@ -119,9 +122,11 @@ const TeamEditor = () => {
     });
     setSelectedImage(null);
     setImagePreview(null);
+    setImageRemoved(false);
     setIsAddingNew(true);
     setError(null);
     setSuccessMessage(null);
+    scrollToAndHighlight('team-member-form', { delay: 80, duration: 3200, block: 'start' });
   };
 
   // Düzenleme modunu aç
@@ -137,11 +142,10 @@ const TeamEditor = () => {
     });
     setImagePreview(member.url ? publicService.getImageURL(member.url) : null);
     setSelectedImage(null);
+    setImageRemoved(false);
     setError(null);
     setSuccessMessage(null);
-
-    // Form alanına yumuşak kaydırma
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToAndHighlight('team-member-form', { delay: 80, duration: 3200, block: 'start' });
   };
 
   // Kategori değiştiğinde
@@ -173,6 +177,7 @@ const TeamEditor = () => {
         return;
       }
       setSelectedImage(file);
+      setImageRemoved(false);
       const reader = new FileReader();
       reader.onload = (event) => setImagePreview(event.target.result);
       reader.readAsDataURL(file);
@@ -183,6 +188,9 @@ const TeamEditor = () => {
   const removeImagePreview = () => {
     setSelectedImage(null);
     setImagePreview(null);
+    if (editingMember && editingMember.url) {
+      setImageRemoved(true);
+    }
   };
 
   // Form gönderimi
@@ -198,16 +206,27 @@ const TeamEditor = () => {
       setSaving(true);
       setError(null);
 
+      let savedMemberId = editingMember ? editingMember.id : null;
+
       if (editingMember) {
-        await adminService.updateTeamMember(editingMember.id, formData, selectedImage);
+        const payload = {
+          ...formData,
+          ...(imageRemoved && !selectedImage ? { removeImage: 'true' } : {})
+        };
+        await adminService.updateTeamMember(editingMember.id, payload, selectedImage);
         setSuccessMessage(`"${formData.namesurname}" üyesi başarıyla güncellendi.`);
       } else {
-        await adminService.addTeamMember(formData, selectedImage);
+        const addResult = await adminService.addTeamMember(formData, selectedImage);
+        savedMemberId = addResult?.id || addResult?.member?.id || addResult?.data?.id || null;
         setSuccessMessage(`"${formData.namesurname}" başarıyla ekibe eklendi.`);
       }
 
       await loadTeamMembers();
       resetForm();
+
+      if (savedMemberId) {
+        scrollToAndHighlight(`team-member-${savedMemberId}`, { delay: 180, duration: 3500, block: 'center' });
+      }
 
       setTimeout(() => {
         setSuccessMessage(null);
@@ -331,7 +350,7 @@ const TeamEditor = () => {
 
       {/* Üye Ekleme / Düzenleme Formu */}
       {(isAddingNew || editingMember) && (
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden animate-fade-in">
+        <div id="team-member-form" className="scroll-mt-8 bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden animate-fade-in">
           {/* Form Başlığı */}
           <div className="px-6 py-4 bg-slate-50/70 border-b border-slate-200/80 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -600,7 +619,8 @@ const TeamEditor = () => {
           return (
             <div
               key={member.id}
-              className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between group"
+              id={`team-member-${member.id}`}
+              className="scroll-mt-12 bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between group"
             >
               {/* Üst: Portre & Hızlı Aksiyonlar */}
               <div>

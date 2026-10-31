@@ -9,13 +9,13 @@ const FormButtons = ({
   isDisabled = false
 }) => {
   return (
-    <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-200">
+    <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-6 border-t border-slate-200">
       {onCancel && (
         <button
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors disabled:opacity-50"
+          className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] text-sm font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center active:scale-[0.98]"
         >
           {cancelText}
         </button>
@@ -24,7 +24,7 @@ const FormButtons = ({
         type="submit"
         onClick={onSave}
         disabled={isLoading || isDisabled}
-        className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl shadow-xs hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 min-h-[44px] text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl shadow-xs hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
       >
         {isLoading ? (
           <>

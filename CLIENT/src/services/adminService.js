@@ -1,8 +1,18 @@
 import API_CONFIG from '../config/api.js';
+import publicService from './publicService.js';
 
 class AdminService {
   constructor() {
     // URL'yi her seferinde dinamik olarak al
+  }
+
+  // İstemci tarafı önbelleğini temizle (değişikliklerin anında canlı sitede görünmesi için)
+  clearPublicCache(key = null) {
+    try {
+      publicService.clearCache(key);
+    } catch (e) {
+      console.warn('Public önbellek temizleme uyarısı:', e);
+    }
   }
 
   // Dinamik URL getter'ı
@@ -24,6 +34,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache('contact');
       return await response.json();
     } catch (error) {
       throw error;
@@ -127,6 +138,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache('hero');
       return await response.json();
     } catch (error) {
       throw error;
@@ -166,6 +178,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache('about');
       return await response.json();
     } catch (error) {
       throw error;
@@ -224,6 +237,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -244,6 +258,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -265,6 +280,7 @@ class AdminService {
         throw error;
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -285,6 +301,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -303,6 +320,27 @@ class AdminService {
           'Authorization': this.getHeaders().Authorization
         },
         body: formData
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Tekil görsel sil (Genel Supabase Storage)
+  async deleteImage(imageURL) {
+    try {
+      if (!imageURL) return null;
+      const response = await fetch(`${this.baseURL}/delete-image`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ imageURL })
       });
 
       if (!response.ok) {
@@ -407,6 +445,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -427,6 +466,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -446,6 +486,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -478,6 +519,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -497,6 +539,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -516,6 +559,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -536,6 +580,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -556,6 +601,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache();
       return await response.json();
     } catch (error) {
       throw error;
@@ -613,6 +659,7 @@ class AdminService {
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
+      this.clearPublicCache('team');
       return await response.json();
     } catch (error) {
       throw error;
@@ -649,6 +696,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache('team');
       return await response.json();
     } catch (error) {
       throw error;
@@ -668,6 +716,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache('team');
       return await response.json();
     } catch (error) {
       throw error;
@@ -687,6 +736,7 @@ class AdminService {
         throw new Error(errorText);
       }
 
+      this.clearPublicCache('team');
       return await response.json();
     } catch (error) {
       throw error;
@@ -819,13 +869,13 @@ class AdminService {
     }
   }
 
-  // Contact mesajını e-posta olarak gönder
-  async sendContactMessageEmail(id) {
+  // Contact mesajını e-posta olarak gönder (Sistem bildirimi veya alıcıya özel mesaj)
+  async sendContactMessageEmail(id, { subject, content, target = 'recipient' } = {}) {
     try {
       const response = await fetch(`${this.baseURL}/contact-messages/${id}/send-email`, {
         method: 'POST',
         headers: this.getHeaders(),
-        body: JSON.stringify({})
+        body: JSON.stringify({ subject, content, target })
       });
 
       if (!response.ok) {
@@ -839,10 +889,10 @@ class AdminService {
     }
   }
 
-  // Contact mesajını sil
-  async deleteContactMessage(id) {
+  // Contact mesajını sil (varsayılan: pasife al)
+  async deleteContactMessage(id, permanent = false) {
     try {
-      const response = await fetch(`${this.baseURL}/contact-messages/${id}`, {
+      const response = await fetch(`${this.baseURL}/contact-messages/${id}${permanent ? '?permanent=true' : ''}`, {
         method: 'DELETE',
         headers: this.getHeaders()
       });
@@ -850,6 +900,105 @@ class AdminService {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Mesaj silinemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Contact mesajını yeniden aktif et
+  async restoreContactMessage(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/contact-messages/${id}/restore`, {
+        method: 'PUT',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Mesaj aktif edilemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Toplu Okundu Olarak İşaretle
+  async bulkMarkContactMessagesAsRead(ids) {
+    try {
+      const response = await fetch(`${this.baseURL}/contact-messages/bulk-read`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ ids })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Mesajlar okundu olarak işaretlenemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Toplu Pasife Al / Sil
+  async bulkDeleteContactMessages(ids, permanent = false) {
+    try {
+      const response = await fetch(`${this.baseURL}/contact-messages/bulk-delete`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ ids, permanent })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Mesajlar silinemedi / pasife alınamadı');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Toplu Geri Yükle
+  async bulkRestoreContactMessages(ids) {
+    try {
+      const response = await fetch(`${this.baseURL}/contact-messages/bulk-restore`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ ids })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Mesajlar geri yüklenemedi');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Toplu E-Posta Gönder
+  async bulkSendContactMessagesEmail(ids, { subject, content, target = 'recipient' } = {}) {
+    try {
+      const response = await fetch(`${this.baseURL}/contact-messages/bulk-email`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ ids, subject, content, target })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || errorData.error || 'Toplu e-posta gönderilemedi');
       }
 
       return await response.json();

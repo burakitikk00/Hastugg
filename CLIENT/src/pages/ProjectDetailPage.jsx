@@ -21,15 +21,31 @@ import {
     FiCheck,
     FiShield
 } from 'react-icons/fi'
+import {
+    FaLocationDot,
+    FaPhone,
+    FaEnvelope,
+    FaClock,
+    FaPaperPlane,
+    FaCheck,
+    FaCircleExclamation,
+    FaLinkedinIn,
+    FaInstagram,
+    FaXTwitter,
+    FaFacebookF
+} from 'react-icons/fa6'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import publicService from '../services/publicService'
 import { getHighlightIcon, getTransportationIcon } from '../utils/projectIcons'
+import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics'
 import './ProjectDetailPage.css'
+import '../components/sections/Contact.css'
 
 const ProjectDetailPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
+    const { trackEvent } = useGoogleAnalytics()
 
     const [project, setProject] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -41,24 +57,36 @@ const ProjectDetailPage = () => {
     const [isLightboxOpen, setIsLightboxOpen] = useState(false)
     const [isNarrativeExpanded, setIsNarrativeExpanded] = useState(false)
 
-    // İletişim formu state
-    const [inquiryForm, setInquiryForm] = useState({
-        name: '',
+    // İletişim / Teklif Terminali Formu state
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
         email: '',
         phone: '',
         message: '',
         kvkkConsent: false
     })
-    const [formSubmitting, setFormSubmitting] = useState(false)
-    const [formSuccess, setFormSuccess] = useState(false)
-    const [formError, setFormError] = useState('')
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitStatus, setSubmitStatus] = useState(null) // 'success' | 'error' | null
+    const [statusMessage, setStatusMessage] = useState('')
 
     // DB'den dinamik iletişim bilgileri
-    const [contactInfo, setContactInfo] = useState({
+    const [contactData, setContactData] = useState({
+        address: '',
         phone: '',
         email: '',
-        address: ''
+        facebook: '',
+        twitter: '',
+        instagram: '',
+        linkedin: '',
+        mapEmbedUrl: ''
     })
+    const contactInfo = contactData
+    const [workingHours, setWorkingHours] = useState([
+        'Pazartesi - Cuma: 10:00 - 18:00',
+        'Cumartesi: 10:00 - 15:00',
+        'Pazar: Randevu ile'
+    ])
 
     // İletişim bilgilerini veritabanından getir
     useEffect(() => {
@@ -67,11 +95,23 @@ const ProjectDetailPage = () => {
                 const data = await publicService.getContact()
                 if (Array.isArray(data) && data.length > 0) {
                     const c = data[0]
-                    setContactInfo({
+                    setContactData({
+                        address: c.address || '',
                         phone: c.phone || '',
                         email: c.email || '',
-                        address: c.address || ''
+                        facebook: c.facebook || '',
+                        twitter: c.twitter || '',
+                        instagram: c.instagram || '',
+                        linkedin: c.linkedin || '',
+                        mapEmbedUrl: c.mapEmbedUrl || ''
                     })
+                }
+
+                // Admin çalışma saatleri
+                const storedHours = localStorage.getItem('workingHours')
+                if (storedHours && typeof storedHours === 'string') {
+                    const lines = storedHours.split(/\r?\n/).filter(l => l.trim().length > 0)
+                    if (lines.length > 0) setWorkingHours(lines)
                 }
             } catch (err) {
                 console.error('İletişim bilgileri DB\'den yüklenemedi:', err)
@@ -168,47 +208,68 @@ const ProjectDetailPage = () => {
         }
     }
 
-    // İletişim Formu Gönderimi
-    const handleInquiryChange = (e) => {
+    // İletişim Formu Input Değişimi
+    const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target
-        setInquiryForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
-        if (formError) setFormError('')
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }))
+        if (submitStatus) {
+            setSubmitStatus(null)
+            setStatusMessage('')
+        }
     }
 
-    const handleInquirySubmit = async (e) => {
+    // İletişim Formu Gönderimi
+    const handleSubmit = async (e) => {
         e.preventDefault()
 
-        if (!inquiryForm.kvkkConsent) {
-            setFormError('Lütfen devam etmek için KVKK İletişim Aydınlatma Metni\'ni okuyup onaylayınız.')
+        if (!formData.kvkkConsent) {
+            setSubmitStatus('error')
+            setStatusMessage('Lütfen devam etmek için KVKK İletişim Aydınlatma Metni\'ni okuyup onaylayınız.')
             return
         }
 
-        setFormSubmitting(true)
-        setFormError('')
+        setIsSubmitting(true)
+        setSubmitStatus(null)
+        setStatusMessage('')
 
-        const nameParts = (inquiryForm.name || '').trim().split(' ')
-        const firstName = nameParts[0] || 'Ziyaretçi'
-        const lastName = nameParts.slice(1).join(' ') || '-'
-
-        const fullMessage = `[PROJE TALEBİ: ${project?.title || 'Genel Proje'}]\n${inquiryForm.message || 'Proje hakkında detaylı teknik ve ticari bilgi almak istiyorum.'}`
+        const projectName = project?.title || 'Proje'
+        const fullMessage = `[PROJE BİLGİ & TEKLİF TALEBİ: ${projectName}]\n${formData.message || `${projectName} projemizin mimari detayları ve şartnameleri hakkında bilgi almak istiyorum.`}`
 
         try {
-            await publicService.submitContact({
-                firstName,
-                lastName,
-                first_name: firstName,
-                last_name: lastName,
-                email: inquiryForm.email,
-                phone: inquiryForm.phone,
-                message: fullMessage
+            const result = await publicService.submitContact({
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                first_name: formData.firstName,
+                last_name: formData.lastName,
+                email: formData.email,
+                phone: formData.phone,
+                message: fullMessage,
+                kvkkConsent: formData.kvkkConsent
             })
-            setFormSuccess(true)
-            setInquiryForm({ name: '', email: '', phone: '', message: '', kvkkConsent: false })
+
+            setSubmitStatus('success')
+            setStatusMessage(result.message || 'Talebiniz başarıyla kaydedildi. Mimari ekibimiz en kısa sürede size dönüş yapacaktır.')
+            setFormData({
+                firstName: '',
+                lastName: '',
+                email: '',
+                phone: '',
+                message: '',
+                kvkkConsent: false
+            })
+
+            if (trackEvent) {
+                trackEvent('form_submit', 'project_inquiry', projectName, 1)
+            }
         } catch (err) {
             console.error('Proje talep formu gönderim hatası:', err)
-            setFormError('Talebiniz gönderilirken bir hata oluştu. Lütfen doğrudan telefon veya e-posta ile iletişime geçiniz.')
+            setSubmitStatus('error')
+            setStatusMessage(err.message || 'Talebiniz gönderilirken bir hata oluştu. Lütfen doğrudan telefon veya e-posta ile iletişime geçiniz.')
         } finally {
-            setFormSubmitting(false)
+            setIsSubmitting(false)
         }
     }
 
@@ -272,15 +333,54 @@ const ProjectDetailPage = () => {
         return str
     }
 
+    // Dizi alanlarını güvenli parse etme
+    const parseProjectArray = (val) => {
+        if (Array.isArray(val)) return val
+        if (typeof val === 'string' && val.trim()) {
+            try {
+                const parsed = JSON.parse(val)
+                if (Array.isArray(parsed)) return parsed
+            } catch (e) {
+                return []
+            }
+        }
+        return []
+    }
+
+    // Google Maps Embed Iframe URL'sini temizle ve ayıkla (kullanıcı komple iframe kodu veya tırnaklı metin yapıştırsa dahi)
+    const cleanMapEmbedUrl = (raw) => {
+        if (!raw) return null
+        let url = String(raw).trim()
+        if (!url) return null
+        if (url.startsWith('<iframe')) {
+            const match = url.match(/src=["']([^"']+)["']/i)
+            if (match && match[1]) url = match[1]
+        }
+        if (url.includes('"')) {
+            url = url.split('"')[0]
+        }
+        if (url.includes("'")) {
+            url = url.split("'")[0]
+        }
+        url = url.trim()
+        return url && url.startsWith('http') ? url : null
+    }
+
     // Öne Çıkan Özellikler - SADECE veritabanında girilenler gösterilir; girilmediyse bölüm gizlenir
-    const rawHighlights = Array.isArray(project.highlights) ? project.highlights : []
+    const rawHighlights = parseProjectArray(project.highlights)
     const highlights = rawHighlights.filter(h => h && (h.title?.trim() || h.description?.trim()))
 
     // Konum ve Ulaşım Noktaları - Sadece girildiyse gösterilir
-    const rawTransportation = Array.isArray(project.transportation) ? project.transportation : []
+    const rawTransportation = parseProjectArray(project.transportation)
     const transportation = rawTransportation.filter(t => t && (t.title?.trim() || t.description?.trim()))
 
-    const hasMap = Boolean(project.map_embed_url || project.map_address || project.location)
+    // Harita Bilgisi - SADECE harita alanlarına veri girilmişse oluşturulur (genel proje konumu harita yerine geçmez!)
+    const directEmbedUrl = cleanMapEmbedUrl(project.map_embed_url)
+    const hasMapAddress = Boolean(project.map_address?.trim())
+    const mapEmbedSrc = directEmbedUrl || (hasMapAddress ? `https://maps.google.com/maps?q=${encodeURIComponent(project.map_address.trim())}&t=&z=15&ie=UTF8&iwloc=&output=embed` : null)
+
+    // Haritaya bir veri girilmemişse harita alanı kullanıcıya kesinlikle görünmeyecek
+    const hasMap = Boolean(mapEmbedSrc)
     const hasTransit = transportation.length > 0
     const showLocationSection = hasMap || hasTransit
 
@@ -708,36 +808,21 @@ const ProjectDetailPage = () => {
                         </div>
 
                         <div className={`location-grid ${!hasTransit ? 'single-col' : !hasMap ? 'single-col' : ''}`}>
-                            {/* Harita Kolonu */}
-                            {hasMap && (
+                            {/* Harita Kolonu - Sadece harita verisi girilmişse görünür */}
+                            {hasMap && mapEmbedSrc && (
                                 <div className="map-view-card">
-                                    {project.map_embed_url ? (
-                                        <div className="map-iframe-container">
-                                            <iframe
-                                                src={project.map_embed_url}
-                                                title={`${project.title} Konumu`}
-                                                width="100%"
-                                                height="100%"
-                                                style={{ border: 0 }}
-                                                allowFullScreen=""
-                                                loading="lazy"
-                                                referrerPolicy="no-referrer-when-downgrade"
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div className="map-blueprint-visual">
-                                            <div className="blueprint-grid-overlay"></div>
-                                            <div className="map-location-badge">
-                                                <div className="badge-pin">
-                                                    <span className="dot"></span>
-                                                    <strong>Hastuğ Mimarlık & Proje</strong>
-                                                </div>
-                                                <p className="badge-address">
-                                                    {project.map_address || project.location}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
+                                    <div className="map-iframe-container">
+                                        <iframe
+                                            src={mapEmbedSrc}
+                                            title={`${project.title} Konumu`}
+                                            width="100%"
+                                            height="100%"
+                                            style={{ border: 0 }}
+                                            allowFullScreen=""
+                                            loading="lazy"
+                                            referrerPolicy="no-referrer-when-downgrade"
+                                        />
+                                    </div>
                                 </div>
                             )}
 
@@ -756,17 +841,19 @@ const ProjectDetailPage = () => {
                                                     </div>
                                                     <div className="transit-info">
                                                         <h4 className="transit-name">{trans.title}</h4>
-                                                        <span className="transit-distance">{trans.description}</span>
+                                                        {trans.description?.trim() && (
+                                                            <span className="transit-distance">{trans.description}</span>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )
                                         })}
                                     </div>
 
-                                    {(project.map_address || project.location || project.title) && (
+                                    {(project.map_address?.trim() || project.location?.trim()) && (
                                         <div className="transit-card-footer">
                                             <a
-                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(project.map_address || project.location || project.title)}`}
+                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(project.map_address?.trim() || project.location?.trim())}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="btn-open-maps"
@@ -781,197 +868,341 @@ const ProjectDetailPage = () => {
                         </div>
                     </section>
                 )}
+                {/* 8. Proje İletişim & Talep Formu (CONTACT HUD) */}
+                <section id="proje-teklif" className="contact-section-container project-inquiry-section" aria-label="Proje Teklif ve İletişim">
+                    {/* Arka Plan Mimari Işıma */}
+                    <div className="contact-ambient-glow" aria-hidden="true" />
 
-                {/* 8. Proje İletişim & Talep Formu */}
-                <section className="project-inquiry-section" id="proje-teklif">
-                    <div className="inquiry-container">
-                        <div className="inquiry-grid">
-                            {/* Sol Bilgi Kolonu */}
-                            <div className="inquiry-info-col">
-                                <span className="blueprint-tag">İLETİŞİM & BİLGİ</span>
-                                <h2 className="inquiry-heading">
-                                    Proje Hakkında Detaylı Bilgi ve Teklif Alın
-                                </h2>
-                                <p className="inquiry-subtext">
-                                    <strong>{project.title}</strong> projemizin mimari detayları, kat planları, uygunluk durumu veya benzeri yeni taahhüt talepleriniz için uzman ekibimizle iletişime geçebilirsiniz.
-                                </p>
+                    <div className="contact-inner-wrapper">
+                        {/* Üst Başlık & Açıklama */}
+                        <div className="contact-top-bar">
+                            <h2 className="contact-main-title">
+                                {project.title} İçin Bilgi ve Teklif Alın
+                            </h2>
+                            <p className="contact-subtext">
+                                "{project.title}" projemizin mimari detayları, kat planları veya benzeri taahhüt talepleriniz için formu doldurabilir ya da teknik ekibimizle doğrudan iletişime geçebilirsiniz.
+                            </p>
+                        </div>
 
-                                <div className="inquiry-contact-chips">
-                                    {(contactInfo.phone || '+90 545 555 55 55') && (
-                                        <a 
-                                            href={`tel:${(contactInfo.phone || '+90 545 555 55 55').replace(/\s+/g, '')}`} 
-                                            className="contact-chip"
-                                        >
-                                            <div className="chip-icon-box">
-                                                <FiPhone />
-                                            </div>
-                                            <div className="chip-details">
-                                                <span className="chip-label">Telefon</span>
-                                                <span className="chip-val">{contactInfo.phone || '+90 545 555 55 55'}</span>
-                                            </div>
-                                        </a>
+                        <div className="contact-grid-layout">
+                            {/* Sol Kolon: Mimari Teklif Terminali (contact-terminal-card) */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6 }}
+                                viewport={{ once: true }}
+                                className="contact-terminal-card"
+                            >
+                                <div className="terminal-header">
+                                    <h3 className="terminal-title">Proje Detaylarınızı İletin</h3>
+                                    <p className="terminal-subtext">
+                                        Statik mühendislerimiz ve mimarlarımız talebinizi inceleyerek en geç 24 saat içinde fizibilite dönüşü sağlayacaktır.
+                                    </p>
+                                </div>
+
+                                <form onSubmit={handleSubmit} className="contact-terminal-form" noValidate>
+                                    {/* İsim & Soyisim Satırı */}
+                                    <div className="form-input-row">
+                                        <div className="form-field-group">
+                                            <label htmlFor="project-contact-firstName" className="form-field-label">
+                                                Adınız *
+                                            </label>
+                                            <input
+                                                id="project-contact-firstName"
+                                                type="text"
+                                                name="firstName"
+                                                value={formData.firstName}
+                                                onChange={handleInputChange}
+                                                placeholder="Örn: Ahmet"
+                                                className="terminal-input"
+                                                required
+                                                autoComplete="given-name"
+                                            />
+                                        </div>
+
+                                        <div className="form-field-group">
+                                            <label htmlFor="project-contact-lastName" className="form-field-label">
+                                                Soyadınız *
+                                            </label>
+                                            <input
+                                                id="project-contact-lastName"
+                                                type="text"
+                                                name="lastName"
+                                                value={formData.lastName}
+                                                onChange={handleInputChange}
+                                                placeholder="Örn: Yılmaz"
+                                                className="terminal-input"
+                                                required
+                                                autoComplete="family-name"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* E-posta & Telefon Satırı */}
+                                    <div className="form-input-row">
+                                        <div className="form-field-group">
+                                            <label htmlFor="project-contact-email" className="form-field-label">
+                                                E-posta Adresiniz *
+                                            </label>
+                                            <input
+                                                id="project-contact-email"
+                                                type="email"
+                                                name="email"
+                                                value={formData.email}
+                                                onChange={handleInputChange}
+                                                placeholder="ahmet@example.com"
+                                                className="terminal-input"
+                                                required
+                                                autoComplete="email"
+                                            />
+                                        </div>
+
+                                        <div className="form-field-group">
+                                            <label htmlFor="project-contact-phone" className="form-field-label">
+                                                Telefon Numaranız *
+                                            </label>
+                                            <input
+                                                id="project-contact-phone"
+                                                type="tel"
+                                                name="phone"
+                                                value={formData.phone}
+                                                onChange={handleInputChange}
+                                                placeholder="+90 (5XX) XXX XX XX"
+                                                className="terminal-input"
+                                                required
+                                                autoComplete="tel"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Proje Mesajı & Detayları */}
+                                    <div className="form-field-group">
+                                        <label htmlFor="project-contact-message" className="form-field-label">
+                                            Proje Açıklaması & Teknik İhtiyaçlarınız *
+                                        </label>
+                                        <textarea
+                                            id="project-contact-message"
+                                            name="message"
+                                            value={formData.message}
+                                            onChange={handleInputChange}
+                                            placeholder={`"${project.title}" projesi hakkında bilgi almak istediğiniz kat planı, teknik şartname veya randevu talebinizi yazınız...`}
+                                            rows={4}
+                                            className="terminal-textarea"
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* KVKK Aydınlatma & Açık Rıza Onay Kutusu */}
+                                    <div className="contact-kvkk-group">
+                                        <label className="kvkk-checkbox-label">
+                                            <input
+                                                id="project-contact-kvkkConsent"
+                                                type="checkbox"
+                                                name="kvkkConsent"
+                                                checked={formData.kvkkConsent}
+                                                onChange={(e) => {
+                                                    const checked = e.target.checked;
+                                                    setFormData(prev => ({ ...prev, kvkkConsent: checked }));
+                                                    if (submitStatus === 'error') {
+                                                        setSubmitStatus(null);
+                                                        setStatusMessage('');
+                                                    }
+                                                }}
+                                                required
+                                                className="kvkk-checkbox-native"
+                                            />
+                                            <span className={`kvkk-checkbox-visual ${formData.kvkkConsent ? 'checked' : ''}`} aria-hidden="true">
+                                                {formData.kvkkConsent && <FaCheck size={9} />}
+                                            </span>
+                                            <span className="kvkk-text-content">
+                                                Kişisel verilerimin,{' '}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        window.dispatchEvent(
+                                                            new CustomEvent('hastug_open_legal_modal', { detail: { tab: 'iletisim' } })
+                                                        );
+                                                    }}
+                                                    className="kvkk-modal-trigger-btn"
+                                                >
+                                                    İletişim Formu Aydınlatma Metni
+                                                </button>
+                                                {' '}kapsamında işlenmesini ve tarafımla iletişime geçilmesini kabul ediyorum. *
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    {/* Geribildirim HUD Kartı */}
+                                    {submitStatus === 'success' && (
+                                        <div className="form-status-alert success" role="alert">
+                                            <FaCheck className="status-icon" size={16} />
+                                            <span>{statusMessage}</span>
+                                        </div>
                                     )}
 
-                                    {(contactInfo.email || 'info@hastug.com') && (
-                                        <a 
-                                            href={`mailto:${contactInfo.email || 'info@hastug.com'}`} 
-                                            className="contact-chip"
-                                        >
-                                            <div className="chip-icon-box">
-                                                <FiMail />
-                                            </div>
-                                            <div className="chip-details">
-                                                <span className="chip-label">E-Posta</span>
-                                                <span className="chip-val">{contactInfo.email || 'info@hastug.com'}</span>
-                                            </div>
-                                        </a>
+                                    {submitStatus === 'error' && (
+                                        <div className="form-status-alert error" role="alert">
+                                            <FaCircleExclamation className="status-icon" size={16} />
+                                            <span>{statusMessage}</span>
+                                        </div>
                                     )}
 
-                                    {(contactInfo.address || 'İstanbul, Türkiye') && (
-                                        <div className="contact-chip">
-                                            <div className="chip-icon-box">
-                                                <FiMapPin />
+                                    {/* Gönderim Butonu & SLA Notu */}
+                                    <div className="form-action-group">
+                                        <button
+                                            type="submit"
+                                            className="terminal-submit-btn"
+                                            disabled={isSubmitting}
+                                        >
+                                            <span>{isSubmitting ? 'İLETİLİYOR...' : 'MİMARİ BRİFİNGİ GÖNDER'}</span>
+                                            <FaPaperPlane size={13} />
+                                        </button>
+
+                                        <span className="terminal-sla-note">
+                                            24 SAATTE DÖNÜŞ // GİZLİLİK GÜVENCESİ
+                                        </span>
+                                    </div>
+                                </form>
+                            </motion.div>
+
+                            {/* Sağ Kolon: Genel Merkez & Koordinatlar (Headquarters HUD) */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.15 }}
+                                viewport={{ once: true }}
+                                className="contact-info-column"
+                            >
+                                {/* İletişim Kanalları Kartı */}
+                                <div className="headquarters-info-card">
+                                    <div className="info-card-header">
+                                        <h3 className="info-card-title">Merkez Ofis & İletişim</h3>
+                                    </div>
+
+                                    <ul className="coordinates-list">
+                                        {contactData.address && (
+                                            <li className="coordinate-item">
+                                                <div className="coordinate-icon-box">
+                                                    <FaLocationDot size={15} />
+                                                </div>
+                                                <div className="coordinate-content">
+                                                    <span className="coordinate-label">GENEL MERKEZ ADRESİ</span>
+                                                    <span className="coordinate-value">{contactData.address}</span>
+                                                </div>
+                                            </li>
+                                        )}
+
+                                        {contactData.phone && (
+                                            <li className="coordinate-item">
+                                                <div className="coordinate-icon-box">
+                                                    <FaPhone size={14} />
+                                                </div>
+                                                <div className="coordinate-content">
+                                                    <span className="coordinate-label">TELEFON HATTI</span>
+                                                    <a href={`tel:${contactData.phone.replace(/\s+/g, '')}`} className="coordinate-link">
+                                                        {contactData.phone}
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        )}
+
+                                        {contactData.email && (
+                                            <li className="coordinate-item">
+                                                <div className="coordinate-icon-box">
+                                                    <FaEnvelope size={14} />
+                                                </div>
+                                                <div className="coordinate-content">
+                                                    <span className="coordinate-label">KURUMSAL E-POSTA</span>
+                                                    <a href={`mailto:${contactData.email}`} className="coordinate-link">
+                                                        {contactData.email}
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        )}
+                                    </ul>
+
+                                    {/* Sosyal Medya İkonları */}
+                                    <div className="contact-socials-row" aria-label="Sosyal Medya Kanalları">
+                                        {contactData.linkedin && (
+                                            <a
+                                                href={contactData.linkedin}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="contact-social-btn"
+                                                aria-label="Hastuğ İnşaat LinkedIn"
+                                            >
+                                                <FaLinkedinIn size={14} />
+                                            </a>
+                                        )}
+                                        {contactData.instagram && (
+                                            <a
+                                                href={contactData.instagram}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="contact-social-btn"
+                                                aria-label="Hastuğ İnşaat Instagram"
+                                            >
+                                                <FaInstagram size={14} />
+                                            </a>
+                                        )}
+                                        {contactData.twitter && (
+                                            <a
+                                                href={contactData.twitter}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="contact-social-btn"
+                                                aria-label="Hastuğ İnşaat X"
+                                            >
+                                                <FaXTwitter size={14} />
+                                            </a>
+                                        )}
+                                        {contactData.facebook && (
+                                            <a
+                                                href={contactData.facebook}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="contact-social-btn"
+                                                aria-label="Hastuğ İnşaat Facebook"
+                                            >
+                                                <FaFacebookF size={14} />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Çalışma Saatleri & Harita */}
+                                <div className="headquarters-map-card">
+                                    <div className="hours-row">
+                                        <div className="hours-icon-box">
+                                            <FaClock size={14} />
+                                        </div>
+                                        <div className="hours-content">
+                                            <span className="coordinate-label">ÇALIŞMA SAATLERİ</span>
+                                            <div className="hours-tags">
+                                                {workingHours.map((hour, idx) => (
+                                                    <span key={idx} className="hour-badge">
+                                                        {hour}
+                                                    </span>
+                                                ))}
                                             </div>
-                                            <div className="chip-details">
-                                                <span className="chip-label">Merkez Ofis</span>
-                                                <span className="chip-val">{contactInfo.address || 'İstanbul, Türkiye'}</span>
-                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {contactData.mapEmbedUrl && (
+                                        <div className="map-embed-wrapper">
+                                            <iframe
+                                                src={contactData.mapEmbedUrl}
+                                                title="Hastuğ İnşaat Genel Merkez"
+                                                loading="lazy"
+                                                className="map-iframe"
+                                                allowFullScreen=""
+                                                referrerPolicy="no-referrer-when-downgrade"
+                                            />
+                                            <div className="map-glass-border" />
                                         </div>
                                     )}
                                 </div>
-                            </div>
-
-                            {/* Sağ Form Kolonu */}
-                            <div className="inquiry-form-col">
-                                {formSuccess ? (
-                                    <div className="inquiry-success-box">
-                                        <div className="success-icon-wrap">
-                                            <FiCheck className="icon" />
-                                        </div>
-                                        <h3 className="success-title">Talebiniz Başarıyla Alındı</h3>
-                                        <p className="success-desc">
-                                            <strong>{project.title}</strong> projesi hakkındaki talebiniz proje koordinasyon ekibimize iletildi. En kısa sürede sizinle iletişime geçeceğiz.
-                                        </p>
-                                        <button
-                                            type="button"
-                                            onClick={() => setFormSuccess(false)}
-                                            className="btn-new-inquiry"
-                                        >
-                                            Yeni Bir Talep Gönder
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <form onSubmit={handleInquirySubmit} className="project-inquiry-form">
-                                        <h3 className="form-title">Bilgi Talep Formu</h3>
-
-                                        {formError && (
-                                            <div className="form-error-alert">
-                                                {formError}
-                                            </div>
-                                        )}
-
-                                        <div className="form-field">
-                                            <label htmlFor="inquiry-name" className="field-label">Adınız Soyadınız *</label>
-                                            <input
-                                                type="text"
-                                                id="inquiry-name"
-                                                name="name"
-                                                value={inquiryForm.name}
-                                                onChange={handleInquiryChange}
-                                                required
-                                                placeholder="Adınız ve Soyadınız"
-                                                className="hud-input"
-                                            />
-                                        </div>
-
-                                        <div className="form-fields-row">
-                                            <div className="form-field">
-                                                <label htmlFor="inquiry-email" className="field-label">E-Posta Adresi *</label>
-                                                <input
-                                                    type="email"
-                                                    id="inquiry-email"
-                                                    name="email"
-                                                    value={inquiryForm.email}
-                                                    onChange={handleInquiryChange}
-                                                    required
-                                                    placeholder="ornek@alanadi.com"
-                                                    className="hud-input"
-                                                />
-                                            </div>
-
-                                            <div className="form-field">
-                                                <label htmlFor="inquiry-phone" className="field-label">Telefon Numarası</label>
-                                                <input
-                                                    type="tel"
-                                                    id="inquiry-phone"
-                                                    name="phone"
-                                                    value={inquiryForm.phone}
-                                                    onChange={handleInquiryChange}
-                                                    placeholder="+90 (5XX) XXX XX XX"
-                                                    className="hud-input"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-field">
-                                            <label htmlFor="inquiry-message" className="field-label">Mesajınız / Sorularınız *</label>
-                                            <textarea
-                                                id="inquiry-message"
-                                                name="message"
-                                                value={inquiryForm.message}
-                                                onChange={handleInquiryChange}
-                                                required
-                                                rows={4}
-                                                placeholder={`${project.title} projesi hakkında öğrenmek istediğiniz detayları belirtebilirsiniz...`}
-                                                className="hud-input"
-                                            />
-                                        </div>
-
-                                        <div className="inquiry-kvkk-group">
-                                            <label className="inquiry-kvkk-label">
-                                                <input
-                                                    type="checkbox"
-                                                    name="kvkkConsent"
-                                                    checked={inquiryForm.kvkkConsent}
-                                                    onChange={handleInquiryChange}
-                                                    required
-                                                    className="inquiry-kvkk-input"
-                                                />
-                                                <span className="inquiry-kvkk-text">
-                                                    Kişisel verilerimin,{' '}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            window.dispatchEvent(
-                                                                new CustomEvent('hastug_open_legal_modal', { detail: { tab: 'iletisim' } })
-                                                            );
-                                                        }}
-                                                        className="inquiry-kvkk-btn"
-                                                    >
-                                                        İletişim Formu Aydınlatma Metni
-                                                    </button>
-                                                    {' '}kapsamında işlenmesini ve tarafımla iletişime geçilmesini onaylıyorum. *
-                                                </span>
-                                            </label>
-                                        </div>
-
-                                        <button
-                                            type="submit"
-                                            disabled={formSubmitting}
-                                            className="btn-submit-inquiry"
-                                        >
-                                            {formSubmitting ? (
-                                                <span>Gönderiliyor...</span>
-                                            ) : (
-                                                <>
-                                                    <span>Talebi İlet</span>
-                                                    <FiSend className="btn-send-icon" />
-                                                </>
-                                            )}
-                                        </button>
-                                    </form>
-                                )}
-                            </div>
+                            </motion.div>
                         </div>
                     </div>
                 </section>

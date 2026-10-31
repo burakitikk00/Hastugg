@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import FormButtons from './FormButtons';
 import logger from '../../utils/logger';
+import { scrollToAndHighlight } from '../../utils/scrollAndHighlight';
 import {
   HIGHLIGHT_ICONS,
   HIGHLIGHT_ICON_OPTIONS,
@@ -74,6 +75,20 @@ const AdminProjectForm = ({
     return [];
   };
 
+  // Dizi alanlarını güvenli parse etme yardımcısı
+  const parseArrayField = (val) => {
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string' && val.trim()) {
+      try {
+        const parsed = JSON.parse(val);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  };
+
   const [formData, setFormData] = useState({
     title: project?.title || '',
     category: project?.category || 'Karma Konut & Ofis',
@@ -88,8 +103,8 @@ const AdminProjectForm = ({
     description: project?.description || '',
     map_embed_url: project?.map_embed_url || '',
     map_address: project?.map_address || '',
-    highlights: Array.isArray(project?.highlights) ? project.highlights : [],
-    transportation: Array.isArray(project?.transportation) ? project.transportation : []
+    highlights: parseArrayField(project?.highlights),
+    transportation: parseArrayField(project?.transportation)
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -123,8 +138,8 @@ const AdminProjectForm = ({
         description: project.description || '',
         map_embed_url: project.map_embed_url || '',
         map_address: project.map_address || '',
-        highlights: Array.isArray(project.highlights) ? project.highlights : [],
-        transportation: Array.isArray(project.transportation) ? project.transportation : []
+        highlights: parseArrayField(project.highlights),
+        transportation: parseArrayField(project.transportation)
       });
     } else {
       setFormData({
@@ -141,30 +156,8 @@ const AdminProjectForm = ({
         description: '',
         map_embed_url: '',
         map_address: '',
-        highlights: [
-          {
-            title: HIGHLIGHT_ICONS.sun.defaultTitle,
-            description: HIGHLIGHT_ICONS.sun.defaultDescription,
-            icon: 'sun'
-          },
-          {
-            title: HIGHLIGHT_ICONS.park.defaultTitle,
-            description: HIGHLIGHT_ICONS.park.defaultDescription,
-            icon: 'park'
-          }
-        ],
-        transportation: [
-          {
-            title: TRANSPORTATION_ICONS.subway.defaultTitle,
-            description: TRANSPORTATION_ICONS.subway.defaultDescription,
-            icon: 'subway'
-          },
-          {
-            title: TRANSPORTATION_ICONS.car.defaultTitle,
-            description: TRANSPORTATION_ICONS.car.defaultDescription,
-            icon: 'car'
-          }
-        ]
+        highlights: [],
+        transportation: []
       });
     }
   }, [project]);
@@ -211,6 +204,8 @@ const AdminProjectForm = ({
 
   // Highlights Ekle / Çıkar / Güncelle
   const addHighlight = () => {
+    setActiveTab('ozellikler');
+    const newIndex = formData.highlights.length;
     const defaultIcon = HIGHLIGHT_ICONS.sun;
     setFormData(prev => ({
       ...prev,
@@ -223,6 +218,12 @@ const AdminProjectForm = ({
         }
       ]
     }));
+    scrollToAndHighlight(`highlight-item-${newIndex}`, {
+      delay: 100,
+      duration: 3400,
+      block: 'center',
+      focusInput: true
+    });
   };
 
   const removeHighlight = (index) => {
@@ -263,6 +264,8 @@ const AdminProjectForm = ({
 
   // Transportation Ekle / Çıkar / Güncelle
   const addTransportation = () => {
+    setActiveTab('konum');
+    const newIndex = formData.transportation.length;
     const defaultIcon = TRANSPORTATION_ICONS.subway;
     setFormData(prev => ({
       ...prev,
@@ -275,6 +278,12 @@ const AdminProjectForm = ({
         }
       ]
     }));
+    scrollToAndHighlight(`transport-item-${newIndex}`, {
+      delay: 100,
+      duration: 3400,
+      block: 'center',
+      focusInput: true
+    });
   };
 
   const removeTransportation = (index) => {
@@ -376,6 +385,7 @@ const AdminProjectForm = ({
     // 4. Yeni Proje Ekleme Durumunda Görsel Kontrolü
     if (!project && newImagesCount === 0) {
       setValidationErrors(prev => ({ ...prev, images: true }));
+      setActiveTab('temel');
       setToast({
         show: true,
         title: 'Görsel Yüklenmedi',
@@ -398,9 +408,21 @@ const AdminProjectForm = ({
       images: false
     });
 
+    // Boş bırakılmış özellikleri ve ulaşım noktalarını temizle
+    const cleanHighlights = (formData.highlights || []).filter(
+      h => h && (h.title?.trim() || h.description?.trim())
+    );
+    const cleanTransportation = (formData.transportation || []).filter(
+      t => t && (t.title?.trim() || t.description?.trim())
+    );
+
     setIsLoading(true);
     try {
-      await onSave(formData);
+      await onSave({
+        ...formData,
+        highlights: cleanHighlights,
+        transportation: cleanTransportation
+      });
     } catch (error) {
       logger.error('Proje kaydedilirken hata:', error);
       setToast({
@@ -460,64 +482,70 @@ const AdminProjectForm = ({
         </div>
       )}
 
-      {/* Sekme Menüsü */}
-      <div className="flex border-b border-gray-200 gap-2 overflow-x-auto pb-1">
+      {/* Sekme Menüsü - Tamamen Responsive Segmented Navigation */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80 mb-6">
         <button
           type="button"
           onClick={() => setActiveTab('temel')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+          className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all ${
             activeTab === 'temel'
-              ? 'border-b-2 border-amber-500 text-amber-700 bg-amber-50/50'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-          } ${validationErrors.title || validationErrors.service_ids ? 'border-red-400 text-red-600 font-semibold' : ''}`}
+              ? 'bg-white text-slate-900 shadow-xs border border-slate-200/90'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+          } ${validationErrors.title || validationErrors.service_ids || validationErrors.images ? 'ring-2 ring-rose-400 text-rose-700 font-bold bg-rose-50/50' : ''}`}
         >
-          <FiInfo className="text-base" />
-          <span>Temel Bilgiler & Künye</span>
-          {(validationErrors.title || validationErrors.service_ids) && (
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+          <FiInfo className="text-sm sm:text-base shrink-0 text-amber-500" />
+          <span className="truncate">Temel Bilgiler</span>
+          {(validationErrors.title || validationErrors.service_ids || validationErrors.images) && (
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0" />
           )}
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('aciklama')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+          className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all ${
             activeTab === 'aciklama'
-              ? 'border-b-2 border-amber-500 text-amber-700 bg-amber-50/50'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-          } ${validationErrors.description ? 'border-red-400 text-red-600 font-semibold' : ''}`}
+              ? 'bg-white text-slate-900 shadow-xs border border-slate-200/90'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+          } ${validationErrors.description ? 'ring-2 ring-rose-400 text-rose-700 font-bold bg-rose-50/50' : ''}`}
         >
-          <FiFileText className="text-base" />
-          <span>Açıklama & Mimari Vizyon</span>
+          <FiFileText className="text-sm sm:text-base shrink-0 text-amber-500" />
+          <span className="truncate">Açıklama</span>
           {validationErrors.description && (
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0" />
           )}
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('ozellikler')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+          className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all ${
             activeTab === 'ozellikler'
-              ? 'border-b-2 border-amber-500 text-amber-700 bg-amber-50/50'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              ? 'bg-white text-slate-900 shadow-xs border border-slate-200/90'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
         >
-          <FiStar className="text-base" />
-          <span>Öne Çıkan Özellikler ({formData.highlights.length})</span>
+          <FiStar className="text-sm sm:text-base shrink-0 text-amber-500" />
+          <span className="truncate">Özellikler</span>
+          <span className="px-1.5 py-0.2 rounded-md bg-slate-200/80 text-slate-700 text-[10px] font-mono font-bold shrink-0">
+            {formData.highlights.length}
+          </span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('konum')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+          className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all ${
             activeTab === 'konum'
-              ? 'border-b-2 border-amber-500 text-amber-700 bg-amber-50/50'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              ? 'bg-white text-slate-900 shadow-xs border border-slate-200/90'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
         >
-          <FiMapPin className="text-base" />
-          <span>Konum & Ulaşım ({formData.transportation.length})</span>
+          <FiMapPin className="text-sm sm:text-base shrink-0 text-amber-500" />
+          <span className="truncate">Konum & Ulaşım</span>
+          <span className="px-1.5 py-0.2 rounded-md bg-slate-200/80 text-slate-700 text-[10px] font-mono font-bold shrink-0">
+            {formData.transportation.length}
+          </span>
         </button>
       </div>
 
@@ -756,6 +784,18 @@ const AdminProjectForm = ({
               </p>
             )}
           </div>
+
+          {/* Ek İçerik Alanı (Proje Görselleri Bölümü - Sadece Temel Bilgiler Sekmesinde Gösterilir) */}
+          <div
+            id="project-images-section"
+            className={`transition-all rounded-xl ${
+              validationErrors.images
+                ? 'p-4 border-2 border-red-500 ring-4 ring-red-400/20 bg-red-50/20'
+                : ''
+            }`}
+          >
+            {children}
+          </div>
         </div>
       )}
 
@@ -832,19 +872,19 @@ const AdminProjectForm = ({
                 return (
                   <div
                     key={index}
-                    className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-amber-300 transition-colors flex flex-col md:flex-row gap-4 items-start md:items-center"
+                    id={`highlight-item-${index}`}
+                    className="scroll-mt-10 p-3.5 sm:p-4 bg-white border border-gray-200 rounded-xl shadow-xs hover:border-amber-300 transition-all space-y-3"
                   >
-                    {/* İkon Seçici */}
-                    <div className="shrink-0 space-y-1">
-                      <label className="block text-[11px] font-semibold text-gray-500 uppercase">İkon</label>
+                    {/* Üst Satır: İkon Seçici & Sil Butonu */}
+                    <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
-                          <IconComponent className="text-lg" />
+                        <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
+                          <IconComponent className="text-base" />
                         </div>
                         <select
                           value={item.icon || 'sun'}
                           onChange={(e) => handleHighlightIconChange(index, e.target.value)}
-                          className="px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                          className="px-2.5 py-1.5 border border-gray-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
                         >
                           {HIGHLIGHT_ICON_OPTIONS.map((opt) => (
                             <option key={opt.key} value={opt.key}>
@@ -853,43 +893,42 @@ const AdminProjectForm = ({
                           ))}
                         </select>
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={() => removeHighlight(index)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition-colors border border-rose-200/60"
+                        title="Özelliği Sil"
+                      >
+                        <FiTrash2 size={13} />
+                        <span className="text-[11px]">Sil</span>
+                      </button>
                     </div>
 
-                    {/* Başlık */}
-                    <div className="flex-1 w-full space-y-1">
-                      <label className="block text-[11px] font-semibold text-gray-500 uppercase">Özellik Başlığı</label>
-                      <input
-                        type="text"
-                        value={item.title}
-                        onChange={(e) => updateHighlight(index, 'title', e.target.value)}
-                        placeholder="Örn: Doğal Aydınlatma & Cephe"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                        required
-                      />
-                    </div>
+                    {/* Alt Satır: Başlık & Açıklama (Mobilde 1 sütun, masaüstünde 3 sütunlu grid) */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="md:col-span-1 space-y-1">
+                        <label className="block text-[11px] font-semibold text-gray-500 uppercase">Özellik Başlığı</label>
+                        <input
+                          type="text"
+                          value={item.title}
+                          onChange={(e) => updateHighlight(index, 'title', e.target.value)}
+                          placeholder="Örn: Doğal Aydınlatma & Cephe"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                        />
+                      </div>
 
-                    {/* Açıklama */}
-                    <div className="flex-[2] w-full space-y-1">
-                      <label className="block text-[11px] font-semibold text-gray-500 uppercase">Açıklama</label>
-                      <input
-                        type="text"
-                        value={item.description}
-                        onChange={(e) => updateHighlight(index, 'description', e.target.value)}
-                        placeholder="Örn: Gün ışığını optimize eden cephe çözümü..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                        required
-                      />
+                      <div className="md:col-span-2 space-y-1">
+                        <label className="block text-[11px] font-semibold text-gray-500 uppercase">Açıklama</label>
+                        <input
+                          type="text"
+                          value={item.description}
+                          onChange={(e) => updateHighlight(index, 'description', e.target.value)}
+                          placeholder="Örn: Gün ışığını optimize eden cephe çözümü..."
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                        />
+                      </div>
                     </div>
-
-                    {/* Sil Butonu */}
-                    <button
-                      type="button"
-                      onClick={() => removeHighlight(index)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-4 md:mt-0"
-                      title="Özelliği Sil"
-                    >
-                      <FiTrash2 className="text-base" />
-                    </button>
                   </div>
                 );
               })}
@@ -977,19 +1016,19 @@ const AdminProjectForm = ({
                   return (
                     <div
                       key={index}
-                      className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-amber-300 transition-colors flex flex-col md:flex-row gap-4 items-start md:items-center"
+                      id={`transport-item-${index}`}
+                      className="scroll-mt-10 p-3.5 sm:p-4 bg-white border border-gray-200 rounded-xl shadow-xs hover:border-amber-300 transition-all space-y-3"
                     >
-                      {/* İkon Seçici */}
-                      <div className="shrink-0 space-y-1">
-                        <label className="block text-[11px] font-semibold text-gray-500 uppercase">Ulaşım Türü</label>
+                      {/* Üst Satır: İkon Seçici & Sil Butonu */}
+                      <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
-                            <TransIcon className="text-lg" />
+                          <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
+                            <TransIcon className="text-base" />
                           </div>
                           <select
                             value={item.icon || 'subway'}
                             onChange={(e) => handleTransportationIconChange(index, e.target.value)}
-                            className="px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                            className="px-2.5 py-1.5 border border-gray-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
                           >
                             {TRANSPORTATION_ICON_OPTIONS.map((opt) => (
                               <option key={opt.key} value={opt.key}>
@@ -998,43 +1037,42 @@ const AdminProjectForm = ({
                             ))}
                           </select>
                         </div>
+
+                        <button
+                          type="button"
+                          onClick={() => removeTransportation(index)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition-colors border border-rose-200/60"
+                          title="Noktayı Sil"
+                        >
+                          <FiTrash2 size={13} />
+                          <span className="text-[11px]">Sil</span>
+                        </button>
                       </div>
 
-                      {/* Başlık */}
-                      <div className="flex-1 w-full space-y-1">
-                        <label className="block text-[11px] font-semibold text-gray-500 uppercase">Ulaşım Noktası</label>
-                        <input
-                          type="text"
-                          value={item.title}
-                          onChange={(e) => updateTransportation(index, 'title', e.target.value)}
-                          placeholder="Örn: Metro Durağı / TEM Otoyolu"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                          required
-                        />
-                      </div>
+                      {/* Alt Satır: Başlık & Açıklama (Mobilde 1 sütun, masaüstünde 3 sütunlu grid) */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="md:col-span-1 space-y-1">
+                          <label className="block text-[11px] font-semibold text-gray-500 uppercase">Ulaşım Noktası</label>
+                          <input
+                            type="text"
+                            value={item.title}
+                            onChange={(e) => updateTransportation(index, 'title', e.target.value)}
+                            placeholder="Örn: Metro Durağı / TEM Otoyolu"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                          />
+                        </div>
 
-                      {/* Açıklama / Süre */}
-                      <div className="flex-[2] w-full space-y-1">
-                        <label className="block text-[11px] font-semibold text-gray-500 uppercase">Mesafe / Süre Açıklaması</label>
-                        <input
-                          type="text"
-                          value={item.description}
-                          onChange={(e) => updateTransportation(index, 'description', e.target.value)}
-                          placeholder="Örn: Yürüme mesafesinde 3 dakika (250m)"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-                          required
-                        />
+                        <div className="md:col-span-2 space-y-1">
+                          <label className="block text-[11px] font-semibold text-gray-500 uppercase">Mesafe / Süre Açıklaması</label>
+                          <input
+                            type="text"
+                            value={item.description}
+                            onChange={(e) => updateTransportation(index, 'description', e.target.value)}
+                            placeholder="Örn: Yürüme mesafesinde 3 dakika (250m)"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                          />
+                        </div>
                       </div>
-
-                      {/* Sil Butonu */}
-                      <button
-                        type="button"
-                        onClick={() => removeTransportation(index)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-4 md:mt-0"
-                        title="Noktayı Sil"
-                      >
-                        <FiTrash2 className="text-base" />
-                      </button>
                     </div>
                   );
                 })}
@@ -1044,17 +1082,6 @@ const AdminProjectForm = ({
         </div>
       )}
 
-      {/* Ek İçerik Alanı (Proje Görselleri Bölümü) */}
-      <div
-        id="project-images-section"
-        className={`transition-all rounded-xl ${
-          validationErrors.images
-            ? 'p-4 border-2 border-red-500 ring-4 ring-red-400/20 bg-red-50/20'
-            : ''
-        }`}
-      >
-        {children}
-      </div>
 
       {/* Form Gönderim & İptal Butonları - EN ALTTA */}
       <div className="pt-6 border-t border-gray-200">

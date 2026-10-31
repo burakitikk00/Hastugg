@@ -14,13 +14,26 @@ const Team = lazy(() => import('./components/sections/Team'));
 const Contact = lazy(() => import('./components/sections/Contact'));
 const Footer = lazy(() => import('./components/layout/Footer'));
 
+const SPLASH_SESSION_KEY = 'hastug_splash_shown';
+
 function MainApp() {
+  const hasSeenSplash = typeof window !== 'undefined' && sessionStorage.getItem(SPLASH_SESSION_KEY) === 'true';
+
   const [activeSection, setActiveSection] = useState('home');
-  const [isDataReady, setIsDataReady] = useState(false);
-  const [showLoader, setShowLoader] = useState(true);
-  const [loadRemainingSections, setLoadRemainingSections] = useState(false);
+  const [isDataReady, setIsDataReady] = useState(hasSeenSplash);
+  const [showLoader, setShowLoader] = useState(!hasSeenSplash);
+  const [loadRemainingSections, setLoadRemainingSections] = useState(hasSeenSplash);
   const { trackEvent, trackPageView, analyticsSettings, consentStatus } = useGoogleAnalytics();
   const location = useLocation();
+
+  const handleLoaderComplete = () => {
+    try {
+      sessionStorage.setItem(SPLASH_SESSION_KEY, 'true');
+    } catch (e) {
+      console.warn('SessionStorage yazma hatası:', e);
+    }
+    setShowLoader(false);
+  };
 
   // 1. Kritik Yol: Yalnızca ilk görünen Hero & Contact verisini bekle
   // 2. Kademeli Arka Plan Yüklemesi: Sayfa açılırken diğer bölümleri sırayla çek
@@ -175,7 +188,7 @@ function MainApp() {
       {showLoader && (
         <FullPageLoader
           isDataReady={isDataReady}
-          onComplete={() => setShowLoader(false)}
+          onComplete={handleLoaderComplete}
         />
       )}
       <Header

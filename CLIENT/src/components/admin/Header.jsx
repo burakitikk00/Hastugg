@@ -1,5 +1,6 @@
 import { FiMenu, FiExternalLink, FiShield } from 'react-icons/fi';
 import { useLocation } from 'react-router-dom';
+import hastugLogo from '../../assets/hastuglogo.png';
 
 const ROUTE_TITLES = {
   '/admin/dashboard': 'Dashboard & Genel Bakış',
@@ -55,8 +56,12 @@ const Header = ({ user, onToggleSidebar }) => {
 
         {/* Kullanıcı Profili */}
         <div className="flex items-center gap-3 pl-2 sm:border-l sm:border-slate-200">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-amber-400 flex items-center justify-center text-slate-950 font-bold text-xs shadow-sm ring-2 ring-amber-400/20">
-            {user?.username ? user.username.charAt(0).toUpperCase() : 'A'}
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-amber-400 flex items-center justify-center text-slate-950 font-bold text-xs shadow-sm ring-2 ring-amber-400/20 p-1.5 shrink-0 overflow-hidden">
+            <img
+              src={hastugLogo}
+              alt="Hastuğ Logo"
+              className="w-full h-full object-contain brightness-0"
+            />
           </div>
           <div className="hidden md:flex flex-col text-left leading-tight">
             <span className="text-xs font-semibold text-slate-800">
