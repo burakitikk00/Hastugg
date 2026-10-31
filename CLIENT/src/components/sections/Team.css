@@ -1,143 +1,314 @@
-.team {
-    padding: 3rem 1rem;
+/* ==========================================================================
+   Team Section - 3D Kinetic Tilt Monoliths (Hastugg Construction)
+   ========================================================================== */
+
+.team-section-container {
+    position: relative;
+    background-color: var(--bg-primary, #07090e);
+    color: var(--text-main, #f8fafc);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 2.75rem 1.5rem 3.25rem;
+    scroll-margin-top: 76px;
+    overflow: hidden;
 }
 
-.team-container {
-    max-width: 80rem;
+@media (min-width: 1024px) {
+    .team-section-container {
+        padding: 3.25rem 2rem 3.75rem;
+    }
+}
+
+.team-inner-wrapper {
+    position: relative;
+    z-index: 10;
+    max-width: 84rem;
+    width: 100%;
     margin: 0 auto;
 }
 
-.team-header {
+.team-ambient-glow {
+    position: absolute;
+    top: 25%;
+    right: 15%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(229, 169, 60, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Header Row
+   -------------------------------------------------------------------------- */
+
+.team-top-bar {
     text-align: center;
-    margin-bottom: 4rem;
+    max-width: 46rem;
+    margin: 0 auto 1.75rem;
 }
 
-.team-title {
-    font-size: 1.875rem;
-    font-weight: 800;
-    color: #1f2937;
-    margin-bottom: 1.5rem;
+.team-main-title {
+    font-family: 'Syne', Outfit, sans-serif;
+    font-size: clamp(1.75rem, 2.8vw, 2.35rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #f8fafc;
+    margin: 0 0 0.5rem 0;
+    text-wrap: balance;
 }
 
-.team-description {
-    font-size: 1rem;
-    color: #6b7280;
-    max-width: 48rem;
-    margin: 0 auto;
+.team-subtext {
+    font-size: clamp(0.925rem, 1.4vw, 1.025rem);
     line-height: 1.6;
+    color: #94a3b8;
+    margin: 0;
+    text-wrap: pretty;
 }
+
+/* --------------------------------------------------------------------------
+   Team Grid Layout
+   -------------------------------------------------------------------------- */
 
 .team-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
-}
-
-.team-card {
-    background-color: white;
-    border-radius: 1rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-    text-align: center;
-    transition: all 0.3s;
-    transform: scale(1);
-}
-
-.team-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.member-image-container {
-    height: 16rem;
-    overflow: hidden;
-}
-
-.member-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.team-card:hover .member-image {
-    transform: scale(1.1);
-}
-
-.member-info {
-    padding: 1.5rem;
-}
-
-.member-name {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 0.5rem;
-}
-
-.member-position {
-    color: #0284c7;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-}
-
-.member-linkedin {
-    display: inline-flex;
-    align-items: center;
     justify-content: center;
-    color: #0077b5;
-    transition: color 0.3s ease;
 }
 
-.member-linkedin:hover {
-    color: #005885;
-}
-
-.member-image-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f3f4f6;
-    border-radius: 0.5rem;
-}
-
-/* Responsive Design */
 @media (min-width: 640px) {
-    .team {
-        padding: 4rem 1.5rem;
+    .team-grid {
+        grid-template-columns: repeat(auto-fit, minmax(310px, 380px));
+        justify-content: center;
     }
 }
 
-@media (min-width: 768px) {
-    .team-title {
-        font-size: 3rem;
+@media (min-width: 1200px) {
+    .team-grid {
+        grid-template-columns: repeat(3, minmax(320px, 380px));
+        justify-content: center;
     }
+}
 
-    .team-description {
-        font-size: 1.5rem;
-    }
+/* Tek bir üye olduğunda tam ortalı lüks monolit kart */
+.team-grid.single-member {
+    grid-template-columns: minmax(310px, 420px);
+    justify-content: center;
+    margin: 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   3D Kinetic Tilt Monolith Card
+   -------------------------------------------------------------------------- */
+
+.team-tilt-card {
+    position: relative;
+    background: #0d121c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+    transform-style: preserve-3d;
+    transition:
+        border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+}
+
+.team-tilt-card:hover {
+    border-color: rgba(229, 169, 60, 0.45);
+    box-shadow:
+        0 24px 48px rgba(0, 0, 0, 0.7),
+        0 0 25px rgba(229, 169, 60, 0.12);
+}
+
+/* Specular Light Reflection */
+.team-card-glare {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 25;
+    border-radius: 16px;
+    mix-blend-mode: screen;
+    transition: opacity 0.2s ease;
+}
+
+/* Portrait Visual Box */
+.team-card-visual {
+    position: relative;
+    width: 100%;
+    height: 270px;
+    overflow: hidden;
+    background: #07090e;
 }
 
 @media (min-width: 1024px) {
-    .team {
-        padding: 4rem 2rem;
-    }
-
-    .team-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 2rem;
+    .team-card-visual {
+        height: 290px;
     }
 }
 
-@media (min-width: 1280px) {
-    .team-title {
-        font-size: 3.5rem;
-    }
+.team-member-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    filter: saturate(0.9) contrast(1.05);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-    .team-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 2rem;
-    }
+.team-tilt-card:hover .team-member-img {
+    transform: scale(1.04);
+}
+
+.team-visual-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #0d121c 0%, rgba(13, 18, 28, 0.65) 35%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Technical Specification Tag */
+.team-spec-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 6px;
+    padding: 0.35rem 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: rgba(7, 9, 14, 0.85);
+    border: 1px solid rgba(229, 169, 60, 0.4);
+    color: #e5a93c;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.team-pulse-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: currentColor;
+    box-shadow: 0 0 6px currentColor;
+}
+
+/* Card Body */
+.team-card-body {
+    padding: 1.5rem 1.75rem 1.65rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    z-index: 10;
+}
+
+.team-member-name {
+    font-family: 'Syne', Outfit, sans-serif;
+    font-size: clamp(1.25rem, 1.8vw, 1.45rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: #f8fafc;
+    margin: 0 0 0.35rem 0;
+}
+
+.team-member-position {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.775rem;
+    letter-spacing: 0.04em;
+    color: #e5a93c;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+}
+
+/* Specialized Disciplines / Chips */
+.team-disciplines-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 1.5rem;
+}
+
+.team-discipline-chip {
+    background: rgba(20, 27, 39, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 5px;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.725rem;
+    color: #94a3b8;
+    font-family: inherit;
+    font-weight: 500;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.team-tilt-card:hover .team-discipline-chip {
+    border-color: rgba(229, 169, 60, 0.25);
+    color: #cbd5e1;
+}
+
+/* Card Bottom Footer */
+.team-card-footer {
+    display: flex;
+    align-items: center;
+    padding-top: 1.15rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    margin-top: auto;
+}
+
+.team-linkedin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    background: rgba(20, 27, 39, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 7px;
+    padding: 0.6rem 1rem;
+    color: #cbd5e1;
+    font-family: inherit;
+    font-size: 0.775rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-linkedin-btn:hover {
+    border-color: rgba(229, 169, 60, 0.6);
+    color: #e5a93c;
+    background: rgba(229, 169, 60, 0.08);
+    box-shadow: 0 0 12px rgba(229, 169, 60, 0.2);
+    transform: translateY(-1px);
+}
+
+.external-icon {
+    opacity: 0.65;
+    transition: transform 0.2s ease;
+}
+
+.team-linkedin-btn:hover .external-icon {
+    opacity: 1;
+    transform: translate(1px, -1px);
+}
+
+.team-credential-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.725rem;
+    color: #e5a93c;
+    letter-spacing: 0.04em;
 }

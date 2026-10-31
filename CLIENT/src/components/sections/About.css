@@ -1,109 +1,297 @@
+/* ==========================================================================
+   About Section - Architectural Dossier & Bento Matrix (Hastugg Construction)
+   ========================================================================== */
+
 .about {
-    padding: 3rem 0.5rem;
-    background-color: #f9fafb;
+    position: relative;
+    padding: 7rem 1.5rem;
+    background-color: var(--bg-primary, #07090e);
+    color: var(--text-main, #f8fafc);
+    overflow: hidden;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.about-ambient-glow {
+    position: absolute;
+    top: 20%;
+    right: 5%;
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, rgba(229, 169, 60, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
 }
 
 .about-container {
+    position: relative;
+    z-index: 10;
     max-width: 80rem;
     margin: 0 auto;
 }
 
-.about-header {
-    text-align: center;
-    margin-bottom: 4rem;
-}
+/* --------------------------------------------------------------------------
+   Asymmetric Architectural Grid
+   -------------------------------------------------------------------------- */
 
-.about-title {
-    font-size: 1.875rem;
-    font-weight: 800;
-    color: #1f2937;
-    margin-bottom: 1.5rem;
-}
-
-.about-description {
-    font-size: 1rem;
-    color: #6b7280;
-    max-width: 100%;
-    margin: 0 auto;
-    line-height: 1.6;
-    white-space: pre-line;
-    text-align: left;
-    padding: 0 0.5rem;
-}
-
-.features-grid {
+.about-layout-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2rem;
-}
-
-.feature-card {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 1rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    text-align: center;
-    transition: all 0.3s;
-    transform: scale(1);
-}
-
-.feature-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.feature-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-}
-
-.feature-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 0.75rem;
-}
-
-.feature-description {
-    color: #6b7280;
-    line-height: 1.6;
-}
-
-/* Responsive Design */
-@media (min-width: 640px) {
-    .about {
-        padding: 4rem 1rem;
-    }
-}
-
-@media (min-width: 768px) {
-    .about-title {
-        font-size: 3rem;
-    }
-
-    .about-description {
-        font-size: 1.5rem;
-    }
+    gap: 3.5rem;
+    align-items: start;
 }
 
 @media (min-width: 1024px) {
-    .about {
-        padding: 4rem 1.5rem;
-    }
-
-    .features-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 2rem;
+    .about-layout-grid {
+        grid-template-columns: 1.1fr 1.2fr;
+        gap: 4.5rem;
     }
 }
 
-@media (min-width: 1280px) {
-    .about-title {
-        font-size: 3.5rem;
-    }
+/* --------------------------------------------------------------------------
+   Left Column: Architectural Narrative
+   -------------------------------------------------------------------------- */
 
-    .features-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 2rem;
+.about-story-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.about-main-title {
+    font-family: 'Syne', Outfit, sans-serif;
+    font-size: clamp(2.1rem, 4vw, 3.25rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #f8fafc;
+    margin: 0 0 1.75rem 0;
+    text-wrap: balance;
+}
+
+.about-paragraphs {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 2.25rem;
+}
+
+.about-p {
+    font-size: 1.025rem;
+    line-height: 1.75;
+    color: #94a3b8;
+    margin: 0;
+    text-wrap: pretty;
+}
+
+/* Architectural Quote / Brand Philosophy Callout */
+.about-quote-box {
+    position: relative;
+    background: rgba(20, 27, 39, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(229, 169, 60, 0.25);
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.about-quote-text {
+    font-family: inherit;
+    font-size: 0.975rem;
+    font-style: italic;
+    line-height: 1.7;
+    color: #e2e8f0;
+    margin: 0 0 0.85rem 0;
+}
+
+.about-quote-author {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: #e5a93c;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.about-quote-author::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 1px;
+    background-color: #e5a93c;
+}
+
+/* Trust Commitments Ribbon */
+.about-trust-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.trust-badge-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(13, 18, 28, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 0.45rem 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.725rem;
+    letter-spacing: 0.04em;
+    color: #cbd5e1;
+    text-transform: uppercase;
+}
+
+.trust-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #e5a93c;
+    box-shadow: 0 0 8px rgba(229, 169, 60, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   Right Column: Interactive Bento Feature Matrix
+   -------------------------------------------------------------------------- */
+
+.about-features-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.features-matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .features-matrix-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
     }
+}
+
+/* Feature Bento Card */
+.feature-bento-card {
+    position: relative;
+    background: #0d121c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 220px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.feature-bento-card:hover,
+.feature-bento-card.active {
+    border-color: rgba(229, 169, 60, 0.45);
+    box-shadow: 
+        0 16px 36px rgba(0, 0, 0, 0.6),
+        0 0 25px rgba(229, 169, 60, 0.12);
+}
+
+.feature-bento-card.active {
+    background: #141b27;
+}
+
+.feature-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.35rem;
+}
+
+.feature-icon-wrapper {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 10px;
+    background: rgba(20, 27, 39, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e5a93c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    transition: all 0.25s ease;
+}
+
+.feature-bento-card:hover .feature-icon-wrapper,
+.feature-bento-card.active .feature-icon-wrapper {
+    background: rgba(229, 169, 60, 0.15);
+    border-color: rgba(229, 169, 60, 0.5);
+    color: #f8fafc;
+    transform: scale(1.05);
+    box-shadow: 0 0 16px rgba(229, 169, 60, 0.35);
+}
+
+.feature-spec-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.feature-title {
+    font-family: 'Syne', Outfit, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #f8fafc;
+    margin: 0 0 0.65rem 0;
+    letter-spacing: -0.01em;
+}
+
+.feature-description {
+    font-size: 0.885rem;
+    line-height: 1.6;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.feature-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.25rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.feature-status-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.675rem;
+    color: #64748b;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.feature-bento-card:hover .feature-status-label,
+.feature-bento-card.active .feature-status-label {
+    color: #e5a93c;
+}
+
+.feature-corner-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.15);
+    transition: all 0.25s ease;
+}
+
+.feature-bento-card:hover .feature-corner-indicator,
+.feature-bento-card.active .feature-corner-indicator {
+    background-color: #e5a93c;
+    box-shadow: 0 0 8px rgba(229, 169, 60, 0.8);
 }

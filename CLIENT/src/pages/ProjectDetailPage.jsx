@@ -1,9 +1,19 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import {
+    FiChevronLeft,
+    FiChevronRight,
+    FiArrowLeft,
+    FiMaximize2,
+    FiX,
+    FiLayers,
+    FiCheckCircle,
+    FiClock,
+    FiSend
+} from 'react-icons/fi'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
-import LoadingImage from '../components/common/LoadingImage'
 import publicService from '../services/publicService'
 import './ProjectDetailPage.css'
 
@@ -16,10 +26,9 @@ const ProjectDetailPage = () => {
     const [error, setError] = useState(null)
     const [activeSection, setActiveSection] = useState('projects')
 
-    // Slider state
+    // Slider state - autoplay kaldırıldı (manuel kontrollü, sıfır takılma)
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [isLightboxOpen, setIsLightboxOpen] = useState(false)
-    const [isPaused, setIsPaused] = useState(false)
 
     useEffect(() => {
         const fetchProject = async () => {
@@ -47,41 +56,48 @@ const ProjectDetailPage = () => {
         }
 
         fetchProject()
-
-        // Sayfa yüklendiğinde en üste scroll
         window.scrollTo(0, 0)
     }, [id])
 
-    // Auto slide - 2 saniyede bir geçiş
+    // Proje görsellerini tarayıcı önbelleğine önceden yükle (Preload)
     useEffect(() => {
-        if (!project || !project.images || project.images.length <= 1 || isPaused || isLightboxOpen) {
-            return
+        if (project && project.images && project.images.length > 0) {
+            project.images.forEach(img => {
+                const preloadImg = new Image()
+                preloadImg.src = publicService.getImageURL(img)
+            })
         }
+    }, [project])
 
-        const interval = setInterval(() => {
-            setCurrentImageIndex(prev =>
-                prev === project.images.length - 1 ? 0 : prev + 1
-            )
-        }, 2000)
-
-        return () => clearInterval(interval)
-    }, [project, isPaused, isLightboxOpen])
-
+    // Manuel görsel geçiş fonksiyonları
     const nextImage = useCallback(() => {
-        if (!project || !project.images) return
+        if (!project || !project.images || project.images.length <= 1) return
         setCurrentImageIndex(prev =>
             prev === project.images.length - 1 ? 0 : prev + 1
         )
     }, [project])
 
     const prevImage = useCallback(() => {
-        if (!project || !project.images) return
+        if (!project || !project.images || project.images.length <= 1) return
         setCurrentImageIndex(prev =>
             prev === 0 ? project.images.length - 1 : prev - 1
         )
     }, [project])
 
-
+    // Klavye ile görsel navigasyonu ve Lightbox ESC kontrolü
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'ArrowLeft') {
+                prevImage()
+            } else if (e.key === 'ArrowRight') {
+                nextImage()
+            } else if (e.key === 'Escape' && isLightboxOpen) {
+                setIsLightboxOpen(false)
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [prevImage, nextImage, isLightboxOpen])
 
     const openLightbox = () => {
         setIsLightboxOpen(true)
@@ -92,18 +108,34 @@ const ProjectDetailPage = () => {
     }
 
     const getStatusText = (status) => {
-        switch (status) {
-            case 'Completed':
-            case 'completed':
-                return 'Tamamlandı'
-            case 'In Progress':
-            case 'in_progress':
-            case 'inprogress':
-                return 'Devam Ediyor'
+        const s = (status || '').toLowerCase()
+        if (s.includes('complete') || s === 'tamamlandı') return 'Tamamlandı'
+        if (s.includes('progress') || s === 'devam ediyor' || s === 'inprogress') return 'Devam Ediyor'
+        if (s.includes('plan')) return 'Planlama Aşamasında'
+        return status || 'Portföy Projesi'
+    }
 
-            default:
-                return status
-        }
+    // Açıklama metnindeki teknik özellikleri (Konum:, Mimari: vb.) parse eden yardımcı
+    const parseProjectDescription = (desc) => {
+        if (!desc) return { specs: [], narrative: [] }
+        const lines = desc.split('\n').map(l => l.trim()).filter(Boolean)
+        const specs = []
+        const narrative = []
+
+        lines.forEach(line => {
+            const colonIdx = line.indexOf(':')
+            if (colonIdx > 0 && colonIdx < 30) {
+                const label = line.slice(0, colonIdx).trim()
+                const value = line.slice(colonIdx + 1).trim()
+                if (value.length > 0) {
+                    specs.push({ label, value })
+                    return
+                }
+            }
+            narrative.push(line)
+        })
+
+        return { specs, narrative }
     }
 
     if (loading) {
@@ -112,8 +144,10 @@ const ProjectDetailPage = () => {
                 <Header activeSection={activeSection} onSectionChange={setActiveSection} />
                 <main className="project-detail-main">
                     <div className="loading-container">
-                        <div className="loading-spinner"></div>
-                        <p>Yükleniyor...</p>
+                        <div className="blueprint-loading-frame">
+                            <div className="loading-spinner"></div>
+                            <span className="loading-blueprint-code">Yükleniyor...</span>
+                        </div>
                     </div>
                 </main>
                 <Footer />
@@ -123,43 +157,26 @@ const ProjectDetailPage = () => {
 
     if (error || !project) {
         const isRateLimit = error?.type === 'rate_limit'
-
         return (
             <div className="project-detail-page">
                 <Header activeSection={activeSection} onSectionChange={setActiveSection} />
                 <main className="project-detail-main">
                     <div className="error-container">
-                        <h2>{isRateLimit ? 'Sunucu Meşgul' : 'Hata'}</h2>
-                        <p>{error?.message || 'Proje bulunamadı.'}</p>
-
-                        {isRateLimit ? (
-                            <button
-                                onClick={() => {
-                                    setLoading(true);
-                                    setError(null);
-                                    // Sayfayı yenilemeden yeniden fetch işlemini tetiklemek için
-                                    // useEffect'i tekrar tetiklememiz gerekir veya fonksiyonu dışarı çıkarıp çağırmalıyız.
-                                    // Ancak en temizi window.location.reload() yerine fonksiyonu çağırmaktır.
-                                    // useEffect içindeki fetchProject fonksiyonunu dışarı taşıyarak erişilebilir yapalım.
-                                    // Şimdilik hızlı çözüm: sayfayı yenilemek yerine id'yi değiştirip geri almak (hacky)
-                                    // Ya da fetchProject'i useCallback ile tanımlayıp dependency array'e ekleyelim.
-                                    // Daha basit çözüm: window.location.reload() kullanıcı deneyimi için acceptable ise. 
-                                    // Ama "tekrar dene" butonu fetch yapsın istiyoruz.
-                                    // En iyisi fetchProject'i useEffect dışına çıkarmaktı ama çok kod değişir.
-                                    // Basitçe window.location.reload() yapalım şimdilik, ya da id'yi trigger olarak kullanalım.
-                                    // ID değişince zaten çalışıyor.
-                                    window.location.reload();
-                                }}
-                                className="back-button retry-button"
-                                style={{ backgroundColor: '#0284c7', color: 'white', marginTop: '1rem' }}
-                            >
-                                Tekrar Dene
-                            </button>
-                        ) : (
-                            <button onClick={() => navigate('/')} className="back-button">
-                                Ana Sayfaya Dön
-                            </button>
-                        )}
+                        <span className="error-badge">HATA</span>
+                        <h2>{isRateLimit ? 'Sunucu Yoğunluğu' : 'Proje Kaydı Bulunamadı'}</h2>
+                        <p>{error?.message || 'İstediğiniz proje detaylarına şu anda ulaşılamıyor.'}</p>
+                        <div className="error-actions">
+                            {isRateLimit ? (
+                                <button onClick={() => window.location.reload()} className="action-btn-primary">
+                                    Yeniden Dene
+                                </button>
+                            ) : (
+                                <button onClick={() => navigate('/#projeler')} className="action-btn-primary">
+                                    <FiArrowLeft />
+                                    <span>Tüm Projelere Dön</span>
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </main>
                 <Footer />
@@ -168,80 +185,110 @@ const ProjectDetailPage = () => {
     }
 
     const images = project.images || []
+    const isCompleted = (project.status || '').toLowerCase().includes('complete')
+    const { specs, narrative } = parseProjectDescription(project.description)
 
     return (
         <div className="project-detail-page">
             <Header activeSection={activeSection} onSectionChange={setActiveSection} />
 
             <main className="project-detail-main">
-                {/* Navigation Button removed */}
+                {/* Üst Navigasyon */}
+                <div className="project-top-nav">
+                    <button
+                        onClick={() => navigate('/#projeler')}
+                        className="back-nav-button"
+                        aria-label="Tüm projelere dön"
+                    >
+                        <FiArrowLeft className="back-icon" />
+                        <span>Projeler Portföyüne Dön</span>
+                    </button>
+                </div>
 
-
-                {/* Image Slider Section */}
+                {/* Görsel Galerisi & Slider Bölümü */}
                 {images.length > 0 && (
                     <motion.div
-                        initial={{ opacity: 0, y: 30 }}
+                        initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                         className="image-slider-section"
-                        onMouseEnter={() => setIsPaused(true)}
-                        onMouseLeave={() => setIsPaused(false)}
                     >
                         <div className="slider-container">
-                            {/* Navigation Arrows */}
+                            {/* Önceki ve Sonraki Butonları - İçindeki oklar tam ortalı SVG */}
                             {images.length > 1 && (
                                 <>
                                     <button
+                                        type="button"
                                         className="slider-nav prev"
-                                        onClick={prevImage}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            prevImage()
+                                        }}
                                         aria-label="Önceki görsel"
                                     >
-                                        ‹
+                                        <FiChevronLeft className="nav-arrow-icon" />
                                     </button>
                                     <button
+                                        type="button"
                                         className="slider-nav next"
-                                        onClick={nextImage}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            nextImage()
+                                        }}
                                         aria-label="Sonraki görsel"
                                     >
-                                        ›
+                                        <FiChevronRight className="nav-arrow-icon" />
                                     </button>
                                 </>
                             )}
 
-                            {/* Main Image */}
-                            <div className="slider-image-wrapper" onClick={openLightbox}>
-                                <AnimatePresence mode="wait">
-                                    <motion.div
-                                        key={currentImageIndex}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ duration: 0.5 }}
-                                        className="slider-image-container"
-                                    >
-                                        <LoadingImage
-                                            src={publicService.getImageURL(images[currentImageIndex])}
-                                            alt={`${project.title} - Görsel ${currentImageIndex + 1}`}
-                                            className="slider-image"
-                                            blurWhileLoading={true}
-                                            showLoadingSpinner={true}
-                                        />
-                                    </motion.div>
-                                </AnimatePresence>
+                            {/* Donanım Hızlandırmalı Kesintisiz Kayar Ray (GPU Hardware Track) */}
+                            <div
+                                className="slider-track-container"
+                                onClick={openLightbox}
+                                role="button"
+                                tabIndex={0}
+                                aria-label="Görseli tam ekran büyüt"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        openLightbox()
+                                    }
+                                }}
+                            >
+                                <div
+                                    className="slider-track"
+                                    style={{
+                                        transform: `translateX(-${currentImageIndex * 100}%)`
+                                    }}
+                                >
+                                    {images.map((img, idx) => (
+                                        <div key={idx} className="slider-slide">
+                                            <img
+                                                src={publicService.getImageURL(img)}
+                                                alt={`${project.title} - Görsel ${idx + 1}`}
+                                                className="slider-image"
+                                                loading={idx === 0 ? "eager" : "lazy"}
+                                                decoding="async"
+                                                draggable={false}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Tam Ekran İpucu */}
                                 <div className="fullscreen-hint">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M8 3H5C3.89543 3 3 3.89543 3 5V8M21 8V5C21 3.89543 20.1046 3 19 3H16M16 21H19C20.1046 21 21 20.1046 21 19V16M3 16V19C3 20.1046 3.89543 21 5 21H8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                    <span>Tam ekran görüntüle</span>
+                                    <FiMaximize2 className="fullscreen-icon" />
+                                    <span>Tam Ekran İncele</span>
                                 </div>
                             </div>
 
-                            {/* Image Indicators */}
+                            {/* Görsel İndikatör Noktaları */}
                             {images.length > 1 && (
                                 <div className="slider-indicators">
                                     {images.map((_, index) => (
                                         <button
                                             key={index}
+                                            type="button"
                                             className={`indicator ${index === currentImageIndex ? 'active' : ''}`}
                                             onClick={() => setCurrentImageIndex(index)}
                                             aria-label={`Görsel ${index + 1}`}
@@ -250,124 +297,195 @@ const ProjectDetailPage = () => {
                                 </div>
                             )}
 
-                            {/* Image Counter */}
+                            {/* Görsel Sayaç Rozeti */}
                             {images.length > 1 && (
                                 <div className="image-counter">
-                                    {currentImageIndex + 1} / {images.length}
-                                </div>
-                            )}
-
-                            {/* Auto-play indicator */}
-                            {images.length > 1 && (
-                                <div className={`autoplay-indicator ${isPaused ? 'paused' : ''}`}>
-                                    {isPaused ? '⏸' : '▶'}
+                                    <span className="counter-current">{String(currentImageIndex + 1).padStart(2, '0')}</span>
+                                    <span className="counter-separator">/</span>
+                                    <span className="counter-total">{String(images.length).padStart(2, '0')}</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* Thumbnail Strip */}
+                        {/* Tüm Görseller Listesi / Thumbnail Strip - Tam Ortalı */}
                         {images.length > 1 && (
-                            <div className="thumbnail-strip">
-                                {images.map((img, index) => (
-                                    <button
-                                        key={index}
-                                        className={`thumbnail ${index === currentImageIndex ? 'active' : ''}`}
-                                        onClick={() => setCurrentImageIndex(index)}
-                                    >
-                                        <LoadingImage
-                                            src={publicService.getImageURL(img)}
-                                            alt={`Thumbnail ${index + 1}`}
-                                            className="thumbnail-image"
-                                        />
-                                    </button>
-                                ))}
+                            <div className="thumbnail-strip-wrapper">
+                                <div className="thumbnail-strip">
+                                    {images.map((img, index) => (
+                                        <button
+                                            key={index}
+                                            type="button"
+                                            className={`thumbnail ${index === currentImageIndex ? 'active' : ''}`}
+                                            onClick={() => setCurrentImageIndex(index)}
+                                            aria-label={`Görsel ${index + 1}'e geç`}
+                                        >
+                                            <img
+                                                src={publicService.getImageURL(img)}
+                                                alt={`Küçük Görsel ${index + 1}`}
+                                                className="thumbnail-image"
+                                                loading="eager"
+                                                draggable={false}
+                                            />
+                                            {index === currentImageIndex && (
+                                                <span className="thumbnail-active-indicator" />
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </motion.div>
                 )}
 
-                {/* Project Info Section */}
+                {/* Proje Bilgi ve Detay Kartı */}
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
+                    transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
                     className="project-info-section"
                 >
+                    {/* Proje Başlığı ve Durum Rozeti */}
                     <div className="project-info-header">
-                        <h1 className="project-title">{project.title}</h1>
-                        <span className={`status-badge ${(project.status || '').toLowerCase().replace(' ', '_')}`}>
-                            {getStatusText(project.status)}
-                        </span>
+                        <div className="project-title-group">
+                            <h1 className="project-title">{project.title}</h1>
+                        </div>
+
+                        <div className="project-status-wrapper">
+                            <span className={`status-badge ${isCompleted ? 'completed' : 'in-progress'}`}>
+                                {isCompleted ? <FiCheckCircle className="status-icon" /> : <FiClock className="status-icon" />}
+                                {getStatusText(project.status)}
+                            </span>
+                        </div>
                     </div>
 
-                    <div className="project-description">
-                        <h2>Proje Hakkında</h2>
-                        <p>{project.description}</p>
-                    </div>
+                    {/* Yapısal Özellikler Izgarası (Varsa) */}
+                    {specs.length > 0 && (
+                        <div className="project-specs-grid">
+                            {specs.map((item, idx) => (
+                                <div key={idx} className="spec-card">
+                                    <span className="spec-label">{item.label}</span>
+                                    <span className="spec-value">{item.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
-                    {/* Related Services */}
-                    {project.services && project.services.length > 0 && (
-                        <div className="related-services">
-                            <h3>İlgili Hizmetler</h3>
-                            <div className="services-tags">
-                                {project.services.map((service, index) => (
-                                    <span
-                                        key={service.id || index}
-                                        className="service-tag"
-                                        onClick={() => navigate(`/hizmet/${service.id}`)}
-                                    >
-                                        {service.service}
-                                    </span>
+                    {/* Proje Detay Metni */}
+                    {narrative.length > 0 && (
+                        <div className="project-narrative-section">
+                            <h2 className="section-subtitle">Proje Açıklaması</h2>
+                            <div className="narrative-content">
+                                {narrative.map((par, i) => (
+                                    <p key={i} className="narrative-paragraph">{par}</p>
                                 ))}
                             </div>
                         </div>
                     )}
+
+                    {/* İlgili Hizmetler */}
+                    {project.services && project.services.length > 0 && (
+                        <div className="related-services-section">
+                            <div className="services-header">
+                                <FiLayers className="services-icon" />
+                                <h3 className="services-title">Uygulanan Uzmanlık Alanları</h3>
+                            </div>
+                            <div className="services-tags">
+                                {project.services.map((service, index) => (
+                                    <button
+                                        key={service.id || index}
+                                        type="button"
+                                        className="service-tag"
+                                        onClick={() => navigate(`/hizmet/${service.id}`)}
+                                        title={`${service.service} detaylarını görüntüle`}
+                                    >
+                                        <span>{service.service}</span>
+                                        <FiChevronRight className="tag-chevron" />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Proje İletişim & Teklif CTA */}
+                    <div className="project-inquiry-cta">
+                        <div className="cta-text-wrapper">
+                            <h3 className="cta-headline">Benzer Bir Proje Hayata Geçirmek İster misiniz?</h3>
+                            <p className="cta-subline">
+                                Hastuğ İnşaat & Mimarlık teknik kadrosuyla projenize özel statik hesaplama, mimari çizim ve anahtar teslim uygulama teklifi alın.
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/#iletisim')}
+                            className="cta-contact-button"
+                        >
+                            <span>Hemen Teklif Alın</span>
+                            <FiSend className="cta-icon" />
+                        </button>
+                    </div>
                 </motion.div>
             </main>
 
             <Footer />
 
-            {/* Lightbox */}
+            {/* Tam Ekran Lightbox Modal */}
             <AnimatePresence>
                 {isLightboxOpen && images.length > 0 && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        transition={{ duration: 0.25 }}
                         className="lightbox-overlay"
                         onClick={closeLightbox}
                     >
-                        <button className="lightbox-close" onClick={closeLightbox}>
-                            ×
+                        <button
+                            type="button"
+                            className="lightbox-close"
+                            onClick={closeLightbox}
+                            aria-label="Kapat"
+                        >
+                            <FiX className="lightbox-close-icon" />
                         </button>
 
                         {images.length > 1 && (
                             <>
                                 <button
+                                    type="button"
                                     className="lightbox-nav prev"
-                                    onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        prevImage()
+                                    }}
+                                    aria-label="Önceki görsel"
                                 >
-                                    ‹
+                                    <FiChevronLeft className="lightbox-nav-icon" />
                                 </button>
                                 <button
+                                    type="button"
                                     className="lightbox-nav next"
-                                    onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        nextImage()
+                                    }}
+                                    aria-label="Sonraki görsel"
                                 >
-                                    ›
+                                    <FiChevronRight className="lightbox-nav-icon" />
                                 </button>
                             </>
                         )}
 
-                        <motion.img
-                            key={currentImageIndex}
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.8, opacity: 0 }}
-                            src={publicService.getImageURL(images[currentImageIndex])}
-                            alt={`${project.title} - Görsel ${currentImageIndex + 1}`}
-                            className="lightbox-image"
+                        <div
+                            className="lightbox-image-container"
                             onClick={(e) => e.stopPropagation()}
-                        />
+                        >
+                            <img
+                                key={currentImageIndex}
+                                src={publicService.getImageURL(images[currentImageIndex])}
+                                alt={`${project.title} - Tam Ekran Görsel ${currentImageIndex + 1}`}
+                                className="lightbox-image"
+                            />
+                        </div>
 
                         {images.length > 1 && (
                             <div className="lightbox-counter">

@@ -188,6 +188,14 @@ class PublicService {
   async getProjectById(id) {
     return this.request(`/projects/${id}`);
   }
+
+  // İletişim formu mesajı gönder
+  async submitContact(data) {
+    return this.request('/contact', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
 }
 
 export default new PublicService();

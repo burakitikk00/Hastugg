@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import FormButtons from './FormButtons';
 import logger from '../../utils/logger';
 import adminService from '../../services/adminService';
+import { AVAILABLE_ADMIN_ICONS, getArchitecturalIcon } from '../../utils/architecturalIcons';
 
 const AboutEditor = ({ onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -26,7 +27,6 @@ const AboutEditor = ({ onSave, onCancel }) => {
             mainDescription: aboutData.mainDescription || '',
             features: aboutData.features || []
           });
-
         }
       } catch (error) {
         logger.error('About verileri getirilemedi:', error);
@@ -36,11 +36,6 @@ const AboutEditor = ({ onSave, onCancel }) => {
 
     fetchAboutData();
   }, []);
-
-  // Kullanılabilir simgeler
-  const availableIcons = [
-    '✅', '💡', '🌱', '👷‍♂️', '🏗️', '🔨', '⚡', '🌟', '💎', '🎯', '🚀', '🌍', '🔒', '⚙️', '📈', '🎨', '🏆', '💪', '🤝', '📋', '🔍', '💼', '🎪', '🎭', '🎨', '🎬', '🎵', '🎤', '🎧', '🎮', '🎲', '🎯', '🎪', '🎭', '🎨', '🎬', '🎵', '🎤', '🎧', '🎮', '🎲', '🎯', '🎪', '🎭', '🎨', '🎬', '🎵', '🎤', '🎧', '🎮', '🎲', '🎯'
-  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,10 +55,10 @@ const AboutEditor = ({ onSave, onCancel }) => {
     setFormData(prev => ({
       ...prev,
       features: [...prev.features, {
-        id: null, // Yeni feature için ID null
-        feature: 'Yeni Özellik',
+        id: null,
+        feature: 'Yeni Mimari Nitelik',
         description: 'Özellik açıklaması buraya gelecek',
-        icon: '⭐'
+        icon: 'compass'
       }]
     }));
   };
@@ -80,9 +75,9 @@ const AboutEditor = ({ onSave, onCancel }) => {
     setShowIconPicker(true);
   };
 
-  const selectIcon = (icon) => {
+  const selectIcon = (iconId) => {
     if (selectedFeatureIndex !== null) {
-      handleFeatureChange(selectedFeatureIndex, 'icon', icon);
+      handleFeatureChange(selectedFeatureIndex, 'icon', iconId);
     }
     setShowIconPicker(false);
     setSelectedFeatureIndex(null);
@@ -97,7 +92,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
         ...feature,
         feature: (feature.feature || '').trim(),
         description: (feature.description || '').trim(),
-        icon: feature.icon || '⭐'
+        icon: feature.icon || 'compass'
       }));
 
       const cleanedFormData = {
@@ -111,6 +106,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
       await onSave(cleanedFormData);
     } catch (error) {
       logger.error('About kaydedilirken hata:', error);
+      alert('Kaydedilirken bir hata oluştu: ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +116,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
     <div className="bg-white rounded-lg shadow">
       <div className="px-6 py-4 border-b border-gray-200">
         <h3 className="text-lg font-medium text-gray-900">Hakkımızda Bölümü Düzenle</h3>
-        <p className="text-sm text-gray-600 mt-1">Hakkımızda bölümünü özelleştirin</p>
+        <p className="text-sm text-gray-600 mt-1">Hakkımızda vizyonunu ve mimari özellik kartlarını özelleştirin</p>
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -136,7 +132,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
             value={formData.mainTitle}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent font-medium"
             placeholder="Ana başlık girin"
           />
         </div>
@@ -144,7 +140,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
         {/* Ana Açıklama */}
         <div>
           <label htmlFor="mainDescription" className="block text-sm font-medium text-gray-700 mb-2">
-            Ana Açıklama *
+            Kurumsal Hikaye & Felsefe *
           </label>
           <textarea
             id="mainDescription"
@@ -152,109 +148,127 @@ const AboutEditor = ({ onSave, onCancel }) => {
             value={formData.mainDescription}
             onChange={handleChange}
             required
-            rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Hakkımızda ana açıklamasını girin"
+            rows={6}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            placeholder="Kurumsal vizyon ve açıklama metnini girin"
           />
         </div>
 
         {/* Özellik Kartları */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Özellik Kartları
-            </label>
+            <div>
+              <h4 className="text-md font-medium text-gray-900">Öne Çıkan Mimari Nitelikler</h4>
+              <p className="text-xs text-gray-500">Ziyaretçilere gösterilen mimari ve mühendislik garantileri</p>
+            </div>
             <button
               type="button"
               onClick={addFeature}
-              className="px-3 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              className="px-3 py-1.5 text-sm bg-gray-900 text-amber-400 border border-gray-800 rounded-md hover:bg-black transition-colors font-medium flex items-center gap-1.5"
             >
-              + Yeni Kart Ekle
+              <span>+</span> Yeni Mimari Nitelik Ekle
             </button>
           </div>
 
           <div className="space-y-4">
-            {formData.features.map((feature, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <div className="flex items-start space-x-3">
-                  {/* Simge Seçici */}
-                  <div className="flex-shrink-0">
+            {formData.features.map((feature, index) => {
+              const IconComponent = getArchitecturalIcon(feature.icon, feature.feature);
+              return (
+                <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-start space-x-3">
+                    {/* Vektör Simge Seçici */}
+                    <div className="flex-shrink-0 text-center">
+                      <button
+                        type="button"
+                        onClick={() => openIconPicker(index)}
+                        title="Özgün mimari vektör ikonu seçin"
+                        className="w-14 h-14 border-2 border-amber-300 rounded-lg bg-gray-900 text-amber-400 flex flex-col items-center justify-center hover:bg-black hover:border-amber-400 transition-all shadow-sm"
+                      >
+                        <IconComponent size={22} />
+                        <span className="text-[10px] mt-1 text-gray-300">Değiştir</span>
+                      </button>
+                    </div>
+
+                    {/* Kart İçeriği */}
+                    <div className="flex-1 space-y-3">
+                      <input
+                        type="text"
+                        value={feature.feature || ''}
+                        onChange={(e) => handleFeatureChange(index, 'feature', e.target.value)}
+                        placeholder="Nitelik başlığı (örn: Statik Güvenilirlik, Lüks Malzeme)"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent font-medium"
+                      />
+                      <textarea
+                        value={feature.description || ''}
+                        onChange={(e) => handleFeatureChange(index, 'description', e.target.value)}
+                        placeholder="Nitelik detay açıklaması"
+                        rows={2}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                      />
+                    </div>
+
+                    {/* Silme Butonu */}
                     <button
                       type="button"
-                      onClick={() => openIconPicker(index)}
-                      className="w-12 h-12 border-2 border-gray-300 rounded-lg bg-white flex items-center justify-center text-xl hover:border-blue-500 transition-colors"
+                      onClick={() => removeFeature(index)}
+                      className="flex-shrink-0 px-3 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors text-sm font-medium"
                     >
-                      {feature.icon}
+                      Sil
                     </button>
                   </div>
-
-                  {/* Kart İçeriği */}
-                  <div className="flex-1 space-y-3">
-                    <input
-                      type="text"
-                      value={feature.feature || ''}
-                      onChange={(e) => handleFeatureChange(index, 'feature', e.target.value)}
-                      placeholder="Özellik başlığı"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
-                    />
-                    <textarea
-                      value={feature.description || ''}
-                      onChange={(e) => handleFeatureChange(index, 'description', e.target.value)}
-                      placeholder="Özellik açıklaması"
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  {/* Silme Butonu */}
-                  <button
-                    type="button"
-                    onClick={() => removeFeature(index)}
-                    className="flex-shrink-0 px-3 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
-                  >
-                    Sil
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Simge Seçici Modal */}
+        {/* Özgün Vektör Simge Seçici Modal */}
         {showIconPicker && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Simge Seçin</h3>
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Özgün Mimari Vektör İkonu Seçin</h3>
+                  <p className="text-xs text-gray-500">Mühendislik ve mimari kimliğe uygun profesyonel vektör ikonlar</p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setShowIconPicker(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 text-xl font-bold p-1"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="grid grid-cols-8 gap-2">
-                {availableIcons.map((icon, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => selectIcon(icon)}
-                    className="w-12 h-12 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 flex items-center justify-center text-xl transition-colors"
-                  >
-                    {icon}
-                  </button>
-                ))}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {AVAILABLE_ADMIN_ICONS.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => selectIcon(item.id)}
+                      className="p-3 border border-gray-200 rounded-lg hover:border-amber-500 hover:bg-amber-50 flex items-center gap-3 text-left transition-all group"
+                    >
+                      <div className="w-10 h-10 rounded-md bg-gray-900 text-amber-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                        <Icon size={18} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-gray-900 truncate">{item.shortName}</div>
+                        <div className="text-[11px] text-gray-500 truncate">{item.title}</div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
 
-              <div className="mt-4 text-center">
+              <div className="mt-6 pt-3 border-t border-gray-200 text-right">
                 <button
                   type="button"
                   onClick={() => setShowIconPicker(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors text-sm font-medium"
                 >
-                  İptal
+                  Vazgeç
                 </button>
               </div>
             </div>

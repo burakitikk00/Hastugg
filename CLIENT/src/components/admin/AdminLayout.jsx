@@ -19,26 +19,32 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Mobile Overlay */}
+    <div className="flex h-screen bg-[#f8fafc] text-slate-800 antialiased overflow-hidden font-sans">
+      {/* Mobile Backdrop Overlay */}
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+        <div
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
-      {/* Sidebar */}
-      <Sidebar onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      
+
+      {/* Sidebar Navigation */}
+      <Sidebar
+        onLogout={handleLogout}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col lg:ml-64">
-        {/* Header */}
+      <div className="flex-1 flex flex-col lg:ml-64 min-w-0 h-full overflow-hidden">
+        {/* Studio Top Header */}
         <Header user={user} onToggleSidebar={toggleSidebar} />
-        
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
-          {children}
+
+        {/* Dynamic Page Content */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

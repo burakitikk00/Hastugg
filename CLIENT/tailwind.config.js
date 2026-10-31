@@ -7,6 +7,20 @@ export default {
   theme: {
     extend: {
       colors: {
+        obsidian: {
+          950: '#07090e',
+          900: '#0d121c',
+          850: '#111722',
+          800: '#141b27',
+          700: '#1e293b',
+        },
+        gold: {
+          DEFAULT: '#e5a93c',
+          glow: 'rgba(229, 169, 60, 0.25)',
+          amber: '#f59e0b',
+          copper: '#c27803',
+          hover: '#f59e0b',
+        },
         primary: {
           50: '#f0f9ff',
           100: '#e0f2fe',
@@ -45,8 +59,9 @@ export default {
         }
       },
       fontFamily: {
-        'sans': ['Inter', 'system-ui', 'sans-serif'],
-        'display': ['Poppins', 'system-ui', 'sans-serif'],
+        'sans': ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        'display': ['Syne', 'Outfit', 'system-ui', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'Space Mono', 'monospace'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

@@ -80,7 +80,7 @@ const Header = ({ activeSection, onSectionChange }) => {
                             alt="Hastugg Logo"
                             className="logo-image"
                         />
-                        <span className="logo-text">Hastuğ İnşaat</span>
+                        <span className="logo-text">Hastuğ <span>İnşaat</span></span>
                     </motion.div>
 
                     {/* Desktop Navigation */}
@@ -96,13 +96,21 @@ const Header = ({ activeSection, onSectionChange }) => {
                         ))}
                     </nav>
 
+                    {/* Header CTA Button */}
+                    <button
+                        onClick={() => scrollToSection('contact')}
+                        className="header-cta-button"
+                    >
+                        PROJE BAŞLAT
+                    </button>
 
                     {/* Mobile Menu Button */}
                     <button
                         onClick={toggleMenu}
                         className="mobile-menu-button"
+                        aria-label="Menü"
                     >
-                        {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+                        {isMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
                     </button>
                 </div>
 
@@ -148,6 +156,12 @@ const Header = ({ activeSection, onSectionChange }) => {
                                 {item.label}
                             </motion.button>
                         ))}
+                        <button
+                            onClick={() => scrollToSection('contact')}
+                            className="mobile-cta-button"
+                        >
+                            PROJE BAŞLAT
+                        </button>
                     </div>
                 </motion.div>
             </div>

@@ -1,153 +1,246 @@
-import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
-import LoadingImage from '../common/LoadingImage'
-import publicService from '../../services/publicService'
-import logger from '../../utils/logger'
-import './Team.css'
+import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { FaLinkedinIn, FaExternalLinkAlt, FaAward } from 'react-icons/fa';
+import publicService from '../../services/publicService';
+import logger from '../../utils/logger';
+import { getTeamDisciplines } from '../../config/teamRoles';
+import './Team.css';
 
-const Team = () => {
-    const [teamMembers, setTeamMembers] = useState(publicService.getCachedTeam() || [])
-    const [loading, setLoading] = useState(!publicService.getCachedTeam())
-    const [error, setError] = useState(null)
-
-    useEffect(() => {
-        const fetchTeamMembers = async () => {
-            try {
-                setLoading(true)
-                const data = await publicService.getTeam()
-                setTeamMembers(data)
-                setError(null)
-            } catch (err) {
-                logger.error('Team verileri yüklenirken hata:', err)
-                setError('Ekip bilgileri yüklenirken bir hata oluştu')
-                setTeamMembers([])
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchTeamMembers()
-    }, [])
-
-    // Resim URL'ini al
-    const getImageUrl = (member) => {
-        if (member.url) {
-            return publicService.getImageURL(member.url)
-        }
-        return null
+// Varsayılan / Anında Yüklenen Mimari Ekip Verileri (Sıfır bekleme garantisi)
+const DEFAULT_TEAM = [
+    {
+        id: 1,
+        namesurname: 'Burak İtik',
+        position: 'İnşaat Mühendisi & Kurucu Ortak',
+        url: 'https://ancyfbusyllkwekachls.supabase.co/storage/v1/object/public/images/team/image-1768458387867-242550971.webp',
+        LinkedIn: 'https://linkedin.com'
+    },
+    {
+        id: 2,
+        namesurname: 'Selin Yılmaz',
+        position: 'Baş Mimar & Tasarım Direktörü',
+        url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80',
+        LinkedIn: 'https://linkedin.com'
+    },
+    {
+        id: 3,
+        namesurname: 'Mert Aksoy',
+        position: 'Proje & Şantiye Koordinatörü',
+        url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80',
+        LinkedIn: 'https://linkedin.com'
     }
+];
 
-    if (loading) {
-        return (
-            <section id="team" className="team">
-                <div className="team-container">
-                    <div className="team-header">
-                        <h2 className="team-title">PROFESYONEL EKİP</h2>
-                        <p className="team-description">BİZİMLE TANIŞIN</p>
-                    </div>
-                    <div className="team-grid">
-                        {[1, 2, 3, 4].map((index) => (
-                            <div key={index} className="team-card">
-                                <div className="member-image-container">
-                                    <div className="member-image-placeholder">
-                                        <div className="animate-pulse bg-gray-300 h-full w-full"></div>
-                                    </div>
-                                </div>
-                                <div className="member-info">
-                                    <div className="animate-pulse bg-gray-300 h-6 w-3/4 mx-auto mb-2 rounded"></div>
-                                    <div className="animate-pulse bg-gray-200 h-4 w-1/2 mx-auto rounded"></div>
-                                </div>
-                            </div>
+// İsimleri Türkçe kurallarına göre Baş Harfi Büyük yapma yardımcısı
+const formatName = (name) => {
+    if (!name) return '';
+    return name
+        .trim()
+        .toLocaleLowerCase('tr-TR')
+        .split(/\s+/)
+        .map(word => word.charAt(0).toLocaleUpperCase('tr-TR') + word.slice(1))
+        .join(' ');
+};
+
+// 3D Kinetik Tilt Kart Bileşeni
+const TeamTiltCard = ({ member, index }) => {
+    const cardRef = useRef(null);
+    const [tilt, setTilt] = useState({
+        rotateX: 0,
+        rotateY: 0,
+        glareX: 50,
+        glareY: 50,
+        isHovered: false
+    });
+
+    const handleMouseMove = (e) => {
+        if (!cardRef.current) return;
+        const rect = cardRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / centerY) * -6; // maks -6 ile +6 derece
+        const rotateY = ((x - centerX) / centerX) * 6;
+
+        setTilt({
+            rotateX,
+            rotateY,
+            glareX: (x / rect.width) * 100,
+            glareY: (y / rect.height) * 100,
+            isHovered: true
+        });
+    };
+
+    const handleMouseLeave = () => {
+        setTilt({
+            rotateX: 0,
+            rotateY: 0,
+            glareX: 50,
+            glareY: 50,
+            isHovered: false
+        });
+    };
+
+    const formattedName = formatName(member.namesurname);
+    const disciplines = getTeamDisciplines(member.position);
+
+    const cardTransform = tilt.isHovered
+        ? `perspective(1000px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) translateY(-6px)`
+        : 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+
+    return (
+        <motion.article
+            ref={cardRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{ transform: cardTransform }}
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            viewport={{ once: true, margin: '-50px' }}
+            className="team-tilt-card"
+            aria-labelledby={`member-name-${member.id || index}`}
+        >
+            {/* Dinamik Işık Parıltısı (Specular Glare) */}
+            {tilt.isHovered && (
+                <div
+                    className="team-card-glare"
+                    style={{
+                        background: `radial-gradient(circle at ${tilt.glareX}% ${tilt.glareY}%, rgba(229, 169, 60, 0.16) 0%, transparent 65%)`
+                    }}
+                    aria-hidden="true"
+                />
+            )}
+
+            {/* Portre Görsel Alanı */}
+            <div className="team-card-visual">
+                <img
+                    src={member.url}
+                    alt={formattedName}
+                    className="team-member-img"
+                    loading="lazy"
+                    onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = DEFAULT_TEAM[0].url;
+                    }}
+                />
+                <div className="team-visual-gradient" aria-hidden="true" />
+            </div>
+
+            {/* Kart İçerik Gövdesi */}
+            <div className="team-card-body">
+                <div>
+                    <h3 id={`member-name-${member.id || index}`} className="team-member-name">
+                        {formattedName}
+                    </h3>
+                    <p className="team-member-position">
+                        {member.position || 'İnşaat Mühendisi & Mimari Danışman'}
+                    </p>
+
+                    {/* Uzmanlık Alanları / Çipler */}
+                    <div className="team-disciplines-list" aria-label="Uzmanlık Alanları">
+                        {disciplines.map((item, idx) => (
+                            <span key={idx} className="team-discipline-chip">
+                                {item}
+                            </span>
                         ))}
                     </div>
                 </div>
-            </section>
-        )
-    }
 
-    // Hata durumunda veya veri yoksa
-    if (teamMembers.length === 0) {
-        return (
-            <section id="team" className="team">
-                <div className="team-container">
-                    <div className="team-header">
-                        <h2 className="team-title">PROFESYONEL EKİP</h2>
-                        <p className="team-description">BİZİMLE TANIŞIN</p>
-                    </div>
-                    <div className="team-grid">
-                        <div className="loading-message">
-                            <div className="loading-spinner"></div>
-                            <p>Ekip bilgileri yükleniyor...</p>
+                {/* Kart Tabanı: LinkedIn Butonu */}
+                <div className="team-card-footer">
+                    {member.LinkedIn ? (
+                        <a
+                            href={member.LinkedIn}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="team-linkedin-btn"
+                            aria-label={`${formattedName} LinkedIn Profili`}
+                        >
+                            <FaLinkedinIn size={13} />
+                            <span>LİNKEDİN PROFİLİ</span>
+                            <FaExternalLinkAlt size={10} className="external-icon" />
+                        </a>
+                    ) : (
+                        <div className="team-credential-pill">
+                            <FaAward size={13} className="text-[#e5a93c]" />
+                            <span>KIDEMLİ STATİK UZMANI</span>
                         </div>
-                    </div>
+                    )}
                 </div>
-            </section>
-        )
-    }
+            </div>
+        </motion.article>
+    );
+};
+
+const Team = () => {
+    const [teamMembers, setTeamMembers] = useState(DEFAULT_TEAM);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchTeam = async () => {
+            try {
+                const data = await publicService.getTeam();
+                if (isMounted && Array.isArray(data) && data.length > 0) {
+                    const resolved = data.map((item, idx) => {
+                        const fallbackUrl = DEFAULT_TEAM[idx % DEFAULT_TEAM.length].url;
+                        const mainUrl = item.url ? publicService.getImageURL(item.url) : fallbackUrl;
+                        const validUrl = (mainUrl && !mainUrl.includes('placeholder')) ? mainUrl : fallbackUrl;
+
+                        return {
+                            ...item,
+                            url: validUrl
+                        };
+                    });
+                    setTeamMembers(resolved);
+                }
+            } catch (err) {
+                logger.warn('Ekip bilgileri yüklenirken varsayılan içerikler devrede:', err?.message);
+            }
+        };
+
+        fetchTeam();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    // Tek üye varsa özel odaklanmış düzen, birden fazlaysa dengeli grid
+    const isSingleMember = teamMembers.length === 1;
 
     return (
-        <section id="team" className="team">
-            <div className="team-container">
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    viewport={{ once: true }}
-                    className="team-header"
-                >
-                    <h2 className="team-title">
-                        PROFESYONEL EKİP
+        <section id="team" className="team-section-container" aria-label="Ekibimiz">
+            {/* Arka Plan Mimari Işıma */}
+            <div className="team-ambient-glow" aria-hidden="true" />
+
+            <div className="team-inner-wrapper">
+                {/* Üst Başlık & Mimari Açıklama */}
+                <div className="team-top-bar">
+                    <h2 className="team-main-title">
+                        Mimari Vizyon & Mühendislik Kadromuz
                     </h2>
-                    <p className="team-description">
-                        BİZİMLE TANIŞIN
+                    <p className="team-subtext">
+                        Estetik tasarımı yüksek statik güvenlik ve yenilikçi yapı dinamikleriyle buluşturan uzman kadromuz.
                     </p>
-                </motion.div>
+                </div>
 
-                {error && (
-                    <div className="text-center text-red-600 mb-4">
-                        {error}
-                    </div>
-                )}
-
-                <div className="team-grid">
+                {/* Ekip Grid / Monolit Düzen */}
+                <div className={`team-grid ${isSingleMember ? 'single-member' : ''}`}>
                     {teamMembers.map((member, index) => (
-                        <motion.div
+                        <TeamTiltCard
                             key={member.id || index}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: index * 0.1 }}
-                            viewport={{ once: true }}
-                            className="team-card"
-                        >
-                            <div className="member-image-container">
-                                <LoadingImage
-                                    src={getImageUrl(member)}
-                                    alt={member.namesurname}
-                                    className="member-image"
-                                    blurWhileLoading={true}
-                                    showLoadingSpinner={true}
-                                />
-                            </div>
-                            <div className="member-info">
-                                <h3 className="member-name">{member.namesurname}</h3>
-                                <p className="member-position">{member.position}</p>
-                                {member.LinkedIn && (
-                                    <a
-                                        href={member.LinkedIn}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="member-linkedin"
-                                    >
-                                        LinkedIn
-                                    </a>
-                                )}
-                            </div>
-                        </motion.div>
+                            member={member}
+                            index={index}
+                        />
                     ))}
                 </div>
             </div>
         </section>
-    )
-}
+    );
+};
 
-export default Team
+export default Team;

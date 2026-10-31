@@ -1,161 +1,213 @@
-import { motion } from 'framer-motion'
-import { FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa'
-import { useState, useEffect } from 'react'
-import publicService from '../../services/publicService'
-import logger from '../../utils/logger'
-import './Hero.css'
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaArrowRight } from 'react-icons/fa';
+import publicService from '../../services/publicService';
+import logger from '../../utils/logger';
+import './Hero.css';
+
+// Varsayılan / Anında Yüklenen Mimari İçerikler (Backend gecikse bile sıfır bekleme)
+const DEFAULT_HERO = {
+    mainTitle: 'Hayalinizdeki Yapıları Kusursuz İşçilikle Gerçeğe Dönüştürüyoruz',
+    subheading: 'Modern mimari vizyon, ileri statik mühendislik ve şeffaf süreç yönetimiyle konut ve ticari yaşam alanlarınızı geleceğe taşıyoruz.'
+};
+
+const DEFAULT_CONTACT = {
+    address: 'Bağdat Caddesi No:142, Kadıköy / İstanbul',
+    phone: '+90 (216) 450 80 90',
+    email: 'info@hastug.com'
+};
+
+// Sabit Mimari Mühendislik Metrikleri (The Blueprint Metrics)
+const ARCHITECTURAL_METRICS = [
+    { value: '150+', label: 'Tamamlanan Prestij Projesi' },
+    { value: '%100', label: 'Statik & Deprem Güvencesi' },
+    { value: '15+', label: 'Yıllık Mimari Deneyim' },
+    { value: 'A+', label: 'Enerji & Malzeme Kalitesi' }
+];
 
 const Hero = () => {
-    const [heroData, setHeroData] = useState(null);
-    const [contactInfo, setContactInfo] = useState(null);
-    const [loading, setLoading] = useState(true);
+    // İlk render anında doğrudan varsayılan içerikle başlar (kullanıcıya bekleme çarkı göstermez)
+    const [heroData, setHeroData] = useState(DEFAULT_HERO);
+    const [contactData, setContactData] = useState(DEFAULT_CONTACT);
 
     useEffect(() => {
-        const fetchData = async () => {
+        let isMounted = true;
+
+        const fetchDynamicData = async () => {
             try {
-                // Veritabanından hero verilerini getir
+                // 1. Değişebilir Hero Verilerini Getir
                 const heroResponse = await publicService.getHero();
-                if (heroResponse) {
-                    setHeroData(heroResponse);
+                if (isMounted && heroResponse) {
+                    const fetchedTitle = heroResponse.mainTitle || heroResponse.maintitle;
+                    const fetchedSubheading = heroResponse.subheading;
+
+                    if (fetchedTitle || fetchedSubheading) {
+                        setHeroData(prev => ({
+                            mainTitle: fetchedTitle || prev.mainTitle,
+                            subheading: fetchedSubheading || prev.subheading
+                        }));
+                    }
                 }
 
-                // Contact bilgilerini getir
+                // 2. Değişebilir İletişim Verilerini Getir
                 const contactResponse = await publicService.getContact();
-                if (contactResponse && contactResponse.length > 0) {
+                if (isMounted && contactResponse && contactResponse.length > 0) {
                     const contact = contactResponse[0];
-                    setContactInfo([
-                        {
-                            icon: FaMapMarkerAlt,
-                            title: 'Lokasyon',
-                            info: contact.address || 'Adres bilgisi bulunamadı',
-                            subInfo: ''
-                        },
-                        {
-                            icon: FaPhone,
-                            title: 'Telefon',
-                            info: contact.phone || 'Telefon bilgisi bulunamadı'
-                        },
-                        {
-                            icon: FaEnvelope,
-                            title: 'E-Posta',
-                            info: contact.email || 'E-posta bilgisi bulunamadı'
-                        }
-                    ])
+                    setContactData({
+                        address: contact.address || DEFAULT_CONTACT.address,
+                        phone: contact.phone || DEFAULT_CONTACT.phone,
+                        email: contact.email || DEFAULT_CONTACT.email
+                    });
                 }
             } catch (error) {
-                logger.error('Veriler getirilemedi:', error)
-                setHeroData(null);
-                setContactInfo(null);
-            } finally {
-                setLoading(false);
+                // Backend gecikse veya hata verse dahi varsayılan kaliteli içerikler kesintisiz görünür
+                logger.warn('Backend verisi beklenirken varsayılan mimari içerikler devrede:', error?.message);
             }
-        }
+        };
 
-        fetchData()
-    }, [])
+        fetchDynamicData();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const scrollToSection = (sectionId) => {
-        const element = document.getElementById(sectionId)
+        const element = document.getElementById(sectionId);
         if (element) {
-            element.scrollIntoView({ behavior: 'smooth' })
+            const headerOffset = 80;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
         }
-    }
+    };
 
-    if (loading || !heroData) {
-        return (
-            <section id="home" className="hero">
-                <div className="hero-background">
-                    <div className="hero-overlay"></div>
-                </div>
-
-                <div className="hero-content">
-                    <div className="hero-text">
-                        <div className="loading-message">
-                            <div className="loading-spinner"></div>
-                            <p>İçerik yükleniyor...</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Contact Info Overlay */}
-                <div className="contact-overlay">
-                    <div className="contact-container">
-                        <div className="contact-grid">
-                            <div className="loading-message">
-                                <div className="loading-spinner"></div>
-                                <p>İletişim bilgileri yükleniyor...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        )
-    }
+    // Dinamik başlıkta vurgulu ayrım yapma (varsa mimarlık/inşaat ayrımı)
+    const renderTitle = (rawTitle) => {
+        if (!rawTitle) return DEFAULT_HERO.mainTitle;
+        return rawTitle;
+    };
 
     return (
-        <section id="home" className="hero">
-            <div className="hero-background">
-                <div className="hero-overlay"></div>
+        <section id="home" className="hero" aria-label="Ana Karşılama">
+            {/* Arka Plan Mimari Kanvas & Blueprint Izgara */}
+            <div className="hero-background-canvas" aria-hidden="true">
+                <div className="hero-photo-layer" />
+                <div className="hero-gradient-overlay" />
+                <div className="hero-datum-line" />
             </div>
 
-            <div className="hero-content">
+            {/* Ana İçerik Gövdesi */}
+            <div className="hero-main-container">
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="hero-text"
+                    transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+                    className="hero-content-wrap"
                 >
-                    <h3 className="hero-title">
-                        {heroData.mainTitle || 'Siz İsteyin, Biz İnşa Edelim'}
-                    </h3>
+                    {/* Dinamik Başlık (Veritabanından gelir / Fallback hazır) */}
+                    <h1 className="hero-title">
+                        {renderTitle(heroData.mainTitle)}
+                    </h1>
+
+                    {/* Dinamik Alt Açıklama (Veritabanından gelir / Fallback hazır) */}
                     <p className="hero-description">
-                        {heroData.subheading || 'Profesyonel ekibimizle isteğinizi birebir yerine getiriyoruz. Hemen teklif alabilirsiniz.'}
+                        {heroData.subheading}
                     </p>
-                    <div className="hero-buttons">
+
+                    {/* Sabit Eyleme Çağrı Butonları (CTA) */}
+                    <div className="hero-cta-group">
                         <button
-                            className="hero-button-primary"
+                            type="button"
+                            className="hero-btn-primary"
                             onClick={() => scrollToSection('contact')}
                         >
-                            İLETİŞİM FORMU
+                            <span>PROJENİZ İÇİN TEKLİF ALIN</span>
+                            <FaArrowRight size={14} />
                         </button>
+                        
                         <button
-                            className="hero-button-secondary"
+                            type="button"
+                            className="hero-btn-ghost"
                             onClick={() => scrollToSection('projects')}
                         >
-                            PROJELERİMİZİ İNCELEYİN
+                            <span>PORTFÖYÜ İNCELE</span>
                         </button>
+                    </div>
+
+                    {/* Sabit Mimari Güvence Metrikleri (The Blueprint Metrics) */}
+                    <div className="hero-metrics-grid">
+                        {ARCHITECTURAL_METRICS.map((metric, idx) => (
+                            <div key={idx} className="metric-item">
+                                <span className="metric-value">
+                                    {metric.value}
+                                </span>
+                                <span className="metric-label">
+                                    {metric.label}
+                                </span>
+                            </div>
+                        ))}
                     </div>
                 </motion.div>
             </div>
 
-            {/* Contact Info Overlay */}
-            {contactInfo && (
-                <div className="contact-overlay">
-                    <div className="contact-container">
-                        <div className="contact-grid">
-                            {contactInfo.map((item, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                                    className="contact-item"
-                                >
-                                    
-                                    <div className="contact-text">
-                                        <p className="contact-title">{item.title}</p>
-                                        <item.icon className="contact-icon" />
-                                        <p className="contact-info">{item.info}</p>
-                                        {item.subInfo && <p className="contact-sub-info">{item.subInfo}</p>}
-                                    </div>
-                                </motion.div>
-                            ))}
+            {/* Alt Şerit: Canlı İletişim HUD Paneli (Veritabanından çekilir, dinamiktir) */}
+            <footer className="hero-contact-hud">
+                <div className="hero-hud-container">
+                    <div className="hero-hud-grid">
+                        {/* Lokasyon */}
+                        <div 
+                            className="hud-item clickable"
+                            onClick={() => scrollToSection('contact')}
+                            role="button"
+                            tabIndex={0}
+                        >
+                            <div className="hud-icon-box" aria-hidden="true">
+                                <FaMapMarkerAlt />
+                            </div>
+                            <div className="hud-text">
+                                <span className="hud-label">MERKEZ OFİS</span>
+                                <span className="hud-value" title={contactData.address}>
+                                    {contactData.address}
+                                </span>
+                            </div>
                         </div>
+
+                        {/* Telefon */}
+                        <a 
+                            href={`tel:${contactData.phone?.replace(/[^+\d]/g, '')}`} 
+                            className="hud-item clickable"
+                        >
+                            <div className="hud-icon-box" aria-hidden="true">
+                                <FaPhoneAlt />
+                            </div>
+                            <div className="hud-text">
+                                <span className="hud-label">DANIŞMA HATTI</span>
+                                <span className="hud-value">{contactData.phone}</span>
+                            </div>
+                        </a>
+
+                        {/* E-Posta */}
+                        <a 
+                            href={`mailto:${contactData.email}`} 
+                            className="hud-item clickable"
+                        >
+                            <div className="hud-icon-box" aria-hidden="true">
+                                <FaEnvelope />
+                            </div>
+                            <div className="hud-text">
+                                <span className="hud-label">MİMARİ TEKLİF</span>
+                                <span className="hud-value">{contactData.email}</span>
+                            </div>
+                        </a>
                     </div>
                 </div>
-            )}
+            </footer>
         </section>
-    )
-}
+    );
+};
 
-export default Hero
+export default Hero;

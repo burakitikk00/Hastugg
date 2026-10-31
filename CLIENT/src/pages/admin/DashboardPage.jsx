@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaEnvelope, FaEnvelopeOpen, FaChartLine } from 'react-icons/fa';
+import {
+  FiInbox,
+  FiMail,
+  FiSend,
+  FiBarChart2,
+  FiArrowUpRight,
+  FiUsers,
+  FiBriefcase,
+  FiLayers,
+  FiCheckCircle,
+  FiShield
+} from 'react-icons/fi';
 import AdminLayout from '../../components/admin/AdminLayout';
 import adminService from '../../services/adminService';
 import logger from '../../utils/logger';
@@ -49,121 +60,210 @@ const DashboardPage = () => {
     }
   };
 
-  const handleMessagesClick = () => {
-    navigate('/admin/contact-messages');
-  };
-
   return (
     <AdminLayout>
       <div className="space-y-6">
-        {/* Page Header */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">
-            Hoş geldiniz! Buradan tüm işlemlerinizi yönetebilirsiniz.
-            {messageStats.unread > 0 && (
-              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                {messageStats.unread} yeni mesajınız var
-              </span>
+        {/* Karşılama ve Durum Kartı */}
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-xs relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-full bg-gradient-to-l from-amber-500/10 to-transparent pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500">
+                  HASTUĞ YÖNETİM SİSTEMİ
+                </span>
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                Hoş Geldiniz, Yönetici Paneli
+              </h2>
+              <p className="text-sm text-slate-500 mt-1 max-w-xl">
+                Portfolyo projeleri, mimari & mühendislik ekip kadrosu ve gelen müşteri taleplerini tek merkezden yönetin.
+              </p>
+            </div>
+
+            {messageStats.unread > 0 ? (
+              <button
+                onClick={() => navigate('/admin/contact-messages')}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-800 text-xs font-bold hover:bg-amber-500/25 transition-all self-start md:self-auto"
+              >
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                <span>{messageStats.unread} Okunmamış İletişim Mesajı</span>
+                <FiArrowUpRight size={14} />
+              </button>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 text-xs font-medium border border-emerald-500/20 self-start md:self-auto">
+                <FiCheckCircle size={14} />
+                <span>Tüm mesajlar güncel</span>
+              </div>
             )}
-          </p>
+          </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Temel Metrik Kartları */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Toplam Mesajlar */}
           <div
-            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow duration-200"
-            onClick={handleMessagesClick}
+            onClick={() => navigate('/admin/contact-messages')}
+            className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs hover:shadow-md hover:border-amber-400/50 transition-all cursor-pointer group"
           >
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-                <FaEnvelope className="w-6 h-6" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Toplam Mesaj</p>
-                <p className="text-2xl font-semibold text-gray-900">
-                  {isLoading ? '...' : messageStats.total}
-                </p>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Toplam Talep
+              </span>
+              <div className="p-2.5 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-amber-500/10 group-hover:text-amber-600 transition-colors">
+                <FiInbox size={18} />
               </div>
             </div>
+            <div className="text-3xl font-extrabold text-slate-900 tracking-tight font-mono">
+              {isLoading ? '...' : messageStats.total}
+            </div>
+            <p className="text-xs text-slate-500 mt-2 flex items-center gap-1 group-hover:text-amber-600">
+              <span>Mesaj havuzunu incele</span>
+              <FiArrowUpRight size={12} />
+            </p>
           </div>
 
           {/* Okunmamış Mesajlar */}
           <div
-            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow duration-200"
-            onClick={handleMessagesClick}
+            onClick={() => navigate('/admin/contact-messages')}
+            className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs hover:shadow-md hover:border-rose-400/50 transition-all cursor-pointer group"
           >
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-red-100 text-red-600">
-                <FaEnvelopeOpen className="w-6 h-6" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Okunmamış Mesaj</p>
-                <p className="text-2xl font-semibold text-gray-900">
-                  {isLoading ? '...' : messageStats.unread}
-                </p>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Yanıt Bekleyen
+              </span>
+              <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-600">
+                <FiMail size={18} />
               </div>
             </div>
+            <div className="text-3xl font-extrabold text-rose-600 tracking-tight font-mono">
+              {isLoading ? '...' : messageStats.unread}
+            </div>
+            <p className="text-xs text-slate-500 mt-2 flex items-center gap-1 group-hover:text-rose-600">
+              <span>Hemen yanıtla</span>
+              <FiArrowUpRight size={12} />
+            </p>
           </div>
 
-          {/* Gönderilen Mesajlar */}
+          {/* Gönderilen Bildirimler */}
           <div
-            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow duration-200"
-            onClick={handleMessagesClick}
+            onClick={() => navigate('/admin/contact-messages')}
+            className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs hover:shadow-md hover:border-emerald-400/50 transition-all cursor-pointer group"
           >
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 text-green-600">
-                <FaEnvelope className="w-6 h-6" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Gönderilen</p>
-                <p className="text-2xl font-semibold text-gray-900">
-                  {isLoading ? '...' : messageStats.sent}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">Otomatik email gönderildi</p>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Otomatik Bildirim
+              </span>
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600">
+                <FiSend size={18} />
               </div>
             </div>
+            <div className="text-3xl font-extrabold text-slate-900 tracking-tight font-mono">
+              {isLoading ? '...' : messageStats.sent}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">İletilen e-posta onayları</p>
           </div>
 
           {/* Google Analytics */}
           <div
-            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow duration-200"
             onClick={() => navigate('/admin/analytics')}
+            className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs hover:shadow-md hover:border-amber-400/50 transition-all cursor-pointer group"
           >
-            <div className="flex items-center">
-              <div className={`p-3 rounded-full ${analyticsStats.isActive ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
-                <FaChartLine className="w-6 h-6" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Google Analytics</p>
-                <p className="text-2xl font-semibold text-gray-900">
-                  {analyticsStats.isActive ? (
-                    <span className="text-green-600">Aktif</span>
-                  ) : (
-                    <span className="text-gray-500">Pasif</span>
-                  )}
-                </p>
-                <div className="text-xs text-gray-500 mt-1">
-                  {analyticsStats.isActive ? (
-                    <div>
-                      <p>ID: {analyticsStats.measurementId}</p>
-                      <a
-                        href="https://analytics.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 underline"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        Raporları Görüntüle
-                      </a>
-                    </div>
-                  ) : (
-                    <p>Analytics ayarlarını yapılandırın</p>
-                  )}
-                </div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Trafik Takibi
+              </span>
+              <div
+                className={`p-2.5 rounded-xl ${
+                  analyticsStats.isActive
+                    ? 'bg-amber-500/10 text-amber-600'
+                    : 'bg-slate-100 text-slate-400'
+                }`}
+              >
+                <FiBarChart2 size={18} />
               </div>
             </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-slate-900">
+                {analyticsStats.isActive ? 'Aktif' : 'Pasif'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-2 truncate">
+              {analyticsStats.measurementId
+                ? `ID: ${analyticsStats.measurementId}`
+                : 'Analytics yapılandır'}
+            </p>
+          </div>
+        </div>
+
+        {/* Hızlı Yönetim Kısayolları */}
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-2xs space-y-4">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">
+            Hızlı Yönetim Eylemleri
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <button
+              onClick={() => navigate('/admin/team')}
+              className="p-4 rounded-xl border border-slate-200/80 hover:border-amber-500 hover:bg-amber-50/30 text-left transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-600">
+                  <FiUsers size={20} />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-slate-900 group-hover:text-amber-700">
+                    Ekip & Uzman Kadro
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Mühendis, mimar ve saha ustalarını yönet
+                  </div>
+                </div>
+              </div>
+              <FiArrowUpRight className="text-slate-400 group-hover:text-amber-600 transition-colors" />
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/projects')}
+              className="p-4 rounded-xl border border-slate-200/80 hover:border-amber-500 hover:bg-amber-50/30 text-left transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-sky-500/10 text-sky-600">
+                  <FiBriefcase size={20} />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-slate-900 group-hover:text-sky-700">
+                    Portfolyo & Projeler
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Tamamlanan ve devam eden yapı projeleri
+                  </div>
+                </div>
+              </div>
+              <FiArrowUpRight className="text-slate-400 group-hover:text-sky-600 transition-colors" />
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/services')}
+              className="p-4 rounded-xl border border-slate-200/80 hover:border-amber-500 hover:bg-amber-50/30 text-left transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-600">
+                  <FiLayers size={20} />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-slate-900 group-hover:text-emerald-700">
+                    Mimari Hizmetler
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Statik analiz, kentsel dönüşüm ve taahhüt
+                  </div>
+                </div>
+              </div>
+              <FiArrowUpRight className="text-slate-400 group-hover:text-emerald-600 transition-colors" />
+            </button>
           </div>
         </div>
       </div>

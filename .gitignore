@@ -1,0 +1,60 @@
+# ==============================================================================
+# Git Ignore Configuration - Hastugg
+# ==============================================================================
+
+# Agent & Skill Internal Configurations (Antigravity & Impeccable)
+.agent/
+.agents/
+.impeccable/
+*.impeccable*
+.gemini/
+
+# Node & Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+giris.env
+dbconfig.js
+
+# Build Outputs & Bundles
+dist/
+dist-ssr/
+build/
+coverage/
+.nyc_output/
+
+# Uploads & Temporary Media (local uploads)
+uploads/*
+!uploads/.gitkeep
+SERVER/uploads/*
+!SERVER/uploads/.gitkeep
+
+# IDEs & Operating System Files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swo
+*.swp
+.DS_Store
+Thumbs.db
+
+# Temporary & Log Files
+logs/
+*.log
+*.pid
+*.seed
+*.pid.lock
+*.tgz

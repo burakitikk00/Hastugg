@@ -1,39 +1,38 @@
 /* Global App Styles */
 .app {
   min-height: 100vh;
-  background-color: white;
+  background-color: #07090e;
+  color: #f8fafc;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
 }
 
-/* Custom scrollbar */
+/* Custom Architectural Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #07090e;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #0ea5e9;
+  background: #1e293b;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #0284c7;
-}
-
-/* Smooth transitions for all elements */
-* {
-  transition: all 0.3s ease;
+  background: #e5a93c;
 }
 
 /* Custom focus styles */
-button:focus,
-input:focus,
-textarea:focus {
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
   outline: none;
-  ring: 2px;
-  ring-color: #0ea5e9;
+  box-shadow: 0 0 0 2px rgba(229, 169, 60, 0.45);
 }
 
 /* Loading animation */
@@ -42,12 +41,9 @@ textarea:focus {
 }
 
 @keyframes pulse {
-
-  0%,
-  100% {
+  0%, 100% {
     opacity: 1;
   }
-
   50% {
     opacity: .5;
   }
@@ -55,46 +51,14 @@ textarea:focus {
 
 /* Custom animations */
 @keyframes float {
-
-  0%,
-  100% {
+  0%, 100% {
     transform: translateY(0px);
   }
-
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
 }
 
 .float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Custom icon animations */
-.icon-bounce {
-  animation: bounce 1s infinite;
-}
-
-@keyframes bounce {
-
-  0%,
-  20%,
-  53%,
-  80%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-
-  40%,
-  43% {
-    transform: translate3d(0, -8px, 0);
-  }
-
-  70% {
-    transform: translate3d(0, -4px, 0);
-  }
-
-  90% {
-    transform: translate3d(0, -2px, 0);
-  }
+  animation: float 3.5s ease-in-out infinite;
 }
