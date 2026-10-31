@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 // JWT secret key'i environment variable'dan al
-const SECRET_KEY = process.env.JWT_SECRET; 
+const SECRET_KEY = process.env.JWT_SECRET || 'Hastugg2025SecretKey!@'; 
 
 const verifyToken = (req, res, next) => {
     // 1. İstek başlıklarından token'ı al

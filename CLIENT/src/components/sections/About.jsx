@@ -5,45 +5,12 @@ import logger from '../../utils/logger';
 import { getArchitecturalIcon } from '../../utils/architecturalIcons';
 import './About.css';
 
-// Varsayılan / Anında Yüklenen Mimari Hakkımızda İçeriği (Sunucu gecikse dahi sıfır bekleme)
-const DEFAULT_ABOUT = {
-    mainTitle: 'Mühendislik Bilimini Mimari Sanatla Buluşturuyoruz',
-    mainDescription: `Hastuğ İnşaat olarak; adımızdan aldığımız güç ve sektördeki tecrübemizle, sadece binalar değil, güvenli ve huzurlu gelecekler inşa etmek üzere yola çıktık.
-
-İsmimizdeki "Has" kelimesinden gelen özgünlüğü ve "Tuğ" kelimesinin temsil ettiği liderlik vizyonunu, imza attığımız her projeye yansıtıyoruz. İnşaat sektöründe sağlamlık, estetik ve fonksiyonelliği bir araya getirerek, şehrin silüetine değer katan yapılar üretiyoruz.
-
-Temel ilkemiz; mühendislik bilimini sanatla buluşturmak ve müşterilerimize standartların ötesinde bir yaşam kalitesi sunmaktır. Çevreye duyarlı, modern teknolojilerle donatılmış ve yatırım değeri yüksek projelerimizle geleceğin temelini atıyoruz.`,
-    features: [
-        {
-            id: 1,
-            feature: 'Kalite Standartları',
-            description: 'Avrupa normlarına uygun birinci sınıf yapı malzemeleri ve kusursuz işçilik detayları.',
-            icon: 'gem'
-        },
-        {
-            id: 2,
-            feature: 'Statik Güvenilirlik',
-            description: 'İleri zemin etüdü ve deprem mühendisliği simülasyonlarıyla tavizsiz statik güvenlik.',
-            icon: 'shield'
-        },
-        {
-            id: 3,
-            feature: '15+ Yıllık Tecrübe',
-            description: 'Konut, villa ve restorasyon projelerinde saha tecrübesine dayalı uzman mimari kadro.',
-            icon: 'award'
-        },
-        {
-            id: 4,
-            feature: '+100 Tamamlanan Proje',
-            description: 'Zamanında anahtar teslim garantisi ve şeffaf sözleşme yönetimiyle kanıtlanmış referanslar.',
-            icon: 'city'
-        }
-    ]
-};
-
 const About = () => {
-    const [data, setData] = useState(DEFAULT_ABOUT);
-    const [activeCardIndex, setActiveCardIndex] = useState(0);
+    const [data, setData] = useState({
+        mainTitle: '',
+        mainDescription: '',
+        features: []
+    });
 
     useEffect(() => {
         let isMounted = true;
@@ -53,15 +20,15 @@ const About = () => {
                 const response = await publicService.getAbout();
                 if (isMounted && response) {
                     setData({
-                        mainTitle: response.mainTitle || response.maintitle || DEFAULT_ABOUT.mainTitle,
-                        mainDescription: response.mainDescription || response.maindescription || DEFAULT_ABOUT.mainDescription,
-                        features: (response.features && response.features.length > 0) 
+                        mainTitle: response.mainTitle || response.maintitle || '',
+                        mainDescription: response.mainDescription || response.maindescription || '',
+                        features: (response.features && Array.isArray(response.features)) 
                             ? response.features 
-                            : DEFAULT_ABOUT.features
+                            : []
                     });
                 }
             } catch (error) {
-                logger.warn('About verileri getirilirken varsayılan mimari içerikler devrede:', error?.message);
+                logger.warn('About verileri getirilirken hata:', error?.message);
             }
         };
 
@@ -75,7 +42,7 @@ const About = () => {
     // Metin paragraflarını temiz ve ritmik bölümlere ayırma
     const paragraphs = data.mainDescription
         ? data.mainDescription.split('\n\n').filter(p => p.trim().length > 0)
-        : [DEFAULT_ABOUT.mainDescription];
+        : [];
 
     return (
         <section id="about" className="about" aria-label="Hakkımızda">
@@ -114,25 +81,14 @@ const About = () => {
                             </span>
                         </div>
 
-                        {/* Mühendislik Taahhüt Etiketleri */}
-                        <div className="about-trust-badges">
-                            <div className="trust-badge-item">
-                                <span className="trust-badge-dot" />
-                                <span>ISO 9001:2015 STATİK STANDARDI</span>
-                            </div>
-                            <div className="trust-badge-item">
-                                <span className="trust-badge-dot" />
-                                <span>MİMARİ DANIŞMANLIK & ANAHTAR TESLİM</span>
-                            </div>
-                        </div>
+                      
                     </motion.div>
 
-                    {/* Sağ Kolon: Etkileşimli Mimari Nitelikler Bento Matrisi */}
+                    {/* Sağ Kolon: Mimari Nitelikler Bento Matrisi */}
                     <div className="about-features-col">
                         <div className="features-matrix-grid">
                             {data.features.map((feature, index) => {
                                 const IconComponent = getArchitecturalIcon(feature.icon, feature.feature);
-                                const isActive = activeCardIndex === index;
 
                                 return (
                                     <motion.div
@@ -145,11 +101,7 @@ const About = () => {
                                             ease: [0.16, 1, 0.3, 1] 
                                         }}
                                         viewport={{ once: true, margin: '-30px' }}
-                                        whileHover={{ y: -6, scale: 1.015 }}
-                                        onClick={() => setActiveCardIndex(index)}
-                                        className={`feature-bento-card ${isActive ? 'active' : ''}`}
-                                        role="button"
-                                        tabIndex={0}
+                                        className="feature-bento-card"
                                         aria-label={feature.feature}
                                     >
                                         <div>
@@ -170,7 +122,7 @@ const About = () => {
 
                                         <div className="feature-card-footer">
                                             <span className="feature-status-label">
-                                                {isActive ? 'MİMARİ ODAK' : 'İNCELE'}
+                                                MİMARİ NİTELİK
                                             </span>
                                             <div className="feature-corner-indicator" />
                                         </div>

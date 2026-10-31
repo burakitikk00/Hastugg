@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import HeroEditor from './HeroEditor';
 import AboutEditor from './AboutEditor';
+import AdminPageHeader from './AdminPageHeader';
 import adminService from '../../services/adminService';
 import logger from '../../utils/logger';
 
@@ -10,12 +11,11 @@ const PageContentManager = () => {
   const [aboutData, setAboutData] = useState(null);
 
   const sections = [
-    { id: 'hero', label: 'Hero Section', component: HeroEditor },
-    { id: 'about', label: 'Hakkımızda', component: AboutEditor }
+    { id: 'hero', label: 'Hero / Karşılama Manşeti' },
+    { id: 'about', label: 'Hakkımızda & Mimari Vizyon' }
   ];
 
   useEffect(() => {
-    // localStorage'dan about verilerini yükle
     const savedAboutData = localStorage.getItem('aboutData');
     if (savedAboutData) {
       try {
@@ -31,12 +31,9 @@ const PageContentManager = () => {
     setIsLoading(true);
     try {
       if (activeSection === 'about') {
-        // About verilerini localStorage'a kaydet
         localStorage.setItem('aboutData', JSON.stringify(sectionData));
         setAboutData(sectionData);
       }
-      
-      // Başarılı kayıt sonrası işlemler
       alert(`${sections.find(s => s.id === activeSection)?.label} başarıyla kaydedildi!`);
     } catch (error) {
       logger.error('Kaydetme hatası:', error);
@@ -47,53 +44,53 @@ const PageContentManager = () => {
   };
 
   const handleCancel = () => {
-    // İptal işlemi - form verilerini sıfırla
+    // İptal işlemi
   };
-
-  const ActiveComponent = sections.find(s => s.id === activeSection)?.component;
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-600 mt-2">Sayfa içerikleri ve email ayarlarını buradan düzenleyebilirsiniz</p>
-      </div>
-
-      {/* Section Navigation */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Yönetim Bölümleri</h3>
-        </div>
-        <div className="p-6">
-          <div className="flex flex-wrap gap-3">
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  activeSection === section.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {section.label}
-              </button>
-            ))}
+      {/* Sayfa Başlığı ve Sekmeler */}
+      <AdminPageHeader
+        title="Sayfa İçerikleri & Metinler"
+        subtitle="Ana sayfa karşılama sloganı, alt başlık metinleri ve Hakkımızda mimari vizyon kartlarını düzenleyin."
+        badge="İçerik Yönetimi"
+        actions={
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl border border-slate-200/80">
+            {sections.map((section) => {
+              const active = activeSection === section.id;
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    active
+                      ? 'bg-amber-400 text-slate-950 shadow-xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                  }`}
+                >
+                  {section.label}
+                </button>
+              );
+            })}
           </div>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Active Section Editor */}
-      {ActiveComponent && (
-        <ActiveComponent
-          aboutData={activeSection === 'about' ? aboutData : null}
+      {/* Aktif Bölüm Düzenleyici */}
+      {activeSection === 'hero' ? (
+        <HeroEditor
+          onSave={handleSave}
+          onCancel={handleCancel}
+          isLoading={isLoading}
+        />
+      ) : (
+        <AboutEditor
+          aboutData={aboutData}
           onSave={handleSave}
           onCancel={handleCancel}
           isLoading={isLoading}
         />
       )}
-
     </div>
   );
 };

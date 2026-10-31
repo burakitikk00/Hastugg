@@ -18,19 +18,56 @@
     width: 100%;
     max-width: 100%;
     position: relative;
+    font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .project-detail-main {
     flex: 1;
-    padding: 130px 5% 80px;
-    max-width: 1200px;
+    padding: 130px 5% 100px;
+    max-width: 1280px;
     margin: 0 auto;
     width: 100%;
     box-sizing: border-box;
 }
 
 /* --------------------------------------------------------------------------
-   Top Navigation & Blueprint Tag
+   Blueprint Tags & Typography Tokens
+   -------------------------------------------------------------------------- */
+.blueprint-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: #e5a93c;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.section-title-wrap {
+    margin-bottom: 24px;
+}
+
+.section-main-heading {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f8fafc;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    margin: 0 0 8px;
+}
+
+.section-lead-text {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    max-width: 650px;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   1. Top Navigation & Breadcrumb
    -------------------------------------------------------------------------- */
 .project-top-nav {
     display: flex;
@@ -45,13 +82,12 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 20px;
+    padding: 9px 18px;
     background: rgba(13, 18, 28, 0.85);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     color: #94a3b8;
-    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 13.5px;
     font-weight: 500;
     cursor: pointer;
@@ -60,7 +96,7 @@
 }
 
 .back-nav-button .back-icon {
-    font-size: 16px;
+    font-size: 15px;
     transition: transform 0.2s ease;
 }
 
@@ -74,23 +110,242 @@
     transform: translateX(-3px);
 }
 
+.breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.breadcrumb-sep {
+    color: #475569;
+}
+
+.breadcrumb-cat {
+    color: #94a3b8;
+}
+
+.breadcrumb-current {
+    color: #e2e8f0;
+    font-weight: 500;
+}
 
 /* --------------------------------------------------------------------------
-   Image Slider Section
+   2. Project Hero Header
+   -------------------------------------------------------------------------- */
+.project-hero-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.hero-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 850px;
+}
+
+.status-badge-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.blueprint-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.blueprint-status-badge .status-pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    animation: statusPulse 2s infinite;
+}
+
+.blueprint-status-badge.completed {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #34d399;
+}
+.blueprint-status-badge.completed .status-pulse-dot {
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+}
+
+.blueprint-status-badge.in-progress {
+    background: rgba(229, 169, 60, 0.12);
+    border: 1px solid rgba(229, 169, 60, 0.4);
+    color: #e5a93c;
+}
+.blueprint-status-badge.in-progress .status-pulse-dot {
+    background: #e5a93c;
+    box-shadow: 0 0 8px #e5a93c;
+}
+
+@keyframes statusPulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.category-pill-tag {
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #cbd5e1;
+}
+
+.project-main-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #f8fafc;
+    letter-spacing: -0.025em;
+    margin: 0;
+}
+
+.project-location-subline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #94a3b8;
+    font-size: 1rem;
+    margin: 0;
+}
+.project-location-subline .pin-icon {
+    color: #e5a93c;
+    font-size: 16px;
+}
+
+.btn-quick-inquiry {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 26px;
+    background: #e5a93c;
+    border: none;
+    border-radius: 8px;
+    color: #07090e;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(229, 169, 60, 0.25);
+}
+.btn-quick-inquiry .btn-icon {
+    font-size: 15px;
+    transition: transform 0.2s ease;
+}
+.btn-quick-inquiry:hover {
+    background: #f59e0b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(229, 169, 60, 0.4);
+}
+.btn-quick-inquiry:hover .btn-icon {
+    transform: translateX(3px) translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   3. Key Facts Bar (Hızlı Özet Çubuğu)
+   -------------------------------------------------------------------------- */
+.key-facts-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 22px 28px;
+    background: #0d121c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    margin-bottom: 36px;
+    position: relative;
+    overflow: hidden;
+}
+
+.key-facts-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, rgba(229, 169, 60, 0.5), transparent);
+}
+
+.key-fact-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    padding-right: 16px;
+}
+.key-fact-col:last-child {
+    border-right: none;
+    padding-right: 0;
+}
+
+.key-fact-col .fact-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #e5a93c;
+}
+
+.key-fact-col .fact-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.key-fact-col .fact-value.mono-val {
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.02em;
+    font-size: 1.1rem;
+}
+
+/* --------------------------------------------------------------------------
+   4. Image Slider & Centered Thumbnail Strip
    -------------------------------------------------------------------------- */
 .image-slider-section {
-    margin-bottom: 40px;
+    margin-bottom: 60px;
 }
 
 .slider-container {
     position: relative;
     width: 100%;
-    aspect-ratio: 16/9;
+    height: 440px;
+    max-height: 52vh;
     border-radius: 16px;
     overflow: hidden;
     background: #0d121c;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
 }
 
 .slider-track-container {
@@ -127,16 +382,14 @@
     -webkit-user-drag: none;
 }
 
-/* Slider Navigation Buttons - Perfect Optical & Geometric Centering */
 .slider-nav {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 50px;
-    height: 50px;
-    background: rgba(7, 9, 14, 0.82);
+    width: 48px;
+    height: 48px;
+    background: rgba(7, 9, 14, 0.85);
     backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 50%;
     color: #f8fafc;
@@ -147,44 +400,23 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-    margin: 0;
     outline: none;
-    box-sizing: border-box;
 }
-
 .slider-nav .nav-arrow-icon {
     width: 22px;
     height: 22px;
     display: block;
     stroke-width: 2.2;
-    margin: auto;
-    transition: transform 0.2s ease;
 }
-
 .slider-nav:hover {
     background: #e5a93c;
     border-color: #e5a93c;
     color: #07090e;
-    box-shadow: 0 6px 24px rgba(229, 169, 60, 0.4);
+    box-shadow: 0 6px 20px rgba(229, 169, 60, 0.4);
 }
+.slider-nav.prev { left: 20px; }
+.slider-nav.next { right: 20px; }
 
-.slider-nav.prev {
-    left: 20px;
-}
-
-.slider-nav.next {
-    right: 20px;
-}
-
-.slider-nav.prev:hover .nav-arrow-icon {
-    transform: translateX(-2px);
-}
-
-.slider-nav.next:hover .nav-arrow-icon {
-    transform: translateX(2px);
-}
-
-/* Fullscreen Hint */
 .fullscreen-hint {
     position: absolute;
     bottom: 20px;
@@ -206,18 +438,15 @@
     pointer-events: none;
     z-index: 5;
 }
-
 .fullscreen-hint .fullscreen-icon {
     font-size: 14px;
     color: #e5a93c;
 }
-
 .slider-track-container:hover .fullscreen-hint {
     opacity: 1;
     transform: translateY(0);
 }
 
-/* Image Counter Badge */
 .image-counter {
     position: absolute;
     top: 20px;
@@ -233,103 +462,38 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 12.5px;
     font-weight: 600;
-    letter-spacing: 0.05em;
     z-index: 5;
 }
+.image-counter .counter-current { color: #e5a93c; }
+.image-counter .counter-separator { color: #64748b; }
+.image-counter .counter-total { color: #94a3b8; }
 
-.counter-current {
-    color: #e5a93c;
-}
-
-.counter-separator {
-    color: #64748b;
-}
-
-.counter-total {
-    color: #94a3b8;
-}
-
-/* Slider Indicators (Pill Style) */
-.slider-indicators {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 5;
-    background: rgba(7, 9, 14, 0.6);
-    backdrop-filter: blur(8px);
-    padding: 6px 10px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.indicator {
-    width: 20px;
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.25);
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    transition: all 0.25s ease;
-}
-
-.indicator.active {
-    background: #e5a93c;
-    width: 32px;
-    box-shadow: 0 0 10px rgba(229, 169, 60, 0.5);
-}
-
-.indicator:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.5);
-}
-
-/* --------------------------------------------------------------------------
-   Thumbnail Strip - Centered Horizontally (User Requirement)
-   -------------------------------------------------------------------------- */
 .thumbnail-strip-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin-top: 20px;
+    margin-top: 18px;
 }
-
 .thumbnail-strip {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 12px;
-    padding: 10px 14px;
+    padding: 8px 12px;
     background: rgba(13, 18, 28, 0.85);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
+    border-radius: 12px;
     overflow-x: auto;
     max-width: 100%;
-    box-sizing: border-box;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(229, 169, 60, 0.4) transparent;
 }
-
-.thumbnail-strip::-webkit-scrollbar {
-    height: 5px;
-}
-
-.thumbnail-strip::-webkit-scrollbar-thumb {
-    background: rgba(229, 169, 60, 0.4);
-    border-radius: 3px;
-}
-
 .thumbnail {
     position: relative;
     flex-shrink: 0;
-    width: 96px;
-    height: 64px;
-    border-radius: 8px;
+    width: 74px;
+    height: 48px;
+    border-radius: 6px;
     overflow: hidden;
     border: 1.5px solid rgba(255, 255, 255, 0.1);
     cursor: pointer;
@@ -338,25 +502,21 @@
     padding: 0;
     outline: none;
 }
-
 .thumbnail:hover {
     border-color: rgba(229, 169, 60, 0.5);
     transform: translateY(-2px);
 }
-
 .thumbnail.active {
     border-color: #e5a93c;
-    box-shadow: 0 4px 16px rgba(229, 169, 60, 0.3);
+    box-shadow: 0 4px 14px rgba(229, 169, 60, 0.3);
     transform: translateY(-2px);
 }
-
 .thumbnail-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
 }
-
 .thumbnail-active-indicator {
     position: absolute;
     bottom: 0;
@@ -367,274 +527,616 @@
 }
 
 /* --------------------------------------------------------------------------
-   Project Information Card
+   5. Narrative & Spec Grid
    -------------------------------------------------------------------------- */
-.project-info-section {
-    background: #0d121c;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
-    position: relative;
-    overflow: hidden;
-}
-
-.project-info-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(229, 169, 60, 0.4), transparent);
-}
-
-.project-info-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 24px;
-    padding-bottom: 28px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    flex-wrap: wrap;
-}
-
-.project-title-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-width: 800px;
-}
-
-.project-category-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    color: #e5a93c;
-}
-
-.project-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 2.5rem;
-    font-weight: 700;
-    line-height: 1.15;
-    color: #f8fafc;
-    margin: 0;
-    letter-spacing: -0.02em;
-}
-
-/* Status Badge */
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 18px;
-    border-radius: 24px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
-
-.status-badge .status-icon {
-    font-size: 14px;
-}
-
-.status-badge.completed {
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: #34d399;
-}
-
-.status-badge.in-progress {
-    background: rgba(229, 169, 60, 0.12);
-    border: 1px solid rgba(229, 169, 60, 0.35);
-    color: #e5a93c;
-}
-
-/* Specifications Grid */
-.project-specs-grid {
+.project-narrative-spec-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: 7fr 5fr;
+    gap: 40px;
+    align-items: start;
+    margin-bottom: 70px;
+}
+
+.narrative-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.narrative-text-flow {
+    display: flex;
+    flex-direction: column;
     gap: 16px;
-    margin: 32px 0;
 }
-
-.spec-card {
-    background: rgba(20, 27, 39, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-left: 2.5px solid #e5a93c;
-    border-radius: 10px;
-    padding: 18px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    transition: all 0.25s ease;
-}
-
-.spec-card:hover {
-    background: rgba(20, 27, 39, 0.9);
-    border-color: rgba(229, 169, 60, 0.3);
-    transform: translateY(-2px);
-}
-
-.spec-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #e5a93c;
-}
-
-.spec-value {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    line-height: 1.55;
-    color: #e2e8f0;
-}
-
-/* Project Narrative */
-.project-narrative-section {
-    margin-top: 32px;
-    padding-top: 28px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.section-subtitle {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #f8fafc;
-    margin: 0 0 16px;
-    letter-spacing: -0.01em;
-}
-
-.narrative-content {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.narrative-paragraph {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+.narrative-p {
     font-size: 1.05rem;
     line-height: 1.8;
     color: #cbd5e1;
     margin: 0;
 }
 
-/* Related Services */
-.related-services-section {
-    margin-top: 36px;
-    padding-top: 28px;
+.project-services-block {
+    margin-top: 24px;
+    padding-top: 24px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
-
-.related-services-section .services-header {
+.project-services-block .block-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
+    gap: 8px;
+    margin-bottom: 14px;
 }
-
-.related-services-section .services-icon {
-    font-size: 18px;
+.project-services-block .block-icon {
     color: #e5a93c;
+    font-size: 18px;
+}
+.project-services-block .block-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f8fafc;
+    margin: 0;
 }
 
-.related-services-section .services-title {
+.services-tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.spec-service-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(229, 169, 60, 0.08);
+    border: 1px solid rgba(229, 169, 60, 0.25);
+    border-radius: 6px;
+    color: #e5a93c;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+.spec-service-chip:hover {
+    background: #e5a93c;
+    color: #07090e;
+    border-color: #e5a93c;
+    transform: translateY(-2px);
+}
+
+/* Proje Künyesi Kartı */
+.project-spec-card {
+    background: #0d121c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.project-spec-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #e5a93c, rgba(229, 169, 60, 0.2));
+}
+
+.spec-card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 18px;
+}
+
+.spec-rows-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.spec-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.92rem;
+    gap: 16px;
+}
+.spec-row:last-child {
+    border-bottom: none;
+}
+
+.spec-row .row-label {
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+.spec-row .row-value {
+    color: #f8fafc;
+    font-weight: 500;
+    text-align: right;
+}
+.spec-row .row-value.mono-val {
+    font-family: 'JetBrains Mono', monospace;
+    color: #e2e8f0;
+}
+
+.spec-row .status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+}
+.spec-row .status-indicator .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+.spec-row .status-indicator .dot.green { background: #10b981; box-shadow: 0 0 6px #10b981; }
+.spec-row .status-indicator .dot.amber { background: #e5a93c; box-shadow: 0 0 6px #e5a93c; }
+
+.spec-card-action {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.btn-spec-inquiry {
+    width: 100%;
+    padding: 12px 20px;
+    background: rgba(229, 169, 60, 0.1);
+    border: 1px solid rgba(229, 169, 60, 0.35);
+    border-radius: 8px;
+    color: #e5a93c;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+}
+.btn-spec-inquiry:hover {
+    background: #e5a93c;
+    color: #07090e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(229, 169, 60, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   6. Highlights Grid (Öne Çıkan Özellikler)
+   -------------------------------------------------------------------------- */
+.project-highlights-section {
+    margin-bottom: 70px;
+}
+
+.highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.highlight-card {
+    background: #141b27;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+.highlight-card:hover {
+    border-color: rgba(229, 169, 60, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(229, 169, 60, 0.15);
+}
+
+.highlight-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: rgba(229, 169, 60, 0.1);
+    border: 1px solid rgba(229, 169, 60, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e5a93c;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+}
+.highlight-card:hover .highlight-icon-wrap {
+    background: #e5a93c;
+    color: #07090e;
+    transform: scale(1.05);
+}
+.highlight-icon-wrap .h-icon {
+    font-size: 20px;
+}
+
+.highlight-text-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.highlight-title {
     font-family: 'Syne', sans-serif;
     font-size: 1.15rem;
     font-weight: 600;
     color: #f8fafc;
     margin: 0;
 }
-
-.services-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.service-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
-    background: rgba(229, 169, 60, 0.08);
-    border: 1px solid rgba(229, 169, 60, 0.25);
-    border-radius: 8px;
-    color: #e5a93c;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13.5px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    outline: none;
-}
-
-.service-tag .tag-chevron {
-    font-size: 13px;
-    transition: transform 0.2s ease;
-}
-
-.service-tag:hover {
-    background: #e5a93c;
-    color: #07090e;
-    border-color: #e5a93c;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(229, 169, 60, 0.25);
-}
-
-.service-tag:hover .tag-chevron {
-    transform: translateX(2px);
-}
-
-/* Project Inquiry CTA */
-.project-inquiry-cta {
-    margin-top: 40px;
-    padding: 32px;
-    background: linear-gradient(135deg, rgba(20, 27, 39, 0.9) 0%, rgba(13, 18, 28, 0.95) 100%);
-    border: 1px solid rgba(229, 169, 60, 0.25);
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    flex-wrap: wrap;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
-}
-
-.cta-text-wrapper {
-    flex: 1;
-    min-width: 280px;
-}
-
-.cta-headline {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #f8fafc;
-    margin: 0 0 8px;
-    letter-spacing: -0.01em;
-}
-
-.cta-subline {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.95rem;
-    line-height: 1.6;
+.highlight-desc {
+    font-size: 0.9rem;
+    line-height: 1.55;
     color: #94a3b8;
     margin: 0;
 }
 
-.cta-contact-button {
+/* --------------------------------------------------------------------------
+   7. Location & Accessibility Section
+   -------------------------------------------------------------------------- */
+.project-location-section {
+    margin-bottom: 70px;
+}
+
+.location-grid {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: 32px;
+    align-items: stretch;
+}
+
+.location-grid.single-col {
+    grid-template-columns: 1fr;
+}
+
+.map-view-card {
+    background: #0d121c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    min-height: 380px;
+    display: flex;
+}
+
+.map-iframe-container {
+    width: 100%;
+    height: 100%;
+    min-height: 380px;
+}
+
+.map-blueprint-visual {
+    width: 100%;
+    height: 100%;
+    min-height: 380px;
+    background: #0d121c;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: 
+        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(229, 169, 60, 0.12), transparent 75%),
+        linear-gradient(rgba(229, 169, 60, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(229, 169, 60, 0.06) 1px, transparent 1px);
+    background-size: 100% 100%, 32px 32px, 32px 32px;
+}
+
+.map-location-badge {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    right: 24px;
+    background: rgba(13, 18, 28, 0.92);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(229, 169, 60, 0.3);
+    border-radius: 12px;
+    padding: 18px 22px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+.map-location-badge .badge-pin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+.map-location-badge .badge-pin .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e5a93c;
+    box-shadow: 0 0 10px #e5a93c;
+}
+.map-location-badge .badge-pin strong {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    color: #f8fafc;
+}
+.map-location-badge .badge-address {
+    font-size: 0.88rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* Transit Points Card */
+.transit-points-card {
+    background: #0d121c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 20px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.transit-card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0;
+}
+
+.transit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.transit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.transit-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.transit-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: rgba(229, 169, 60, 0.1);
+    border: 1px solid rgba(229, 169, 60, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e5a93c;
+    flex-shrink: 0;
+}
+.transit-icon-box .t-icon {
+    font-size: 18px;
+}
+
+.transit-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.transit-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #f8fafc;
+    margin: 0;
+}
+.transit-distance {
+    font-size: 0.82rem;
+    color: #94a3b8;
+}
+
+.btn-open-maps {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 14px 28px;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: #e2e8f0;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+.btn-open-maps:hover {
+    border-color: rgba(229, 169, 60, 0.4);
+    color: #e5a93c;
+    background: rgba(229, 169, 60, 0.06);
+}
+
+/* --------------------------------------------------------------------------
+   8. Project Inquiry Section (Doğrudan Başvuru Formu)
+   -------------------------------------------------------------------------- */
+.project-inquiry-section {
+    margin-top: 30px;
+}
+
+.inquiry-container {
+    background: linear-gradient(135deg, #0d121c 0%, #141b27 100%);
+    border: 1px solid rgba(229, 169, 60, 0.25);
+    border-radius: 20px;
+    padding: 48px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+.inquiry-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #e5a93c, rgba(229, 169, 60, 0.1));
+}
+
+.inquiry-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+}
+
+.inquiry-info-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.inquiry-heading {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f8fafc;
+    line-height: 1.25;
+    margin: 0;
+}
+
+.inquiry-subtext {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #94a3b8;
+    margin: 0;
+}
+.inquiry-subtext strong {
+    color: #f8fafc;
+}
+
+.inquiry-contact-chips {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+.contact-chip {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+}
+.contact-chip:hover .chip-val {
+    color: #e5a93c;
+}
+.contact-chip:hover .chip-icon-box {
+    background: #e5a93c;
+    color: #07090e;
+    transform: scale(1.05);
+}
+.chip-icon-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: rgba(229, 169, 60, 0.1);
+    border: 1px solid rgba(229, 169, 60, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e5a93c;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+.chip-details {
+    display: flex;
+    flex-direction: column;
+}
+.chip-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+}
+.chip-val {
+    font-size: 0.95rem;
+    color: #f8fafc;
+    font-weight: 500;
+}
+
+/* Sağ Form Alanı */
+.inquiry-form-col {
+    background: rgba(7, 9, 14, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 32px;
+    backdrop-filter: blur(12px);
+}
+
+.project-inquiry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 4px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.field-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+}
+
+.form-fields-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.hud-input {
+    background: rgba(13, 18, 28, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #f8fafc;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.25s ease;
+}
+.hud-input:focus {
+    border-color: #e5a93c;
+    box-shadow: 0 0 0 3px rgba(229, 169, 60, 0.18);
+}
+.hud-input::placeholder {
+    color: #475569;
+}
+
+.btn-submit-inquiry {
+    margin-top: 6px;
+    padding: 14px 24px;
     background: #e5a93c;
     border: none;
     border-radius: 8px;
@@ -643,24 +1145,84 @@
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    white-space: nowrap;
-    outline: none;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 18px rgba(229, 169, 60, 0.3);
 }
-
-.cta-contact-button .cta-icon {
-    font-size: 16px;
-    transition: transform 0.2s ease;
-}
-
-.cta-contact-button:hover {
+.btn-submit-inquiry:hover:not(:disabled) {
     background: #f59e0b;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(229, 169, 60, 0.4);
+    box-shadow: 0 6px 24px rgba(229, 169, 60, 0.45);
+}
+.btn-submit-inquiry:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.btn-send-icon {
+    font-size: 16px;
 }
 
-.cta-contact-button:hover .cta-icon {
-    transform: translateX(3px) translateY(-1px);
+/* Başarı Kutusu */
+.inquiry-success-box {
+    text-align: center;
+    padding: 24px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+.success-icon-wrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #10b981;
+    font-size: 26px;
+}
+.success-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0;
+}
+.success-desc {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0;
+}
+.btn-new-inquiry {
+    margin-top: 8px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid rgba(229, 169, 60, 0.4);
+    border-radius: 8px;
+    color: #e5a93c;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+.btn-new-inquiry:hover {
+    background: rgba(229, 169, 60, 0.1);
+}
+
+.form-error-alert {
+    padding: 10px 14px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: 8px;
+    color: #f87171;
+    font-size: 13px;
 }
 
 /* --------------------------------------------------------------------------
@@ -671,7 +1233,6 @@
     inset: 0;
     background: rgba(7, 9, 14, 0.96);
     backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -695,15 +1256,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    outline: none;
     z-index: 20;
 }
-
-.lightbox-close .lightbox-close-icon {
-    font-size: 24px;
-}
-
 .lightbox-close:hover {
     background: rgba(229, 169, 60, 0.2);
     border-color: #e5a93c;
@@ -714,8 +1268,8 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 56px;
-    height: 56px;
+    width: 54px;
+    height: 54px;
     background: rgba(13, 18, 28, 0.85);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -726,30 +1280,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    outline: none;
     z-index: 20;
 }
-
-.lightbox-nav .lightbox-nav-icon {
-    font-size: 24px;
-    stroke-width: 2.2;
-}
-
 .lightbox-nav:hover {
     background: #e5a93c;
     border-color: #e5a93c;
     color: #07090e;
     box-shadow: 0 4px 20px rgba(229, 169, 60, 0.4);
 }
-
-.lightbox-nav.prev {
-    left: 28px;
-}
-
-.lightbox-nav.next {
-    right: 28px;
-}
+.lightbox-nav.prev { left: 28px; }
+.lightbox-nav.next { right: 28px; }
 
 .lightbox-image-container {
     max-width: 90vw;
@@ -758,7 +1298,6 @@
     align-items: center;
     justify-content: center;
 }
-
 .lightbox-image {
     max-width: 100%;
     max-height: 85vh;
@@ -778,9 +1317,8 @@
     border-radius: 20px;
     color: #e5a93c;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 600;
-    letter-spacing: 0.05em;
     z-index: 20;
 }
 
@@ -802,56 +1340,39 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
     padding: 40px;
+    border: 1px solid rgba(229, 169, 60, 0.25);
     background: #0d121c;
-    border: 1px solid rgba(229, 169, 60, 0.2);
     border-radius: 16px;
 }
-
 .loading-spinner {
     width: 44px;
     height: 44px;
-    border: 3px solid rgba(255, 255, 255, 0.08);
+    border: 3px solid rgba(229, 169, 60, 0.2);
     border-top-color: #e5a93c;
     border-radius: 50%;
-    animation: blueprintSpin 0.9s linear infinite;
+    animation: spin 0.8s linear infinite;
 }
-
-@keyframes blueprintSpin {
-    to {
-        transform: rotate(360deg);
-    }
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
-
 .loading-blueprint-code {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    font-size: 13px;
     color: #e5a93c;
+    letter-spacing: 0.1em;
 }
 
 .error-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 4px;
+    padding: 4px 12px;
     background: rgba(239, 68, 68, 0.15);
     border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
     color: #f87171;
     margin-bottom: 12px;
-}
-
-.error-container h2 {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.75rem;
-    margin-bottom: 8px;
-}
-
-.error-container p {
-    color: #94a3b8;
-    max-width: 400px;
-    margin-bottom: 24px;
 }
 
 .action-btn-primary {
@@ -863,144 +1384,489 @@
     border: none;
     border-radius: 8px;
     color: #07090e;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
 }
-
 .action-btn-primary:hover {
     background: #f59e0b;
-    transform: translateY(-2px);
 }
 
 /* --------------------------------------------------------------------------
-   Responsive Design
+   Responsive Layout (Media Queries)
    -------------------------------------------------------------------------- */
-@media (max-width: 992px) {
-    .project-title {
-        font-size: 2.1rem;
-    }
+.back-btn-text-short {
+    display: none;
+}
 
-    .project-info-section {
-        padding: 30px;
-    }
+.btn-toggle-narrative {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(229, 169, 60, 0.08);
+    border: 1px solid rgba(229, 169, 60, 0.25);
+    border-radius: 8px;
+    color: #e5a93c;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+    margin-top: 4px;
+}
+.btn-toggle-narrative:hover {
+    background: rgba(229, 169, 60, 0.16);
+    border-color: #e5a93c;
+    transform: translateY(-1px);
+}
 
-    .slider-nav {
-        width: 44px;
-        height: 44px;
+@media (max-width: 1024px) {
+    .slider-container {
+        height: 340px;
     }
-
-    .slider-nav .nav-arrow-icon {
-        width: 20px;
-        height: 20px;
+    .project-narrative-spec-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
     }
-
-    .thumbnail {
-        width: 84px;
-        height: 56px;
+    .location-grid {
+        grid-template-columns: 1fr;
+    }
+    .inquiry-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    .key-facts-bar {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px;
+    }
+    .key-fact-col:nth-child(2) {
+        border-right: none;
+    }
+    .project-main-title {
+        font-size: 2.2rem;
     }
 }
 
 @media (max-width: 768px) {
+    /* Genel Sayfa Boşluğu */
     .project-detail-main {
-        padding: 100px 4% 50px;
+        padding: 85px 4% 60px;
     }
 
-    .project-title {
-        font-size: 1.75rem;
+    /* 1. Üst Navigasyon & Breadcrumb */
+    .project-top-nav {
+        margin-bottom: 14px;
+        gap: 10px;
+    }
+    .back-nav-button {
+        padding: 6px 12px;
+        font-size: 12.5px;
+        border-radius: 6px;
+        gap: 6px;
+    }
+    .back-btn-text-full {
+        display: none;
+    }
+    .back-btn-text-short {
+        display: inline;
+    }
+    .breadcrumb-nav {
+        font-size: 11px;
+    }
+    .breadcrumb-sep-current,
+    .breadcrumb-current {
+        display: none;
     }
 
-    .project-info-header {
+    /* 2. Hero Header */
+    .project-hero-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 16px;
+        gap: 12px;
+        padding-bottom: 14px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .hero-header-left {
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+    }
+    .status-badge-container {
+        gap: 8px;
+    }
+    .blueprint-status-badge {
+        padding: 4px 10px;
+        font-size: 10.5px;
+    }
+    .category-pill-tag {
+        padding: 3px 10px;
+        font-size: 10.5px;
+    }
+    .project-main-title {
+        font-size: 1.55rem;
+        line-height: 1.24;
+        letter-spacing: -0.02em;
+    }
+    .project-location-subline {
+        font-size: 0.85rem;
+        gap: 6px;
+    }
+    .project-location-subline .pin-icon {
+        font-size: 14px;
+    }
+    .hero-header-right {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        margin-top: 2px;
+    }
+    .btn-quick-inquiry {
+        width: auto;
+        padding: 8px 16px;
+        font-size: 12.5px;
+        font-weight: 600;
+        border-radius: 6px;
+        gap: 8px;
+        box-shadow: 0 2px 10px rgba(229, 169, 60, 0.2);
+    }
+    .btn-quick-inquiry .btn-icon {
+        font-size: 13px;
     }
 
+    /* 3. Hızlı Özet Çubuğu (Key Facts) */
+    .key-facts-bar {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px 14px;
+        padding: 12px 14px;
+        margin-bottom: 18px;
+        border-radius: 10px;
+    }
+    .key-fact-col {
+        border-right: none;
+        border-bottom: none;
+        padding: 0;
+        gap: 2px;
+    }
+    .key-fact-col .fact-label {
+        font-size: 9.5px;
+        letter-spacing: 0.06em;
+    }
+    .key-fact-col .fact-value {
+        font-size: 0.95rem;
+        font-weight: 600;
+        line-height: 1.25;
+    }
+    .key-fact-col .fact-value.mono-val {
+        font-size: 0.92rem;
+    }
+
+    /* 4. Görsel Slider */
+    .image-slider-section {
+        margin-bottom: 32px;
+    }
+    .slider-container {
+        height: 240px;
+        aspect-ratio: 16/10;
+        border-radius: 12px;
+    }
     .slider-nav {
+        width: 34px;
+        height: 34px;
+    }
+    .slider-nav .nav-arrow-icon {
+        font-size: 14px;
+    }
+    .slider-nav.prev {
+        left: 8px;
+    }
+    .slider-nav.next {
+        right: 8px;
+    }
+    .image-counter {
+        top: 10px;
+        right: 10px;
+        padding: 4px 10px;
+        font-size: 11px;
+    }
+    .fullscreen-hint {
+        bottom: 10px;
+        left: 10px;
+        padding: 4px 10px;
+        font-size: 11px;
+    }
+    .thumbnail-strip-wrapper {
+        margin-top: 10px;
+    }
+    .thumbnail-strip {
+        padding: 5px 8px;
+        gap: 8px;
+        border-radius: 10px;
+    }
+    .thumbnail {
+        width: 54px;
+        height: 36px;
+        border-radius: 4px;
+    }
+
+    /* 5. Mimari Anlatım & Künye */
+    .project-narrative-spec-grid {
+        gap: 28px;
+        margin-bottom: 36px;
+    }
+    .section-title-wrap {
+        margin-bottom: 12px;
+    }
+    .blueprint-tag {
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        margin-bottom: 4px;
+    }
+    .section-main-heading {
+        font-size: 1.35rem;
+        line-height: 1.28;
+        letter-spacing: -0.015em;
+        margin-bottom: 6px;
+    }
+    .section-lead-text {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+    .narrative-col {
+        gap: 12px;
+    }
+    .narrative-text-flow {
+        gap: 10px;
+    }
+    .narrative-p {
+        font-size: 0.92rem;
+        line-height: 1.65;
+        color: #cbd5e1;
+    }
+    .project-services-block {
+        margin-top: 16px;
+        padding-top: 16px;
+    }
+    .project-services-block .block-title {
+        font-size: 0.95rem;
+    }
+    .spec-service-chip {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    .project-spec-card {
+        padding: 18px 16px;
+        border-radius: 12px;
+    }
+    .spec-card-title {
+        font-size: 1.15rem;
+        margin-bottom: 12px;
+    }
+    .spec-row {
+        padding: 9px 0;
+        font-size: 0.85rem;
+    }
+    .spec-card-action {
+        margin-top: 16px;
+        padding-top: 14px;
+    }
+    .btn-spec-inquiry {
+        padding: 10px 16px;
+        font-size: 12.5px;
+    }
+
+    /* 6. Öne Çıkan Özellikler */
+    .project-highlights-section {
+        margin-bottom: 36px;
+    }
+    .highlights-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .highlight-card {
+        padding: 14px;
+        gap: 12px;
+        border-radius: 10px;
+    }
+    .highlight-icon-wrap {
         width: 38px;
         height: 38px;
+        border-radius: 8px;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    .highlight-title {
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+    }
+    .highlight-desc {
+        font-size: 0.83rem;
+        line-height: 1.45;
     }
 
-    .slider-nav.prev {
-        left: 12px;
+    /* 7. Lokasyon & Ulaşım */
+    .project-location-section {
+        margin-bottom: 36px;
+    }
+    .location-grid {
+        gap: 14px;
+    }
+    .map-view-card {
+        height: 220px;
+        border-radius: 12px;
+    }
+    .transit-points-card {
+        padding: 18px 16px;
+        border-radius: 12px;
+    }
+    .transit-card-title {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+    .transit-item {
+        padding: 9px 0;
+        gap: 10px;
+    }
+    .transit-icon-box {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    .transit-name {
+        font-size: 0.88rem;
+    }
+    .transit-distance {
+        font-size: 0.78rem;
+    }
+    .btn-open-maps {
+        padding: 9px 14px;
+        font-size: 12px;
     }
 
-    .slider-nav.next {
-        right: 12px;
+    /* 8. İletişim & Teklif Formu */
+    .project-inquiry-section {
+        margin-bottom: 30px;
     }
-
-    .slider-nav .nav-arrow-icon {
-        width: 18px;
-        height: 18px;
+    .inquiry-container {
+        padding: 20px 16px;
+        border-radius: 14px;
     }
-
-    .thumbnail {
-        width: 72px;
-        height: 48px;
+    .inquiry-heading {
+        font-size: 1.35rem;
+        line-height: 1.28;
+        letter-spacing: -0.015em;
+        margin-bottom: 8px;
     }
-
-    .thumbnail-strip {
+    .inquiry-subtext {
+        font-size: 0.86rem;
+        line-height: 1.55;
+        margin-bottom: 16px;
+    }
+    .inquiry-contact-chips {
         gap: 8px;
-        padding: 8px;
     }
-
-    .project-inquiry-cta {
-        padding: 24px;
-        flex-direction: column;
-        align-items: flex-start;
+    .contact-chip {
+        padding: 9px 12px;
+        border-radius: 8px;
     }
-
-    .cta-contact-button {
-        width: 100%;
-        justify-content: center;
+    .contact-chip .chip-icon-box {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
     }
-
-    .lightbox-nav {
-        width: 44px;
-        height: 44px;
+    .contact-chip .chip-label {
+        font-size: 9.5px;
     }
-
-    .lightbox-nav.prev {
-        left: 16px;
+    .contact-chip .chip-val {
+        font-size: 12px;
     }
-
-    .lightbox-nav.next {
-        right: 16px;
+    .inquiry-form-col {
+        padding: 18px 14px;
+        border-radius: 12px;
+    }
+    .form-title {
+        font-size: 1.15rem;
+        margin-bottom: 14px;
+    }
+    .form-fields-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .field-label {
+        font-size: 11.5px;
+        margin-bottom: 5px;
+    }
+    .hud-input {
+        padding: 10px 12px;
+        font-size: 13px;
+        border-radius: 6px;
+    }
+    .btn-submit-inquiry {
+        padding: 12px 18px;
+        font-size: 13px;
     }
 }
 
 @media (max-width: 480px) {
-    .project-detail-main {
-        padding: 90px 3% 40px;
+    .project-main-title {
+        font-size: 1.4rem;
     }
-
-    .project-top-nav {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+    .key-facts-bar {
+        padding: 10px 12px;
+        gap: 10px 12px;
     }
-
-    .back-nav-button {
-        width: 100%;
-        justify-content: center;
+    .key-fact-col .fact-value {
+        font-size: 0.88rem;
     }
-
-    .project-title {
-        font-size: 1.5rem;
-    }
-
-    .project-info-section {
-        padding: 20px;
-    }
-
     .slider-container {
-        border-radius: 12px;
+        height: 215px;
     }
+}
 
-    .thumbnail {
-        width: 64px;
-        height: 44px;
-    }
+/* Inquiry Form KVKK Consent Styles */
+.inquiry-kvkk-group {
+    margin-top: 0.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.inquiry-kvkk-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.inquiry-kvkk-input {
+    margin-top: 3px;
+    accent-color: #e5a93c;
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.inquiry-kvkk-text {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #94a3b8;
+}
+
+.inquiry-kvkk-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 600;
+    color: #e5a93c;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s ease;
+}
+
+.inquiry-kvkk-btn:hover {
+    color: #f0b74b;
 }

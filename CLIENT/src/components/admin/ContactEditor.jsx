@@ -81,18 +81,18 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900">Contact Section Düzenle</h3>
-        <p className="text-sm text-gray-600 mt-1">İletişim bölümünü özelleştirin</p>
+    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+      <div className="px-6 py-4.5 border-b border-slate-200/80 bg-slate-50/50">
+        <h3 className="text-base font-bold text-slate-900 tracking-tight">İletişim & Harita Formu</h3>
+        <p className="text-xs text-slate-500 mt-0.5">Ziyaretçilerin size ulaşabileceği kurumsal iletişim kanallarını güncelleyin.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="p-6 sm:p-7 space-y-6">
         {/* İletişim Bilgileri */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-              Adres *
+            <label htmlFor="address" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-mono">
+              Fiziki Ofis Adresi <span className="text-red-500">*</span>
             </label>
             <textarea
               id="address"
@@ -101,14 +101,30 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
               onChange={handleChange}
               required
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Adres bilgisi"
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white leading-relaxed"
+              placeholder="Merkez ofis adres bilgisi"
             />
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-              Telefon *
+            <label htmlFor="workingHours" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-mono">
+              Çalışma Saatleri & Günler <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              id="workingHours"
+              name="workingHours"
+              rows={3}
+              value={formData.workingHours}
+              onChange={handleChange}
+              required
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white leading-relaxed"
+              placeholder={`Pazartesi - Cuma: 09:00 - 18:00\nCumartesi: 09:00 - 14:00`}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="phone" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-mono">
+              Telefon Numarası <span className="text-red-500">*</span>
             </label>
             <input
               type="tel"
@@ -119,14 +135,14 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
               required
               inputMode="numeric"
               maxLength={17}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white font-mono"
               placeholder="+90 555 555 55 55"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              E-posta *
+            <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-mono">
+              Resmi E-Posta Adresi <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -135,86 +151,81 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="info@example.com"
-            />
-          </div>
-
-
-          <div>
-            <label htmlFor="workingHours" className="block text-sm font-medium text-gray-700 mb-2">
-              Çalışma Saatleri *
-            </label>
-            <textarea
-              id="workingHours"
-              name="workingHours"
-              rows={4}
-              value={formData.workingHours}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder={`P.tesi - Cuma: 10:00 - 18:00\nC.tesi: 10:00 - 15:00\nPazar: Kapalı`}
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white"
+              placeholder="info@hastugg.com"
             />
           </div>
         </div>
 
         {/* Sosyal Medya Linkleri */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Sosyal Medya Linkleri
+        <div className="pt-4 border-t border-slate-200">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 font-mono">
+            Sosyal Medya Bağlantıları
           </label>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-gray-600 mb-1">Facebook</label>
-              <input
-                type="url"
-                value={formData.socialLinks.facebook}
-                onChange={(e) => handleSocialLinkChange('facebook', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Facebook URL"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">Twitter</label>
-              <input
-                type="url"
-                value={formData.socialLinks.twitter}
-                onChange={(e) => handleSocialLinkChange('twitter', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Twitter URL"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">Instagram</label>
+              <label className="block text-xs text-slate-600 mb-1 flex items-center gap-1.5 font-medium">
+                <FaInstagram className="text-pink-600" />
+                Instagram URL
+              </label>
               <input
                 type="url"
                 value={formData.socialLinks.instagram}
                 onChange={(e) => handleSocialLinkChange('instagram', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Instagram URL"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white"
+                placeholder="https://instagram.com/hastugg"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-gray-600 mb-1">LinkedIn</label>
+              <label className="block text-xs text-slate-600 mb-1 flex items-center gap-1.5 font-medium">
+                <FaLinkedin className="text-blue-600" />
+                LinkedIn URL
+              </label>
               <input
                 type="url"
                 value={formData.socialLinks.linkedin}
                 onChange={(e) => handleSocialLinkChange('linkedin', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="LinkedIn URL"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white"
+                placeholder="https://linkedin.com/company/hastugg"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs text-slate-600 mb-1 flex items-center gap-1.5 font-medium">
+                <FaFacebook className="text-blue-700" />
+                Facebook URL
+              </label>
+              <input
+                type="url"
+                value={formData.socialLinks.facebook}
+                onChange={(e) => handleSocialLinkChange('facebook', e.target.value)}
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white"
+                placeholder="https://facebook.com/hastugg"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs text-slate-600 mb-1 flex items-center gap-1.5 font-medium">
+                <FaTwitter className="text-slate-800" />
+                X / Twitter URL
+              </label>
+              <input
+                type="url"
+                value={formData.socialLinks.twitter}
+                onChange={(e) => handleSocialLinkChange('twitter', e.target.value)}
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white"
+                placeholder="https://x.com/hastugg"
               />
             </div>
           </div>
         </div>
 
         {/* Harita Embed URL */}
-        <div>
-          <label htmlFor="mapEmbedUrl" className="block text-sm font-medium text-gray-700 mb-2">
-            Google Maps Embed URL
+        <div className="pt-4 border-t border-slate-200">
+          <label htmlFor="mapEmbedUrl" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-mono">
+            Google Maps Harita Yerleştirme (Embed) URL
           </label>
           <input
             type="url"
@@ -222,11 +233,11 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
             name="mapEmbedUrl"
             value={formData.socialLinks.mapEmbedUrl}
             onChange={(e) => handleSocialLinkChange('mapEmbedUrl', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white font-mono text-xs"
             placeholder="https://www.google.com/maps/embed?pb=..."
           />
-          <p className="text-xs text-gray-500 mt-1">
-            Google Maps'ten "Haritayı paylaş"  "Haritayı yerleştir" seçeneğinden alabilirsiniz
+          <p className="text-xs text-slate-400 mt-1.5">
+            Google Haritalar üzerinden "Paylaş" → "Haritayı Yerleştir" seçeneğindeki iframe src linkini yapıştırabilirsiniz.
           </p>
         </div>
 
@@ -234,7 +245,7 @@ const ContactEditor = ({ contactData = null, onSave, onCancel }) => {
         <FormButtons
           onSave={handleSubmit}
           onCancel={onCancel}
-          saveText="Kaydet"
+          saveText="İletişim Bilgilerini Kaydet"
           isLoading={isLoading}
         />
       </form>

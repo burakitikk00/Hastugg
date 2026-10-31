@@ -6,42 +6,6 @@ import publicService from '../../services/publicService';
 import logger from '../../utils/logger';
 import './Services.css';
 
-// Varsayılan / Anında Yüklenen Mimari Hizmetler (Backend gecikse bile sıfır bekleme)
-const DEFAULT_SERVICES = [
-    {
-        id: 11,
-        service: 'Mimari Tasarım & Projelendirme',
-        description: 'Uygulama projeleri, kat planları, kesit ve görünüş çizimleri, 3D modelleme ve render alma hizmetleri ile konseptten ruhsata eksiksiz mimari projelendirme.',
-        url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-        tags: ['3D BIM MODELLEME', 'RUHSAT PROJESİ', 'STATİK ÇÖZÜMLER', 'MALZEME DETAYI'],
-        stamp: 'A+ MİMARİ STANDART'
-    },
-    {
-        id: 12,
-        service: 'Lüks Konut & Villa İnşaatı',
-        description: 'Depreme tam dayanıklı ileri statik karkas mühendisliği, modern akıllı ev altyapısı ve birinci sınıf malzeme işçiliği ile anahtar teslim lüks yaşam alanları.',
-        url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
-        tags: ['STATİK GÜVENCE', 'AKILLI YAPI SİSTEMİ', 'BİRİNCİ SINIF İŞÇİLİK', 'ANAHTAR TESLİM'],
-        stamp: 'DEPREME TAM GÜVENCE'
-    },
-    {
-        id: 13,
-        service: 'Kentsel Dönüşüm & Statik Güçlendirme',
-        description: 'Mevcut binaların ileri teknolojiyle deprem risk analizi, zemin etüdü doğrulaması, yapısal güçlendirme projeleri ve güvenli kentsel yenileme taahhüdü.',
-        url: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=1200&q=80',
-        tags: ['DEPREM RİSK ANALİZİ', 'KARBON LİF GÜÇLENDİRME', 'YASAL SÜREÇ YÖNETİMİ'],
-        stamp: 'TSE ONAYLI MÜHENDİSLİK'
-    },
-    {
-        id: 14,
-        service: 'Saha Uygulama & Şantiye Denetimi',
-        description: 'Saha uygulama takibi, keşif-metraj çalışmaları, hakediş düzenleme ve tüm inşaat aşamalarında milimetrik tolerans denetimi ile şantiye disiplini.',
-        url: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80',
-        tags: ['MİLİMETRİK DENETİM', 'METRAJ & HAKEDİŞ', 'İŞ GÜVENLİĞİ DİSİPLİNİ'],
-        stamp: 'ŞANTİYE GÜVENCESİ'
-    }
-];
-
 const SCOPE_TAGS_MAP = {
     0: ['3D BIM MODELLEME', 'RUHSAT PROJESİ', 'STATİK ÇÖZÜMLER', 'MALZEME DETAYI'],
     1: ['MİLİMETRİK DENETİM', 'METRAJ & HAKEDİŞ', 'İŞ GÜVENLİĞİ DİSİPLİNİ', 'ANAHTAR TESLİM'],
@@ -56,16 +20,9 @@ const STAMP_LIST = [
     'TSE ONAYLI MÜHENDİSLİK'
 ];
 
-const FALLBACK_IMAGES = [
-    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=1200&q=80'
-];
-
 const Services = () => {
     const navigate = useNavigate();
-    const [services, setServices] = useState(DEFAULT_SERVICES);
+    const [services, setServices] = useState([]);
 
     useEffect(() => {
         let isMounted = true;
@@ -76,24 +33,26 @@ const Services = () => {
                 if (isMounted && Array.isArray(servicesData) && servicesData.length > 0) {
                     // Veritabanından gelen verileri mimari kart yapısıyla zenginleştir
                     const enriched = servicesData.map((item, index) => {
-                        const fallbackImg = FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
-                        const resolvedUrl = item.url ? publicService.getImageURL(item.url) : fallbackImg;
-                        const validUrl = (resolvedUrl && !resolvedUrl.includes('placeholder')) ? resolvedUrl : fallbackImg;
+                        const resolvedUrl = item.url ? publicService.getImageURL(item.url) : '';
+                        const dbTags = Array.isArray(item.scope_tags) && item.scope_tags.length > 0 
+                            ? item.scope_tags 
+                            : (SCOPE_TAGS_MAP[index % 4] || []);
 
                         return {
                             id: item.id || (index + 1),
                             service: item.service || `Hizmet ${index + 1}`,
-                            description: item.description || 'Detaylı mimari ve mühendislik hizmet kapsamı.',
-                            url: validUrl,
-                            tags: SCOPE_TAGS_MAP[index % 4],
-                            stamp: STAMP_LIST[index % STAMP_LIST.length]
+                            description: item.short_description || item.description || '',
+                            url: resolvedUrl,
+                            tags: dbTags,
+                            stamp: item.stamp || STAMP_LIST[index % STAMP_LIST.length] || 'A+ MİMARİ STANDART',
+                            category: item.category || 'Mimarlık & Mühendislik'
                         };
                     });
 
                     setServices(enriched);
                 }
             } catch (error) {
-                logger.warn('Hizmetler yüklenirken varsayılan içerikler devrede:', error?.message);
+                logger.warn('Hizmetler yüklenirken hata:', error?.message);
             }
         };
 
@@ -132,11 +91,27 @@ const Services = () => {
                     </p>
                 </motion.div>
 
-                {/* Üst Üste Binen Lüks Kartlar (Sticky Card Deck) */}
                 <div className="services-deck">
-                    {services.map((item, index) => {
+                    {services.length === 0 ? (
+                        <div
+                            className="service-stack-card animate-pulse"
+                            style={{
+                                minHeight: '260px',
+                                background: '#0a0f1d',
+                                border: '1px dashed rgba(197, 168, 128, 0.25)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <span style={{ color: 'rgba(197, 168, 128, 0.5)', fontSize: '0.72rem', letterSpacing: '0.22em', fontFamily: 'monospace' }}>
+                                HİZMETLER & MİMARİ ÇÖZÜMLER SENKRONİZE EDİLİYOR...
+                            </span>
+                        </div>
+                    ) : (
+                        services.map((item, index) => {
                         // Her kart için dinamik sticky üst mesafe (z-index katmanlanması)
-                        const stickyTop = `calc(6.5rem + ${index * 26}px)`;
+                        const stickyTop = `calc(5.75rem + ${index * 20}px)`;
                         const zIndexValue = index + 10;
 
                         return (
@@ -196,7 +171,7 @@ const Services = () => {
                                     {/* Sağ Taraf: Yüksek Çözünürlüklü Mimari Görsel */}
                                     <div className="service-visual-pane">
                                         <img
-                                            src={item.url}
+                                            src={item.url || undefined}
                                             alt={item.service}
                                             className="service-showcase-img"
                                             loading="lazy"
@@ -212,7 +187,7 @@ const Services = () => {
                                 </div>
                             </motion.article>
                         );
-                    })}
+                    }))}
                 </div>
             </div>
         </section>

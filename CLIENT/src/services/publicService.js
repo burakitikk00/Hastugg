@@ -110,19 +110,42 @@ class PublicService {
     }
   }
 
+  clearCache(key = null) {
+    if (key) {
+      delete this.cache[key];
+    } else {
+      this.cache = {};
+    }
+  }
+
   // Hero verilerini getir
   async getHero() {
-    return this.request('/hero');
+    if (this.cache.hero) {
+      return this.cache.hero;
+    }
+    const data = await this.request('/hero');
+    this.cache.hero = data;
+    return data;
   }
 
   // About verilerini getir
   async getAbout() {
-    return this.request('/about');
+    if (this.cache.about) {
+      return this.cache.about;
+    }
+    const data = await this.request('/about');
+    this.cache.about = data;
+    return data;
   }
 
   // İletişim bilgilerini getir
   async getContact() {
-    return this.request('/contact');
+    if (this.cache.contact) {
+      return this.cache.contact;
+    }
+    const data = await this.request('/contact');
+    this.cache.contact = data;
+    return data;
   }
 
   // Projeleri getir

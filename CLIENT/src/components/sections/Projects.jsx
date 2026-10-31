@@ -5,47 +5,12 @@ import publicService from '../../services/publicService';
 import logger from '../../utils/logger';
 import './Projects.css';
 
-// Varsayılan / Anında Yüklenen Mimari Projeler (Sıfır bekleme garantisi)
-const DEFAULT_PROJECTS = [
-    {
-        id: 4,
-        title: 'Vadi Konakları',
-        description: 'Doğayla bütünleşik modern villa mimarisi, yüksek tavanlı yaşam alanları ve depreme tam dayanıklı ileri karkas statik mühendisliği.',
-        status: 'Completed',
-        url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-        images: [
-            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80'
-        ]
-    },
-    {
-        id: 2,
-        title: 'Studio Life',
-        description: 'Metropol silüetine değer katan kompakt lüks rezidans konsepti, modüler iç mimari çözümler ve akıllı otomasyon sistemleri.',
-        status: 'Completed',
-        url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
-        images: [
-            'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80'
-        ]
-    },
-    {
-        id: 1,
-        title: 'Suna ve İnan Kıraç Vakfı Restorasyonu',
-        description: 'Tarihi tescilli kagir yapının geleneksel malzeme dokusu korunarak güçlendirilmesi ve modern mühendislik standartlarıyla geleceğe taşınması.',
-        status: 'In Progress',
-        url: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=1200&q=80',
-        images: [
-            'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=1200&q=80'
-        ]
-    }
-];
-
 const Projects = () => {
     const navigate = useNavigate();
     const reelContainerRef = useRef(null);
     const cardRefs = useRef([]);
 
-    const [projects, setProjects] = useState(DEFAULT_PROJECTS);
+    const [projects, setProjects] = useState([]);
     const [selectedFilter, setSelectedFilter] = useState('all');
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -57,20 +22,20 @@ const Projects = () => {
             try {
                 const data = await publicService.getProjects();
                 if (isMounted && Array.isArray(data) && data.length > 0) {
-                    const resolved = data.map((item, idx) => {
-                        const fallbackUrl = DEFAULT_PROJECTS[idx % DEFAULT_PROJECTS.length].url;
-                        const mainUrl = item.url ? publicService.getImageURL(item.url) : fallbackUrl;
-                        const validUrl = (mainUrl && !mainUrl.includes('placeholder')) ? mainUrl : fallbackUrl;
+                    const resolved = data.map((item) => {
+                        const mainUrl = item.url 
+                            ? publicService.getImageURL(item.url) 
+                            : (item.images && item.images.length > 0 ? publicService.getImageURL(item.images[0]) : '');
 
                         return {
                             ...item,
-                            url: validUrl
+                            url: mainUrl
                         };
                     });
                     setProjects(resolved);
                 }
             } catch (err) {
-                logger.warn('Projeler yüklenirken varsayılan mimari içerikler devrede:', err?.message);
+                logger.warn('Projeler yüklenirken hata:', err?.message);
             }
         };
 
@@ -259,7 +224,26 @@ const Projects = () => {
                     aria-label="Projeler listesi"
                 >
                     <div className="projects-reel-track">
-                        {filteredProjects.map((project, index) => {
+                        {projects.length === 0 ? (
+                            [1, 2].map((sk) => (
+                                <article
+                                    key={`sk-${sk}`}
+                                    className="panoramic-project-card animate-pulse"
+                                    style={{ opacity: 0.5, border: '1px dashed rgba(197, 168, 128, 0.25)' }}
+                                >
+                                    <div className="project-card-visual" style={{ background: '#0a0f1d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <span style={{ color: 'rgba(197, 168, 128, 0.5)', fontSize: '0.7rem', letterSpacing: '0.2em', fontFamily: 'monospace' }}>
+                                            MİMARİ PORTFÖY SENKRONİZE EDİLİYOR...
+                                        </span>
+                                    </div>
+                                    <div className="project-card-body">
+                                        <div style={{ height: '20px', width: '60%', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', marginBottom: '12px' }} />
+                                        <div style={{ height: '14px', width: '90%', background: 'rgba(255,255,255,0.04)', borderRadius: '4px' }} />
+                                    </div>
+                                </article>
+                            ))
+                        ) : (
+                            filteredProjects.map((project, index) => {
                             const statusInfo = getStatusLabel(project.status);
                             const imageCount = project.images?.length || 4;
                             const isActive = index === activeIndex;
@@ -275,7 +259,7 @@ const Projects = () => {
                                     {/* Proje Görseli */}
                                     <div className="project-card-visual">
                                         <img
-                                            src={project.url}
+                                            src={project.url || undefined}
                                             alt={project.title}
                                             className="project-cover-img"
                                             loading="lazy"
@@ -321,7 +305,7 @@ const Projects = () => {
                                     </div>
                                 </article>
                             );
-                        })}
+                        }))}
                     </div>
                 </div>
 

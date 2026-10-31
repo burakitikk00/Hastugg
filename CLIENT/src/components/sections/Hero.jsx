@@ -5,47 +5,36 @@ import publicService from '../../services/publicService';
 import logger from '../../utils/logger';
 import './Hero.css';
 
-// Varsayılan / Anında Yüklenen Mimari İçerikler (Backend gecikse bile sıfır bekleme)
-const DEFAULT_HERO = {
-    mainTitle: 'Hayalinizdeki Yapıları Kusursuz İşçilikle Gerçeğe Dönüştürüyoruz',
-    subheading: 'Modern mimari vizyon, ileri statik mühendislik ve şeffaf süreç yönetimiyle konut ve ticari yaşam alanlarınızı geleceğe taşıyoruz.'
-};
-
-const DEFAULT_CONTACT = {
-    address: 'Bağdat Caddesi No:142, Kadıköy / İstanbul',
-    phone: '+90 (216) 450 80 90',
-    email: 'info@hastug.com'
-};
-
-// Sabit Mimari Mühendislik Metrikleri (The Blueprint Metrics)
-const ARCHITECTURAL_METRICS = [
-    { value: '150+', label: 'Tamamlanan Prestij Projesi' },
-    { value: '%100', label: 'Statik & Deprem Güvencesi' },
-    { value: '15+', label: 'Yıllık Mimari Deneyim' },
-    { value: 'A+', label: 'Enerji & Malzeme Kalitesi' }
-];
-
 const Hero = () => {
-    // İlk render anında doğrudan varsayılan içerikle başlar (kullanıcıya bekleme çarkı göstermez)
-    const [heroData, setHeroData] = useState(DEFAULT_HERO);
-    const [contactData, setContactData] = useState(DEFAULT_CONTACT);
+    const [heroData, setHeroData] = useState({
+        mainTitle: '',
+        subheading: ''
+    });
+    const [contactData, setContactData] = useState({
+        address: '',
+        phone: '',
+        email: ''
+    });
+    const [metrics, setMetrics] = useState([]);
 
     useEffect(() => {
         let isMounted = true;
 
         const fetchDynamicData = async () => {
             try {
-                // 1. Değişebilir Hero Verilerini Getir
+                // 1. Değişebilir Hero Verilerini ve Metrikleri Getir
                 const heroResponse = await publicService.getHero();
                 if (isMounted && heroResponse) {
-                    const fetchedTitle = heroResponse.mainTitle || heroResponse.maintitle;
-                    const fetchedSubheading = heroResponse.subheading;
+                    const fetchedTitle = heroResponse.mainTitle || heroResponse.maintitle || '';
+                    const fetchedSubheading = heroResponse.subheading || '';
 
-                    if (fetchedTitle || fetchedSubheading) {
-                        setHeroData(prev => ({
-                            mainTitle: fetchedTitle || prev.mainTitle,
-                            subheading: fetchedSubheading || prev.subheading
-                        }));
+                    setHeroData({
+                        mainTitle: fetchedTitle,
+                        subheading: fetchedSubheading
+                    });
+
+                    if (Array.isArray(heroResponse.metrics)) {
+                        setMetrics(heroResponse.metrics);
                     }
                 }
 
@@ -54,14 +43,13 @@ const Hero = () => {
                 if (isMounted && contactResponse && contactResponse.length > 0) {
                     const contact = contactResponse[0];
                     setContactData({
-                        address: contact.address || DEFAULT_CONTACT.address,
-                        phone: contact.phone || DEFAULT_CONTACT.phone,
-                        email: contact.email || DEFAULT_CONTACT.email
+                        address: contact.address || '',
+                        phone: contact.phone || '',
+                        email: contact.email || ''
                     });
                 }
             } catch (error) {
-                // Backend gecikse veya hata verse dahi varsayılan kaliteli içerikler kesintisiz görünür
-                logger.warn('Backend verisi beklenirken varsayılan mimari içerikler devrede:', error?.message);
+                logger.warn('Hero verisi yüklenirken hata:', error?.message);
             }
         };
 
@@ -85,10 +73,9 @@ const Hero = () => {
         }
     };
 
-    // Dinamik başlıkta vurgulu ayrım yapma (varsa mimarlık/inşaat ayrımı)
+    // Dinamik başlıkta vurgulu ayrım yapma
     const renderTitle = (rawTitle) => {
-        if (!rawTitle) return DEFAULT_HERO.mainTitle;
-        return rawTitle;
+        return rawTitle || '';
     };
 
     return (
@@ -138,10 +125,10 @@ const Hero = () => {
                         </button>
                     </div>
 
-                    {/* Sabit Mimari Güvence Metrikleri (The Blueprint Metrics) */}
+                    {/* Dinamik Mimari Güvence Metrikleri (The Blueprint Metrics) */}
                     <div className="hero-metrics-grid">
-                        {ARCHITECTURAL_METRICS.map((metric, idx) => (
-                            <div key={idx} className="metric-item">
+                        {metrics.map((metric, idx) => (
+                            <div key={metric.id || idx} className="metric-item">
                                 <span className="metric-value">
                                     {metric.value}
                                 </span>

@@ -1,5 +1,7 @@
 import AdminLayout from '../../components/admin/AdminLayout';
 import ContactEditor from '../../components/admin/ContactEditor';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
+import AdminLoadingState from '../../components/admin/AdminLoadingState';
 import { useState, useEffect } from 'react';
 import publicService from '../../services/publicService';
 import adminService from '../../services/adminService';
@@ -61,7 +63,7 @@ const ContactPage = () => {
       const payload = {
         id: sectionData.id,
         address: sectionData.address,
-        phone: sectionData.phone, // already formatted as x xxx xxx xx xx
+        phone: sectionData.phone,
         email: sectionData.email,
         facebook: sectionData.socialLinks?.facebook || '',
         twitter: sectionData.socialLinks?.twitter || '',
@@ -70,7 +72,6 @@ const ContactPage = () => {
         mapEmbedUrl: sectionData.socialLinks?.mapEmbedUrl || ''
       };
       await adminService.saveContact(payload);
-      // Çalışma saatlerini local'e yaz
       localStorage.setItem('workingHours', sectionData.workingHours || '');
       alert('İletişim bilgileri başarıyla kaydedildi!');
     } catch (error) {
@@ -82,20 +83,21 @@ const ContactPage = () => {
   };
 
   const handleCancel = () => {
-    // İptal işlemi - form verilerini sıfırla
+    // İptal işlemi
   };
 
   return (
     <AdminLayout>
       <div className="space-y-6">
-        {/* Page Header */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-gray-900">İletişim Yönetimi</h1>
-          <p className="text-gray-600 mt-2">İletişim bölümünü buradan düzenleyebilirsiniz</p>
-        </div>
+        <AdminPageHeader
+          title="İletişim & Ofis Bilgileri"
+          subtitle="Merkez ofis adresi, doğrudan irtibat telefonları, resmi e-posta, çalışma saatleri ve harita konumunu yapılandırın."
+          badge="Kurumsal İletişim"
+        />
 
-        {/* Contact Editor */}
-        {contactData && (
+        {!contactData ? (
+          <AdminLoadingState type="form" message="İletişim bilgileri yükleniyor..." />
+        ) : (
           <ContactEditor
             contactData={contactData}
             onSave={handleSave}

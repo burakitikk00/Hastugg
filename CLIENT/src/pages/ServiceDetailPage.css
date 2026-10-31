@@ -1,441 +1,1189 @@
-/* Service Detail Page Styles */
+/* ==========================================================================
+   Service Detail Page Styles - The Blueprint Atelier Design System
+   Hastugg Construction & Architecture
+   ========================================================================== */
+
 .service-detail-page {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    background-color: #07090e;
+    background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(229, 169, 60, 0.08), transparent 70%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 48px 48px, 48px 48px;
+    color: #f8fafc;
     overflow-x: hidden;
     width: 100%;
     max-width: 100%;
     position: relative;
+    font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .service-detail-main {
     flex: 1;
-    padding: 120px 5% 60px;
-    max-width: 1400px;
+    padding: 130px 5% 100px;
+    max-width: 1280px;
     margin: 0 auto;
     width: 100%;
+    box-sizing: border-box;
 }
 
-/* Back Button */
-.back-nav-button {
+/* --------------------------------------------------------------------------
+   Blueprint Tags & Typography Tokens
+   -------------------------------------------------------------------------- */
+.blueprint-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: #e5a93c;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.section-header-centered {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 48px;
+}
+
+.section-header-left {
+    max-width: 760px;
+    margin-bottom: 36px;
+}
+
+.section-main-heading {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #f8fafc;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    margin: 0 0 10px;
+}
+
+.section-sub-desc {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   1. Üst Navigasyon & Breadcrumbs
+   -------------------------------------------------------------------------- */
+.service-top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.service-back-button {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 24px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-bottom: 30px;
-}
-
-.back-nav-button:hover {
-    background: rgba(212, 175, 55, 0.2);
-    border-color: #d4af37;
-    color: #d4af37;
-}
-
-/* Loading & Error States */
-.loading-container,
-.error-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 50vh;
-    color: #fff;
-    text-align: center;
-}
-
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
-    border-top-color: #d4af37;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.error-container h2 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    color: #e74c3c;
-}
-
-.error-container .back-button {
-    margin-top: 20px;
-    padding: 12px 30px;
-    background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
-    border: none;
-    border-radius: 8px;
-    color: #000;
+    padding: 8px 16px;
+    background: rgba(20, 27, 39, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #cbd5e1;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: all 0.25s ease;
 }
 
-.error-container .back-button:hover {
-    transform: scale(1.05);
+.service-back-button:hover {
+    background: rgba(229, 169, 60, 0.12);
+    border-color: rgba(229, 169, 60, 0.4);
+    color: #e5a93c;
+    transform: translateX(-3px);
 }
 
-/* Service Header Section */
-.service-header-section {
-    margin-bottom: 60px;
+.service-breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #64748b;
 }
 
-.service-header-content {
+.crumb-link {
+    cursor: pointer;
+    color: #94a3b8;
+    transition: color 0.2s ease;
+}
+
+.crumb-link:hover {
+    color: #e5a93c;
+}
+
+.crumb-sep {
+    color: #475569;
+}
+
+.crumb-cat {
+    color: #cbd5e1;
+}
+
+.crumb-current {
+    color: #e5a93c;
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   2. Hero Header
+   -------------------------------------------------------------------------- */
+.service-hero-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 28px;
+    margin-bottom: 36px;
+}
+
+.hero-header-left {
+    flex: 1;
+    min-width: 300px;
+}
+
+.service-badge-strip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.service-stamp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 12px;
+    background: rgba(229, 169, 60, 0.12);
+    border: 1px solid rgba(229, 169, 60, 0.35);
+    border-radius: 9999px;
+    color: #f3c778;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.stamp-pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #e5a93c;
+    box-shadow: 0 0 8px #e5a93c;
+    animation: pulseGlow 2s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.5; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+.service-category-tag {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.service-main-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800;
+    color: #f8fafc;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin: 0 0 16px;
+}
+
+.service-summary-lead {
+    font-size: 1.05rem;
+    color: #cbd5e1;
+    line-height: 1.7;
+    max-width: 760px;
+    margin: 0;
+}
+
+.hero-header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-self: center;
+}
+
+.btn-service-inquiry {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #e5a93c 0%, #b87c14 100%);
+    color: #07090e;
+    font-weight: 700;
+    font-size: 14px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(229, 169, 60, 0.25);
+    transition: all 0.25s ease;
+}
+
+.btn-service-inquiry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(229, 169, 60, 0.35);
+    background: linear-gradient(135deg, #f3c778 0%, #e5a93c 100%);
+}
+
+.btn-service-call {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 20px;
+    background: rgba(20, 27, 39, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    color: #f8fafc;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.btn-service-call:hover {
+    border-color: rgba(229, 169, 60, 0.5);
+    color: #e5a93c;
+    background: rgba(20, 27, 39, 1);
+}
+
+/* --------------------------------------------------------------------------
+   3. Key Facts / Matrix Bar
+   -------------------------------------------------------------------------- */
+.service-matrix-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 48px;
+    padding: 20px 24px;
+    background: #0d121c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.matrix-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.matrix-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.matrix-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+/* --------------------------------------------------------------------------
+   4. Overview / İki Kolonlu Grid
+   -------------------------------------------------------------------------- */
+.service-overview-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 40px;
-    backdrop-filter: blur(10px);
+    gap: 48px;
+    align-items: start;
+    margin-bottom: 72px;
 }
 
-.service-header-image {
+.service-cover-frame {
     position: relative;
-    border-radius: 16px;
+    border-radius: 20px;
     overflow: hidden;
-    aspect-ratio: 16/10;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    aspect-ratio: 16 / 10;
+    background: #0d121c;
 }
 
-.service-main-image {
+.service-cover-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
 }
 
-.service-header-info {
-    padding: 20px 0;
+.service-cover-frame:hover .service-cover-image {
+    transform: scale(1.03);
 }
 
-.service-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 20px;
-    background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.service-description {
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: rgba(255, 255, 255, 0.8);
-    white-space: pre-line;
-}
-
-/* Projects Section */
-.service-projects-section {
-    margin-top: 40px;
-}
-
-.projects-section-title {
-    font-size: 2rem;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 40px;
-    text-align: center;
-    position: relative;
-}
-
-.projects-section-title::after {
-    content: '';
+.blueprint-overlay-meta {
     position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 3px;
-    background: linear-gradient(90deg, #d4af37, #f4d03f);
-    border-radius: 2px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 18px;
+    background: linear-gradient(to top, rgba(7, 9, 14, 0.95), transparent);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: #cbd5e1;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Projects Grid */
-.projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 30px;
+.bp-meta-code {
+    color: #e5a93c;
+    font-weight: 700;
 }
 
-/* Project Card */
-.project-card {
-    background: rgba(255, 255, 255, 0.05);
+.bp-meta-status {
+    color: #94a3b8;
+}
+
+.service-tags-box {
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(20, 27, 39, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+}
+
+.tags-box-label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #e5a93c;
+    margin-bottom: 10px;
+}
+
+.service-tags-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.scope-tag-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
+    padding: 4px 10px;
+    border-radius: 6px;
 }
 
-.project-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(212, 175, 55, 0.5);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+.blueprint-section-badge {
+    margin-bottom: 12px;
 }
 
-.project-image-container {
+.bp-badge-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #e5a93c;
+    text-transform: uppercase;
+}
+
+.overview-heading {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: #f8fafc;
+    line-height: 1.3;
+    margin: 0 0 20px;
+}
+
+.overview-paragraphs {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.overview-para {
+    font-size: 0.975rem;
+    color: #94a3b8;
+    line-height: 1.75;
+    margin: 0;
+}
+
+.overview-para:first-child::first-letter {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #e5a93c;
+    float: left;
+    margin-right: 8px;
+    line-height: 1;
+}
+
+.service-features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.service-feature-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    background: rgba(20, 27, 39, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    transition: border-color 0.25s ease;
+}
+
+.service-feature-card:hover {
+    border-color: rgba(229, 169, 60, 0.3);
+}
+
+.feature-icon-box {
+    color: #e5a93c;
+    font-size: 18px;
+    margin-top: 2px;
+}
+
+.feature-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 4px;
+}
+
+.feature-desc {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   5. Süreç Yol Haritası (Process Roadmap)
+   -------------------------------------------------------------------------- */
+.service-process-section {
+    margin-bottom: 80px;
+    padding: 56px 36px;
+    background: #0d121c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.process-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.process-step-card {
     position: relative;
-    aspect-ratio: 16/10;
+    padding: 24px 20px;
+    background: #141b27;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    transition: all 0.3s ease;
+}
+
+.process-step-card:hover {
+    border-color: rgba(229, 169, 60, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.step-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #e5a93c;
+}
+
+.step-duration {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 10px;
+    line-height: 1.3;
+}
+
+.step-desc {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.step-corner-mark {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+    border-bottom: 2px solid rgba(229, 169, 60, 0.4);
+    border-right: 2px solid rgba(229, 169, 60, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   6. Çıktılar & Teslimatlar (Deliverables Grid)
+   -------------------------------------------------------------------------- */
+.service-deliverables-section {
+    margin-bottom: 80px;
+}
+
+.deliverables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.deliverable-card {
+    padding: 26px 24px;
+    background: #141b27;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.deliverable-card:hover {
+    border-color: rgba(229, 169, 60, 0.35);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(229, 169, 60, 0.08);
+}
+
+.deliv-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(229, 169, 60, 0.12);
+    border: 1px solid rgba(229, 169, 60, 0.3);
+    color: #e5a93c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.deliv-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 8px;
+}
+
+.deliv-desc {
+    font-size: 0.88rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0 0 20px;
+}
+
+.deliv-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.08);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    align-self: flex-start;
+}
+
+/* --------------------------------------------------------------------------
+   7. İlgili Projeler (Related Projects)
+   -------------------------------------------------------------------------- */
+.service-projects-section {
+    margin-bottom: 80px;
+}
+
+.service-projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.service-project-card {
+    background: #141b27;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.service-project-card:hover {
+    border-color: rgba(229, 169, 60, 0.45);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+}
+
+.proj-thumb-frame {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: #0d121c;
     overflow: hidden;
 }
 
-.project-thumbnail {
+.proj-thumbnail {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.5s ease;
 }
 
-.project-card:hover .project-thumbnail {
-    transform: scale(1.1);
-}
-
-/* Status Badge */
-.project-status-badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    z-index: 2;
-}
-
-.status-badge {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.status-badge.completed {
-    background: linear-gradient(135deg, #27ae60, #2ecc71);
-    color: #fff;
-}
-
-.status-badge.in_progress,
-.status-badge.inprogress {
-    background: linear-gradient(135deg, #f39c12, #f1c40f);
-    color: #000;
-}
-
-.status-badge.planned {
-    background: linear-gradient(135deg, #3498db, #5dade2);
-    color: #fff;
-}
-
-.status-badge.on_hold,
-.status-badge.onhold {
-    background: linear-gradient(135deg, #e74c3c, #ec7063);
-    color: #fff;
-}
-
-/* Project Overlay */
-.project-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 50%, transparent 100%);
-    display: flex;
-    align-items: flex-end;
-    padding: 25px;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
-
-.project-card:hover .project-overlay {
-    opacity: 1;
-}
-
-.overlay-content {
-    width: 100%;
-}
-
-.overlay-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 8px;
-    word-break: break-word;
-    overflow-wrap: break-word;
-}
-
-.overlay-description {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.4;
-    margin-bottom: 12px;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    word-break: break-word;
-}
-
-/* Metinlerin kendisinde seçim yapılmasını engelle (parent card tıklanabilir kalır) */
-.overlay-title,
-.overlay-description,
-.overlay-content {
-    pointer-events: none;
-    -webkit-user-select: none;
-    user-select: none;
-}
-
-.overlay-button {
-    pointer-events: auto;
-    padding: 10px 25px;
-    background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
-    border: none;
-    border-radius: 6px;
-    color: #000;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.overlay-button:hover {
+.service-project-card:hover .proj-thumbnail {
     transform: scale(1.05);
-    box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
 }
 
-/* Project Name Overlay (visible by default) */
-.project-name-overlay {
+.proj-status-badge {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    top: 14px;
+    left: 14px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    backdrop-filter: blur(8px);
+}
+
+.proj-status-badge.completed {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #6ee7b7;
+}
+
+.proj-status-badge.in-progress {
+    background: rgba(229, 169, 60, 0.2);
+    border: 1px solid rgba(229, 169, 60, 0.4);
+    color: #f3c778;
+}
+
+.proj-info {
     padding: 20px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
-    transition: opacity 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
 }
 
-.project-card:hover .project-name-overlay {
-    opacity: 0;
-}
-
-.project-name {
-    font-size: 1.1rem;
+.proj-category {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #e5a93c;
     font-weight: 600;
-    color: #fff;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.proj-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 8px;
+    line-height: 1.35;
+}
+
+.proj-location {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin: 0 0 16px;
+}
+
+.proj-action-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #e5a93c;
+    margin-top: auto;
+    transition: gap 0.2s ease;
+}
+
+.service-project-card:hover .proj-action-link {
+    gap: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   8. SSS (FAQs Accordion)
+   -------------------------------------------------------------------------- */
+.service-faqs-section {
+    margin-bottom: 80px;
+}
+
+.faqs-accordion-container {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.faq-accordion-item {
+    background: #0d121c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.25s ease;
+}
+
+.faq-accordion-item.active {
+    border-color: rgba(229, 169, 60, 0.4);
+}
+
+.faq-question-btn {
+    width: 100%;
+    padding: 20px 24px;
+    background: transparent;
+    border: none;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 1.02rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.faq-toggle-icon {
+    color: #e5a93c;
+    font-size: 18px;
+    shrink: 0;
+}
+
+.faq-answer-wrapper {
+    padding: 0 24px 20px;
+}
+
+.faq-answer-text {
+    font-size: 0.925rem;
+    color: #94a3b8;
+    line-height: 1.7;
     margin: 0;
 }
 
-/* No Projects */
-.no-projects {
+/* --------------------------------------------------------------------------
+   9. Teklif & Danışmanlık Formu
+   -------------------------------------------------------------------------- */
+.service-inquiry-section {
+    margin-bottom: 80px;
+    padding: 60px 40px;
+    background: linear-gradient(135deg, #0d121c 0%, #141b27 100%);
+    border: 1px solid rgba(229, 169, 60, 0.25);
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.inquiry-container {
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+.inquiry-header {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.inquiry-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 12px;
+}
+
+.inquiry-sub {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.inquiry-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.inquiry-form-grid .full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    background: #07090e;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    color: #f8fafc;
+    font-size: 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #e5a93c;
+    box-shadow: 0 0 0 3px rgba(229, 169, 60, 0.15);
+}
+
+.btn-submit-inquiry {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #e5a93c 0%, #b87c14 100%);
+    color: #07090e;
+    font-weight: 800;
+    font-size: 15px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 24px rgba(229, 169, 60, 0.25);
+}
+
+.btn-submit-inquiry:hover {
+    background: linear-gradient(135deg, #f3c778 0%, #e5a93c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(229, 169, 60, 0.35);
+}
+
+.inquiry-success-box {
+    text-align: center;
+    padding: 40px 20px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 16px;
+}
+
+.inquiry-success-box .success-icon {
+    font-size: 48px;
+    color: #34d399;
+    margin-bottom: 16px;
+}
+
+.inquiry-success-box h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    color: #f8fafc;
+    margin: 0 0 8px;
+}
+
+.inquiry-success-box p {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    margin: 0 0 20px;
+}
+
+.btn-new-inquiry {
+    padding: 10px 24px;
+    background: #141b27;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: #f8fafc;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.inquiry-error-msg {
+    grid-column: 1 / -1;
+    padding: 12px;
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    border-radius: 8px;
+    color: #fda4af;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   10. Diğer Hizmetler (Other Services Grid)
+   -------------------------------------------------------------------------- */
+.other-services-section {
+    margin-top: 40px;
+}
+
+.other-services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.other-service-card {
+    padding: 24px;
+    background: #0d121c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.other-service-card:hover {
+    border-color: rgba(229, 169, 60, 0.4);
+    transform: translateY(-3px);
+    background: #141b27;
+}
+
+.other-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.other-icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(229, 169, 60, 0.1);
+    border: 1px solid rgba(229, 169, 60, 0.25);
+    color: #e5a93c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.other-cat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.other-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 8px;
+}
+
+.other-desc {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.55;
+    margin: 0 0 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.other-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #e5a93c;
+    margin-top: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Loading & Error States
+   -------------------------------------------------------------------------- */
+.service-loading-container,
+.service-error-container {
+    min-height: 55vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     padding: 60px 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    border: 1px dashed rgba(255, 255, 255, 0.2);
 }
 
-.no-projects p {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 1.1rem;
+.service-blueprint-spinner {
+    width: 44px;
+    height: 44px;
+    border: 3px solid rgba(229, 169, 60, 0.15);
+    border-top-color: #e5a93c;
+    border-radius: 50%;
+    animation: bpSpin 0.9s linear infinite;
+    margin-bottom: 18px;
 }
 
-/* Responsive Design */
+@keyframes bpSpin {
+    to { transform: rotate(360deg); }
+}
+
+.service-loading-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: #e5a93c;
+}
+
+.service-error-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #f43f5e;
+    background: rgba(244, 63, 94, 0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+.service-error-container h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    color: #f8fafc;
+    margin: 0 0 10px;
+}
+
+.service-error-container p {
+    color: #94a3b8;
+    max-width: 480px;
+    margin: 0 0 24px;
+    line-height: 1.6;
+}
+
+.btn-service-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #141b27;
+    border: 1px solid rgba(229, 169, 60, 0.4);
+    border-radius: 10px;
+    color: #f8fafc;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+}
+
+.btn-service-back:hover {
+    background: #e5a93c;
+    color: #07090e;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Breakpoints
+   -------------------------------------------------------------------------- */
 @media (max-width: 992px) {
-    .service-header-content {
+    .service-overview-section {
         grid-template-columns: 1fr;
-        gap: 30px;
+        gap: 32px;
     }
 
-    .service-title {
-        font-size: 2rem;
+    .service-hero-header {
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    .projects-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
+    .hero-header-right {
+        align-self: flex-start;
     }
 }
 
 @media (max-width: 768px) {
     .service-detail-main {
-        padding: 100px 4% 40px;
+        padding: 100px 4% 60px;
     }
 
-    .service-header-content {
-        padding: 25px;
-    }
-
-    .service-title {
-        font-size: 1.75rem;
-    }
-
-    .service-description {
-        font-size: 1rem;
-    }
-
-    .projects-section-title {
-        font-size: 1.5rem;
-    }
-
-    .projects-grid {
+    .inquiry-form-grid {
         grid-template-columns: 1fr;
     }
 
-    .back-nav-button {
-        padding: 10px 18px;
-        font-size: 13px;
-    }
-}
-
-@media (max-width: 480px) {
-    .service-detail-main {
-        padding: 90px 3% 30px;
+    .service-inquiry-section {
+        padding: 36px 20px;
     }
 
-    .service-header-content {
-        padding: 20px;
+    .service-process-section {
+        padding: 36px 20px;
     }
 
-    .service-title {
-        font-size: 1.5rem;
+    .section-main-heading {
+        font-size: 1.65rem;
     }
 
-    .overlay-title {
-        font-size: 1rem;
-        /* Daha küçük font */
-        margin-bottom: 4px;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        /* Başlığı 2 satıra zorla */
-        line-clamp: 2;
-        -webkit-box-orient: vertical;
-    }
-
-    .overlay-description {
-        font-size: 0.7rem;
-        line-height: 1.2;
-        margin-bottom: 8px;
-        -webkit-line-clamp: 3;
-        /* Açıklamayı 3 satıra zorla */
-        line-clamp: 3;
+    .service-matrix-bar {
+        grid-template-columns: 1fr 1fr;
     }
 }

@@ -295,10 +295,112 @@
     }
 }
 
+.footer-copyright-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    align-items: center;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .footer-copyright-group {
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+
 .footer-copyright-text {
     font-size: 0.8rem;
     color: #64748b;
     margin: 0;
+    line-height: 1.4;
+}
+
+.footer-dev-credit {
+    position: relative;
+    padding-bottom: 0.35rem;
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    text-decoration: none;
+    width: fit-content;
+    margin: 0;
+}
+
+@media (min-width: 768px) {
+    .footer-dev-credit {
+        justify-content: flex-start;
+    }
+}
+
+.footer-dev-credit::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 22px;
+    height: 1.5px;
+    background: #e5a93c;
+    border-radius: 1px;
+    transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+
+.footer-dev-credit:hover::after {
+    width: 100%;
+    box-shadow: 0 0 8px rgba(229, 169, 60, 0.6);
+}
+
+.footer-dev-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    user-select: none;
+}
+
+.font-signature {
+    font-family: 'Caveat', cursive;
+}
+
+.footer-dev-sig {
+    font-family: 'Caveat', cursive;
+    color: #94a3b8;
+    line-height: 1;
+}
+
+.footer-legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 0.75rem;
+}
+
+.footer-legal-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #94a3b8;
+    font-size: 0.775rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.footer-legal-link:hover {
+    color: #e5a93c;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.footer-legal-separator {
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 0.65rem;
+    user-select: none;
 }
 
 .footer-bottom-code {

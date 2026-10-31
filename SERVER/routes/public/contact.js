@@ -70,7 +70,11 @@ const { contactFormLimiter } = require('../../server');
 // İletişim formu gönderimi
 router.post('/contact', contactFormLimiter, async (req, res) => {
     try {
-        const { firstName, lastName, email, phone, message } = req.body;
+        const firstName = (req.body.firstName || req.body.first_name || '').trim();
+        const lastName = (req.body.lastName || req.body.last_name || '').trim();
+        const email = (req.body.email || '').trim();
+        const phone = (req.body.phone || '').trim();
+        const message = (req.body.message || '').trim();
 
         if (!firstName || !lastName || !email || !phone || !message) {
             return res.status(400).json({ error: 'Tüm alanlar zorunludur' });

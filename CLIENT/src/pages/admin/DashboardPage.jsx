@@ -116,8 +116,12 @@ const DashboardPage = () => {
                 <FiInbox size={18} />
               </div>
             </div>
-            <div className="text-3xl font-extrabold text-slate-900 tracking-tight font-mono">
-              {isLoading ? '...' : messageStats.total}
+            <div className="text-3xl font-extrabold text-slate-900 tracking-tight font-mono h-9 flex items-center">
+              {isLoading ? (
+                <span className="inline-block w-12 h-7 bg-slate-100 rounded-lg animate-pulse" />
+              ) : (
+                messageStats.total
+              )}
             </div>
             <p className="text-xs text-slate-500 mt-2 flex items-center gap-1 group-hover:text-amber-600">
               <span>Mesaj havuzunu incele</span>
@@ -138,8 +142,12 @@ const DashboardPage = () => {
                 <FiMail size={18} />
               </div>
             </div>
-            <div className="text-3xl font-extrabold text-rose-600 tracking-tight font-mono">
-              {isLoading ? '...' : messageStats.unread}
+            <div className="text-3xl font-extrabold text-rose-600 tracking-tight font-mono h-9 flex items-center">
+              {isLoading ? (
+                <span className="inline-block w-12 h-7 bg-rose-100/50 rounded-lg animate-pulse" />
+              ) : (
+                messageStats.unread
+              )}
             </div>
             <p className="text-xs text-slate-500 mt-2 flex items-center gap-1 group-hover:text-rose-600">
               <span>Hemen yanıtla</span>
@@ -160,8 +168,12 @@ const DashboardPage = () => {
                 <FiSend size={18} />
               </div>
             </div>
-            <div className="text-3xl font-extrabold text-slate-900 tracking-tight font-mono">
-              {isLoading ? '...' : messageStats.sent}
+            <div className="text-3xl font-extrabold text-slate-900 tracking-tight font-mono h-9 flex items-center">
+              {isLoading ? (
+                <span className="inline-block w-12 h-7 bg-slate-100 rounded-lg animate-pulse" />
+              ) : (
+                messageStats.sent
+              )}
             </div>
             <p className="text-xs text-slate-500 mt-2">İletilen e-posta onayları</p>
           </div>

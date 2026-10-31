@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaEnvelope, FaCheck, FaTimes, FaArrowLeft } from 'react-icons/fa';
+import { FiMail, FiArrowLeft, FiCheck, FiAlertTriangle } from 'react-icons/fi';
 import adminService from '../../services/adminService';
 
 const ForgotPasswordForm = ({ onBackToLogin }) => {
@@ -10,41 +10,18 @@ const ForgotPasswordForm = ({ onBackToLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!email.trim()) {
-      setMessage({
-        type: 'error',
-        text: 'E-posta adresi zorunludur.'
-      });
-      return;
-    }
-
-    // Basit e-posta validasyonu
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setMessage({
-        type: 'error',
-        text: 'Geçerli bir e-posta adresi girin.'
-      });
-      return;
-    }
-
     setIsLoading(true);
     setMessage({ type: '', text: '' });
 
     try {
       const response = await adminService.forgotPassword(email);
-      
+      setIsEmailSent(true);
       setMessage({
         type: 'success',
         text: response.message || 'Şifre sıfırlama e-postası başarıyla gönderildi!'
       });
-      
-      setIsEmailSent(true);
-      
     } catch (error) {
-      // 404 hatası için özel mesaj
-      if (error.message.includes('kayıtlı değil')) {
+      if (error.response?.status === 404) {
         setMessage({
           type: 'error',
           text: 'Bu e-posta adresi sistemde kayıtlı değil. Lütfen doğru e-posta adresini girin.'
@@ -62,77 +39,77 @@ const ForgotPasswordForm = ({ onBackToLogin }) => {
 
   if (isEmailSent) {
     return (
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <FaCheck className="w-8 h-8 text-green-600" />
-          </div>
+      <div className="relative z-10 max-w-md w-full bg-[#0b101b] border border-slate-800 rounded-3xl p-8 sm:p-9 shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-center">
+        <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
+          <FiCheck size={24} />
+        </div>
+        
+        <h2 className="text-xl font-bold text-white mb-2">E-Posta İletildi!</h2>
+        
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 mb-6 text-left">
+          <p className="text-emerald-200 text-xs leading-relaxed">
+            Şifre sıfırlama talimatı <strong className="text-white">{email}</strong> adresine iletildi. 
+            Lütfen gelen kutunuzu ve spam klasörünüzü kontrol ediniz.
+          </p>
+        </div>
+        
+        <div className="space-y-3">
+          <button
+            onClick={onBackToLogin}
+            className="w-full py-3 px-4 rounded-xl font-bold text-xs text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-xs transition-all flex items-center justify-center gap-2"
+          >
+            <FiArrowLeft size={14} />
+            <span>Giriş Sayfasına Dön</span>
+          </button>
           
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">E-posta Gönderildi!</h2>
-          
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-            <p className="text-green-800 text-sm">
-              Şifre sıfırlama e-postası <strong>{email}</strong> adresine gönderildi. 
-              Lütfen e-posta kutunuzu kontrol edin ve spam klasörünü de kontrol etmeyi unutmayın.
-            </p>
-          </div>
-          
-          <div className="space-y-3">
-            <button
-              onClick={onBackToLogin}
-              className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-            >
-              <FaArrowLeft className="w-4 h-4" />
-              <span>Giriş Sayfasına Dön</span>
-            </button>
-            
-            <button
-              onClick={() => {
-                setIsEmailSent(false);
-                setEmail('');
-                setMessage({ type: '', text: '' });
-              }}
-              className="w-full px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-            >
-              Başka bir e-posta ile dene
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              setIsEmailSent(false);
+              setEmail('');
+              setMessage({ type: '', text: '' });
+            }}
+            className="w-full px-4 py-2 text-xs text-slate-400 hover:text-white transition-colors"
+          >
+            Farklı bir e-posta ile dene
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
+    <div className="relative z-10 max-w-md w-full bg-[#0b101b] border border-slate-800 rounded-3xl p-8 sm:p-9 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-          <FaEnvelope className="w-8 h-8 text-blue-600" />
+        <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto mb-3 shadow-[0_0_15px_rgba(229,169,60,0.2)]">
+          <FiMail size={24} />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">Şifremi Unuttum</h2>
-        <p className="text-gray-600 mt-2">
-          E-posta adresinizi girin, size yeni bir şifre gönderelim.
+        <h2 className="text-xl font-bold text-white tracking-tight">Şifremi Unuttum</h2>
+        <p className="text-xs text-slate-400 mt-1">
+          Kayıtlı yönetici e-posta adresinizi giriniz.
         </p>
       </div>
 
       {message.text && (
-        <div className={`mb-6 p-4 rounded-lg flex items-center ${
-          message.type === 'success' 
-            ? 'bg-green-100 text-green-800 border border-green-200' 
-            : 'bg-red-100 text-red-800 border border-red-200'
-        }`}>
+        <div
+          className={`mb-5 p-3.5 rounded-xl flex items-center gap-2.5 text-xs font-semibold ${
+            message.type === 'success'
+              ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+              : 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
+          }`}
+        >
           {message.type === 'success' ? (
-            <FaCheck className="w-5 h-5 mr-2" />
+            <FiCheck className="shrink-0 text-emerald-400" size={16} />
           ) : (
-            <FaTimes className="w-5 h-5 mr-2" />
+            <FiAlertTriangle className="shrink-0 text-rose-400" size={16} />
           )}
-          {message.text}
+          <span>{message.text}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-            E-posta Adresi
+          <label htmlFor="email" className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 font-mono">
+            E-Posta Adresi
           </label>
           <div className="relative">
             <input
@@ -140,53 +117,50 @@ const ForgotPasswordForm = ({ onBackToLogin }) => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-              placeholder="ornek@email.com"
+              className="w-full pl-10 pr-4 py-3 bg-slate-900/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm transition-all"
+              placeholder="ornek@hastugg.com"
               required
             />
-            <FaEnvelope className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
           </div>
         </div>
 
-        {/* Güvenlik Bilgisi */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-yellow-900 mb-2">Güvenlik Bilgisi:</h4>
-          <ul className="text-sm text-yellow-800 space-y-1">
-            <li>• E-posta adresiniz sistemde kayıtlıysa yeni şifre gönderilecektir</li>
-            <li>• Yeni şifre e-postanızda görünecektir</li>
-            <li>• Giriş yaptıktan sonra şifrenizi değiştirmeniz önerilir</li>
-          </ul>
+        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3.5">
+          <h4 className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
+            Bilgilendirme:
+          </h4>
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            E-posta adresiniz sistemle eşleşirse sıfırlama şifresi oluşturulup posta kutunuza iletilecektir.
+          </p>
         </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-colors duration-200 ${
-            isLoading
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-          }`}
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Gönderiliyor...
-            </div>
-          ) : (
-            'Şifre Sıfırlama E-postası Gönder'
-          )}
-        </button>
+        <div className="pt-2">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-[0_0_20px_rgba(229,169,60,0.2)] hover:shadow-[0_0_25px_rgba(229,169,60,0.35)] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
+                <span>İletiliyor...</span>
+              </>
+            ) : (
+              'Sıfırlama Bağlantısı Gönder'
+            )}
+          </button>
+        </div>
 
-        {/* Back to Login */}
-        <button
-          type="button"
-          onClick={onBackToLogin}
-          className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-        >
-          <FaArrowLeft className="w-4 h-4" />
-          <span>Giriş Sayfasına Dön</span>
-        </button>
+        <div className="text-center pt-2">
+          <button
+            type="button"
+            onClick={onBackToLogin}
+            className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+          >
+            <FiArrowLeft size={13} />
+            <span>Giriş ekranına dön</span>
+          </button>
+        </div>
       </form>
     </div>
   );

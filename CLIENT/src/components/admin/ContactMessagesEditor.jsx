@@ -1,6 +1,21 @@
 import { useState, useEffect } from 'react';
-import { FaEnvelope, FaEnvelopeOpen, FaPaperPlane, FaTrash, FaEye, FaEyeSlash } from 'react-icons/fa';
+import {
+  FiMail,
+  FiPhone,
+  FiClock,
+  FiSend,
+  FiTrash2,
+  FiCheckCircle,
+  FiEye,
+  FiMessageSquare,
+  FiChevronLeft,
+  FiChevronRight
+} from 'react-icons/fi';
 import adminService from '../../services/adminService';
+import logger from '../../utils/logger';
+import AdminPageHeader from './AdminPageHeader';
+import AdminLoadingState from './AdminLoadingState';
+import AdminEmptyState from './AdminEmptyState';
 
 const ContactMessagesEditor = ({ onSave, onCancel, isLoading }) => {
   const [messages, setMessages] = useState([]);
@@ -13,18 +28,11 @@ const ContactMessagesEditor = ({ onSave, onCancel, isLoading }) => {
     hasPrevPage: false
   });
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
-   const [filter, setFilter] = useState('all'); // all, unread, sent
+  const [filter, setFilter] = useState('all'); // all, unread, sent
+  const [actionLoadingId, setActionLoadingId] = useState(null);
 
-  // İlk yükleme
   useEffect(() => {
     loadMessages();
-  }, []);
-
-  // Sayfa veya filtre değişikliklerinde yükleme
-  useEffect(() => {
-    if (pagination.currentPage > 0) {
-      loadMessages();
-    }
   }, [pagination.currentPage, filter]);
 
   const loadMessages = async () => {
@@ -32,13 +40,19 @@ const ContactMessagesEditor = ({ onSave, onCancel, isLoading }) => {
       setIsLoadingMessages(true);
       const currentPage = pagination.currentPage || 1;
       const itemsPerPage = pagination.itemsPerPage || 10;
-      
+
       const data = await adminService.getContactMessages(currentPage, itemsPerPage, filter);
-      setMessages(data.messages);
-      setPagination(data.pagination);
+      setMessages(data.messages || []);
+      setPagination(data.pagination || {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        itemsPerPage: 10,
+        hasNextPage: false,
+        hasPrevPage: false
+      });
     } catch (error) {
       logger.error('Mesajlar yüklenirken hata:', error);
-      alert('Mesajlar yüklenirken bir hata oluştu: ' + error.message);
     } finally {
       setIsLoadingMessages(false);
     }
@@ -55,249 +69,309 @@ const ContactMessagesEditor = ({ onSave, onCancel, isLoading }) => {
 
   const handleMarkAsRead = async (id) => {
     try {
+      setActionLoadingId(id);
       await adminService.markContactMessageAsRead(id);
-      setMessages(messages.map(msg => 
+      setMessages(messages.map(msg =>
         msg.id === id ? { ...msg, is_read: 1 } : msg
       ));
     } catch (error) {
       logger.error('Mesaj okundu işaretlenirken hata:', error);
-      alert('Mesaj okundu işaretlenirken bir hata oluştu: ' + error.message);
+      alert('İşlem sırasında hata oluştu: ' + error.message);
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
   const handleSendEmail = async (id) => {
     try {
+      setActionLoadingId(id);
       await adminService.sendContactMessageEmail(id);
-      setMessages(messages.map(msg => 
+      setMessages(messages.map(msg =>
         msg.id === id ? { ...msg, is_sent: 1 } : msg
       ));
-      alert('Email başarıyla gönderildi!');
+      alert('Email bildirimi başarıyla gönderildi!');
     } catch (error) {
       logger.error('Email gönderilirken hata:', error);
-      alert('Email gönderilirken bir hata oluştu: ' + error.message);
+      alert('Email gönderilirken hata oluştu: ' + error.message);
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
   const handleDeleteMessage = async (id) => {
-    if (!confirm('Bu mesajı silmek istediğinizden emin misiniz?')) {
+    if (!window.confirm('Bu iletişim mesajını silmek istediğinizden emin misiniz?')) {
       return;
     }
 
     try {
+      setActionLoadingId(id);
       await adminService.deleteContactMessage(id);
       setMessages(messages.filter(msg => msg.id !== id));
-      alert('Mesaj başarıyla silindi!');
+      setPagination(prev => ({ ...prev, totalItems: Math.max(0, prev.totalItems - 1) }));
     } catch (error) {
       logger.error('Mesaj silinirken hata:', error);
-      alert('Mesaj silinirken bir hata oluştu: ' + error.message);
+      alert('Mesaj silinirken hata oluştu: ' + error.message);
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('tr-TR');
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleString('tr-TR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
-  if (isLoadingMessages) {
+  const filterTabs = [
+    { key: 'all', label: 'Tüm Mesajlar', count: filter === 'all' ? pagination.totalItems : null },
+    { key: 'unread', label: 'Okunmamış' },
+    { key: 'sent', label: 'Email Gönderilmiş' }
+  ];
+
+  if (isLoadingMessages && messages.length === 0) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="space-y-6">
+        <AdminPageHeader
+          title="Gelen İletişim Mesajları"
+          subtitle="Web sitesi üzerinden gelen teklif ve iletişim taleplerini inceleyin."
+          badge="Mesaj Havuzu"
+        />
+        <AdminLoadingState type="messages" message="Mesaj havuzu yükleniyor..." />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Filtre Seçenekleri */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="text-lg font-medium text-gray-900">Contact Mesajları</h3>
-            <p className="text-gray-600 mt-1">Gelen iletişim mesajlarını buradan yönetebilirsiniz. Email'ler otomatik olarak gönderilir.</p>
+      {/* Sayfa Başlığı ve Filtre Butonları */}
+      <AdminPageHeader
+        title="Gelen İletişim Mesajları"
+        subtitle="Web sitesi üzerinden gelen teklif, proje ve iş birliği taleplerini inceleyin ve yönetin."
+        badge={`${pagination.totalItems} Talep`}
+        actions={
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl border border-slate-200/80">
+            {filterTabs.map(tab => {
+              const active = filter === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => handleFilterChange(tab.key)}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    active
+                      ? 'bg-amber-400 text-slate-950 shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                  }`}
+                >
+                  {tab.label}
+                  {tab.count !== null && (
+                    <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-slate-950/15">
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-          
-          <div className="mt-4 sm:mt-0">
-            <div className="flex space-x-2">
+        }
+      />
+
+      {/* Mesaj Listesi */}
+      {messages.length === 0 ? (
+        <AdminEmptyState
+          icon={FiMessageSquare}
+          title="Mesaj Bulunamadı"
+          description={
+            filter === 'unread'
+              ? 'Okunmamış yeni bir iletişim mesajı bulunmuyor.'
+              : filter === 'sent'
+              ? 'Henüz email bildirimi iletilmiş mesaj bulunmuyor.'
+              : 'Web sitenizden gelen iletişim formu mesajları burada listelenir.'
+          }
+          action={
+            filter !== 'all' ? (
               <button
                 onClick={() => handleFilterChange('all')}
-                className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                  filter === 'all' 
-                    ? 'bg-blue-100 text-blue-800' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
               >
-                Tümü ({pagination.totalItems})
+                Tüm Mesajları Göster
               </button>
-              <button
-                onClick={() => handleFilterChange('unread')}
-                className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                  filter === 'unread' 
-                    ? 'bg-red-100 text-red-800' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Okunmamış
-              </button>
-              <button
-                onClick={() => handleFilterChange('sent')}
-                className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                  filter === 'sent' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Email Gönderilmiş
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+            ) : null
+          }
+        />
+      ) : (
+        <div className="space-y-4">
+          {messages.map((message) => {
+            const isRead = Boolean(message.is_read);
+            const isSent = Boolean(message.is_sent);
+            const isActionBusy = actionLoadingId === message.id;
 
-      {/* Messages List */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium text-gray-900">
-              Mesajlar ({pagination.totalItems})
-            </h3>
-            <div className="text-sm text-gray-500">
-              Sayfa {pagination.currentPage} / {pagination.totalPages}
-            </div>
-          </div>
-        </div>
-        <div className="divide-y divide-gray-200">
-          {messages.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
-              Henüz mesaj bulunmuyor.
-            </div>
-          ) : (
-            messages.map((message) => (
-              <div key={message.id} className="p-6 hover:bg-gray-50">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h4 className="text-lg font-medium text-gray-900">
+            return (
+              <div
+                key={message.id}
+                className={`bg-white rounded-2xl border transition-all duration-200 p-6 shadow-xs hover:shadow-sm ${
+                  !isRead
+                    ? 'border-amber-400/60 ring-1 ring-amber-400/20'
+                    : 'border-slate-200/90 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
+                  {/* Sol & Gövde: Mesaj Detayı */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center flex-wrap gap-2.5 mb-2.5">
+                      <h3 className="text-base font-bold text-slate-900 tracking-tight">
                         {message.first_name} {message.last_name}
-                      </h4>
-                      {!message.is_read && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          <FaEyeSlash className="w-3 h-3 mr-1" />
+                      </h3>
+
+                      {!isRead ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-800 border border-amber-500/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                           Okunmamış
                         </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                          <FiEye size={12} />
+                          Okundu
+                        </span>
                       )}
-                      {message.is_sent && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <FaPaperPlane className="w-3 h-3 mr-1" />
-                          Email Gönderildi
+
+                      {isSent && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-800 border border-emerald-500/30">
+                          <FiCheckCircle size={12} />
+                          E-Posta İletildi
                         </span>
                       )}
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                      <div>
-                        <p className="text-sm text-gray-600">
-                          <strong>Email:</strong> {message.email}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">
-                          <strong>Telefon:</strong> {message.phone}
-                        </p>
-                      </div>
+
+                    {/* Meta Bilgileri: Email, Telefon, Tarih */}
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-xs text-slate-500 mb-3.5">
+                      <a
+                        href={`mailto:${message.email}`}
+                        className="inline-flex items-center gap-1.5 hover:text-amber-700 transition-colors font-medium text-slate-700"
+                      >
+                        <FiMail size={13} className="text-amber-600 shrink-0" />
+                        <span>{message.email}</span>
+                      </a>
+                      {message.phone && (
+                        <a
+                          href={`tel:${message.phone}`}
+                          className="inline-flex items-center gap-1.5 hover:text-amber-700 transition-colors font-medium text-slate-700"
+                        >
+                          <FiPhone size={13} className="text-amber-600 shrink-0" />
+                          <span>{message.phone}</span>
+                        </a>
+                      )}
+                      <span className="inline-flex items-center gap-1.5 text-slate-400">
+                        <FiClock size={13} className="shrink-0" />
+                        <span>{formatDate(message.created_at)}</span>
+                      </span>
                     </div>
-                    
-                    <p className="text-sm text-gray-700 mb-3">
-                      <strong>Mesaj:</strong> {message.message}
-                    </p>
-                    
-                    <p className="text-xs text-gray-400">
-                      {formatDate(message.created_at)}
-                    </p>
+
+                    {/* Mesaj İçeriği */}
+                    <div className="bg-slate-50/80 rounded-xl p-4 border border-slate-200/70 text-slate-800 text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                      {message.message}
+                    </div>
                   </div>
-                  
-                  <div className="flex flex-col space-y-2 ml-4">
-                    {!message.is_read && (
+
+                  {/* Sağ: Aksiyon Butonları */}
+                  <div className="flex lg:flex-col items-center gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                    {!isRead && (
                       <button
                         onClick={() => handleMarkAsRead(message.id)}
-                        className="flex items-center px-3 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200 transition-colors"
+                        disabled={isActionBusy}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-slate-100 hover:bg-slate-200/80 rounded-xl border border-slate-200 transition-colors disabled:opacity-50"
+                        title="Okundu olarak işaretle"
                       >
-                        <FaEye className="w-3 h-3 mr-1" />
-                        Okundu İşaretle
+                        <FiEye size={13} />
+                        <span>Okundu İşaretle</span>
                       </button>
                     )}
-                    
+
                     <button
                       onClick={() => handleSendEmail(message.id)}
-                      className="flex items-center px-3 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200 transition-colors"
+                      disabled={isActionBusy}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:text-amber-950 bg-amber-50 hover:bg-amber-100/80 rounded-xl border border-amber-200/80 transition-colors disabled:opacity-50"
+                      title="Sistem e-posta bildirimini tekrar tetikle"
                     >
-                      <FaPaperPlane className="w-3 h-3 mr-1" />
-                      Email Tekrar Gönder
+                      <FiSend size={13} />
+                      <span>E-Posta Yeniden İlet</span>
                     </button>
-                    
+
                     <button
                       onClick={() => handleDeleteMessage(message.id)}
-                      className="flex items-center px-3 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 transition-colors"
+                      disabled={isActionBusy}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200/70 transition-colors disabled:opacity-50"
+                      title="Mesajı kalıcı olarak sil"
                     >
-                      <FaTrash className="w-3 h-3 mr-1" />
-                      Sil
+                      <FiTrash2 size={13} />
+                      <span>Sil</span>
                     </button>
                   </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-        
-        {/* Sayfalama Kontrolleri */}
-        {pagination.totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-200">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-500">
-                {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} - {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} / {pagination.totalItems} mesaj
+            );
+          })}
+
+          {/* Sayfalama Kontrolleri */}
+          {pagination.totalPages > 1 && (
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-xs text-slate-500 font-medium">
+                Toplam <span className="font-bold text-slate-800">{pagination.totalItems}</span> mesaj arasından{' '}
+                <span className="font-bold text-slate-800">
+                  {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} -{' '}
+                  {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)}
+                </span>{' '}
+                gösteriliyor
               </div>
-              
-              <div className="flex space-x-2">
+
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => handlePageChange(pagination.currentPage - 1)}
                   disabled={!pagination.hasPrevPage}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 text-xs font-semibold border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Önceki Sayfa"
                 >
-                  Önceki
+                  <FiChevronLeft size={16} />
                 </button>
-                
+
                 {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                   const startPage = Math.max(1, pagination.currentPage - 2);
                   const pageNum = startPage + i;
-                  
                   if (pageNum > pagination.totalPages) return null;
-                  
+
+                  const isActive = pageNum === pagination.currentPage;
                   return (
                     <button
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum)}
-                      className={`px-3 py-1 text-sm border rounded-md ${
-                        pageNum === pagination.currentPage
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'border-gray-300 hover:bg-gray-50'
+                      className={`min-w-8 h-8 px-2 text-xs font-bold rounded-lg border transition-all ${
+                        isActive
+                          ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-xs'
+                          : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                       }`}
                     >
                       {pageNum}
                     </button>
                   );
                 })}
-                
+
                 <button
                   onClick={() => handlePageChange(pagination.currentPage + 1)}
                   disabled={!pagination.hasNextPage}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 text-xs font-semibold border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Sonraki Sayfa"
                 >
-                  Sonraki
+                  <FiChevronRight size={16} />
                 </button>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-
+          )}
+        </div>
+      )}
     </div>
   );
 };

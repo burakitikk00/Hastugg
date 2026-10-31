@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import adminService from '../services/adminService';
 
 const AuthContext = createContext();
 
@@ -15,32 +16,79 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Sayfa ilk açıldığında localStorage'daki token'ı doğrula
   useEffect(() => {
-    // Sayfa yüklendiğinde localStorage'dan token kontrolü
     const token = localStorage.getItem('adminToken');
-    if (token) {
-      // Token'ı doğrula (basit kontrol)
+    if (token && typeof token === 'string' && token !== '[object Object]') {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.exp * 1000 > Date.now()) {
-          setIsAuthenticated(true);
-          setUser({ username: payload.username });
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          // Süre dolmadıysa oturumu geçerli say
+          if (payload.exp && payload.exp * 1000 > Date.now()) {
+            setIsAuthenticated(true);
+            setUser({ username: payload.username, id: payload.id });
+          } else {
+            // Süresi geçmiş token
+            localStorage.removeItem('adminToken');
+            setIsAuthenticated(false);
+            setUser(null);
+          }
         } else {
           localStorage.removeItem('adminToken');
+          setIsAuthenticated(false);
+          setUser(null);
         }
       } catch (error) {
         localStorage.removeItem('adminToken');
+        setIsAuthenticated(false);
+        setUser(null);
       }
+    } else {
+      localStorage.removeItem('adminToken');
+      setIsAuthenticated(false);
+      setUser(null);
     }
     setLoading(false);
   }, []);
 
-  const login = (token, userData) => {
-    localStorage.setItem('adminToken', token);
-    setIsAuthenticated(true);
-    setUser(userData);
+  // Admin Girişi (LoginForm'dan çağrılır)
+  const login = async (credentialsOrToken, userData) => {
+    // Eğer doğrudan JWT string ve userData verilmişse (eski uyumluluk)
+    if (typeof credentialsOrToken === 'string') {
+      localStorage.setItem('adminToken', credentialsOrToken);
+      setIsAuthenticated(true);
+      setUser(userData || null);
+      return { success: true };
+    }
+
+    // credentials nesnesi ({ username, password }) gönderilmişse (LoginForm)
+    try {
+      const response = await adminService.login(credentialsOrToken);
+      if (response && response.token) {
+        localStorage.setItem('adminToken', response.token);
+        setIsAuthenticated(true);
+        try {
+          const payload = JSON.parse(atob(response.token.split('.')[1]));
+          setUser({ username: payload.username, id: payload.id });
+        } catch {
+          setUser({ username: credentialsOrToken.username });
+        }
+        return { success: true };
+      }
+      return { 
+        success: false, 
+        error: response?.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.' 
+      };
+    } catch (err) {
+      return { 
+        success: false, 
+        error: err.message || 'Giriş yapılırken sunucu hatası oluştu.' 
+      };
+    }
   };
 
+  // Çıkış
   const logout = () => {
     localStorage.removeItem('adminToken');
     setIsAuthenticated(false);

@@ -1,7 +1,10 @@
 import AdminLayout from '../../components/admin/AdminLayout';
 import EmailSettingsEditor from '../../components/admin/EmailSettingsEditor';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { useState } from 'react';
 import adminService from '../../services/adminService';
+import logger from '../../utils/logger';
+import { FiShield, FiKey, FiCheckCircle } from 'react-icons/fi';
 
 const EmailSettingsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,20 +23,17 @@ const EmailSettingsPage = () => {
   };
 
   const handleCancel = () => {
-    // İptal işlemi - sayfayı yenile
     window.location.reload();
   };
 
   return (
     <AdminLayout>
       <div className="space-y-6">
-        {/* Page Header */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-gray-900">Email Ayarları</h1>
-          <p className="text-gray-600 mt-2">
-            İletişim formundan gelen mesajların gönderileceği email ayarlarını yapılandırın
-          </p>
-        </div>
+        <AdminPageHeader
+          title="E-Posta Servis Ayarları"
+          subtitle="İletişim formundan gelen müşteri mesajlarının yönetici adresine iletilmesini sağlayan SMTP / Gmail yapılandırması."
+          badge="SMTP & Bildirim"
+        />
 
         {/* Email Settings Editor */}
         <EmailSettingsEditor
@@ -42,41 +42,68 @@ const EmailSettingsPage = () => {
           isLoading={isLoading}
         />
 
-        {/* Bilgi Kutusu */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-medium text-blue-800 mb-3">Gmail App Password Nasıl Oluşturulur?</h3>
-          <div className="text-sm text-blue-700 space-y-2">
-            <ol className="list-decimal list-inside ml-4 space-y-1">
-              <li>Google hesabınıza giriş yapın</li>
-              <li>Hesap güvenliği bölümüne gidin</li>
-              <li>2-Factor Authentication (2FA) aktif edin</li>
-              <li>"App passwords" bölümüne gidin</li>
-              <li>Yeni bir App Password oluşturun</li>
-              <li>Oluşturulan 16 haneli şifreyi buraya girin</li>
-            </ol>
+        {/* İki Kolonlu Bilgilendirme ve Güvenlik Kartları */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Gmail Uygulama Şifresi Rehberi */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-7 shadow-xs space-y-4">
+            <div className="flex items-center gap-2.5">
+              <span className="p-2 rounded-xl bg-amber-500/10 text-amber-600">
+                <FiKey size={18} />
+              </span>
+              <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                Gmail Uygulama Şifresi (App Password)
+              </h3>
+            </div>
             
-            <p className="mt-4"><strong>Test Etme:</strong></p>
-            <ul className="list-disc list-inside ml-4 space-y-1">
-              <li>Ayarları kaydettikten sonra "Test Et" butonuna tıklayın</li>
-              <li>Test e-postası kendi email adresinize gönderilecektir</li>
-              <li>E-posta gelirse ayarlarınız doğru çalışıyor demektir</li>
-            </ul>
+            <ol className="space-y-2.5 text-xs text-slate-600 leading-relaxed font-sans">
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center justify-center shrink-0">1</span>
+                <span>Google Hesabınızda <strong>Güvenlik</strong> sekmesine gidin.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center justify-center shrink-0">2</span>
+                <span><strong>2 Adımlı Doğrulama</strong>'yı etkinleştirin.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center justify-center shrink-0">3</span>
+                <span>Arama kısmına <strong>Uygulama Şifreleri</strong> yazarak ilgili menüyü açın.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center justify-center shrink-0">4</span>
+                <span>Uygulama adı olarak "Hastug Web" belirleyip 16 haneli şifreyi oluşturun.</span>
+              </li>
+            </ol>
           </div>
-        </div>
 
-        {/* Güvenlik Bilgisi */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-          <h3 className="text-lg font-medium text-green-800 mb-3">🔒 Güvenlik Bilgisi</h3>
-          <div className="text-sm text-green-700 space-y-2">
-            <p>
-              Email şifreleriniz artık AES-256-CBC algoritması ile şifrelenerek güvenli bir şekilde saklanmaktadır.
+          {/* Güvenlik & Şifreleme Bilgisi */}
+          <div className="bg-[#0b101b] text-slate-200 rounded-2xl border border-slate-800 p-6 sm:p-7 shadow-xs space-y-4">
+            <div className="flex items-center gap-2.5">
+              <span className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
+                <FiShield size={18} />
+              </span>
+              <h3 className="text-base font-bold text-white tracking-tight">
+                AES-256 Veri Güvenliği
+              </h3>
+            </div>
+            
+            <p className="text-xs text-slate-400 leading-relaxed">
+              E-posta servis şifreleriniz sunucuda AES-256-CBC algoritmasıyla çift katmanlı şifrelenerek saklanmaktadır.
             </p>
-            <ul className="list-disc list-inside ml-4 space-y-1">
-              <li>App Password kullanın, normal şifrenizi değil</li>
-              <li>Şifreler veritabanında şifrelenmiş olarak saklanır</li>
-              <li>Otomatik email sistemi güvenli şekilde çalışır</li>
-              <li>Üretim ortamında SSL/TLS kullanın</li>
-            </ul>
+
+            <div className="space-y-2 text-xs text-slate-300">
+              <div className="flex items-center gap-2">
+                <FiCheckCircle className="text-amber-400 shrink-0" size={14} />
+                <span>Kişisel şifrenizi değil, yalnızca App Password kullanın.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FiCheckCircle className="text-amber-400 shrink-0" size={14} />
+                <span>Şifreler veritabanında asla açık metin tutulmaz.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FiCheckCircle className="text-amber-400 shrink-0" size={14} />
+                <span>SSL/TLS şifreli SMTP protokolüyle aktarım sağlanır.</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

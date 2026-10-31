@@ -6,7 +6,7 @@ const router = express.Router();
 const { pool } = require('../dbConfig');
 require('dotenv').config();
 
-const SECRET_KEY = process.env.JWT_SECRET;
+const SECRET_KEY = process.env.JWT_SECRET || 'Hastugg2025SecretKey!@';
 
 // Admin oluştur
 router.post('/register', async (req, res) => {

@@ -18,21 +18,18 @@ import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics';
 import logger from '../../utils/logger';
 import './Contact.css';
 
-// Varsayılan / Anında Yüklenen İletişim Verileri (Sıfır bekleme)
-const DEFAULT_CONTACT = {
-    address: 'İstanbul, Türkiye',
-    phone: '+90 545 555 55 55',
-    email: 'info@hastug.com',
-    facebook: 'https://facebook.com/hastug',
-    twitter: 'https://twitter.com/hastug',
-    instagram: 'https://instagram.com/hastug',
-    linkedin: 'https://linkedin.com/company/hastug',
-    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1035.34668305661!2d29.16613662187106!3d40.933034529249326!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac4462381397f%3A0x6076569714616f63!2zQm_En2F6acOnaSBDYW1paQ!5e0!3m2!1str!2str!4v1770118751430!5m2!1str!2str'
-};
-
 const Contact = () => {
     const { trackEvent } = useGoogleAnalytics();
-    const [contactData, setContactData] = useState(DEFAULT_CONTACT);
+    const [contactData, setContactData] = useState({
+        address: '',
+        phone: '',
+        email: '',
+        facebook: '',
+        twitter: '',
+        instagram: '',
+        linkedin: '',
+        mapEmbedUrl: ''
+    });
 
     // Form Durumu
     const [formData, setFormData] = useState({
@@ -40,7 +37,8 @@ const Contact = () => {
         lastName: '',
         email: '',
         phone: '',
-        message: ''
+        message: '',
+        kvkkConsent: false
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,20 +60,19 @@ const Contact = () => {
                 const data = await publicService.getContact();
                 if (isMounted && Array.isArray(data) && data.length > 0) {
                     const c = data[0];
-                    setContactData(prev => ({
-                        ...prev,
-                        address: c.address || prev.address,
-                        phone: c.phone || prev.phone,
-                        email: c.email || prev.email,
-                        facebook: c.facebook || prev.facebook,
-                        twitter: c.twitter || prev.twitter,
-                        instagram: c.instagram || prev.instagram,
-                        linkedin: c.linkedin || prev.linkedin,
-                        mapEmbedUrl: c.mapEmbedUrl || prev.mapEmbedUrl
-                    }));
+                    setContactData({
+                        address: c.address || '',
+                        phone: c.phone || '',
+                        email: c.email || '',
+                        facebook: c.facebook || '',
+                        twitter: c.twitter || '',
+                        instagram: c.instagram || '',
+                        linkedin: c.linkedin || '',
+                        mapEmbedUrl: c.mapEmbedUrl || ''
+                    });
                 }
             } catch (err) {
-                logger.warn('İletişim bilgileri yüklenirken varsayılan içerikler devrede:', err?.message);
+                logger.warn('İletişim bilgileri yüklenirken hata:', err?.message);
             }
         };
 
@@ -107,6 +104,13 @@ const Contact = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!formData.kvkkConsent) {
+            setSubmitStatus('error');
+            setStatusMessage('Lütfen devam etmek için KVKK İletişim Aydınlatma Metni\'ni okuyup onaylayınız.');
+            return;
+        }
+
         setIsSubmitting(true);
         setSubmitStatus(null);
         setStatusMessage('');
@@ -120,7 +124,8 @@ const Contact = () => {
                 lastName: '',
                 email: '',
                 phone: '',
-                message: ''
+                message: '',
+                kvkkConsent: false
             });
 
             trackEvent('form_submit', 'contact', 'contact_form', 1);
@@ -255,6 +260,46 @@ const Contact = () => {
                                     className="terminal-textarea"
                                     required
                                 />
+                            </div>
+
+                            {/* KVKK Aydınlatma & Açık Rıza Onay Kutusu */}
+                            <div className="contact-kvkk-group">
+                                <label className="kvkk-checkbox-label">
+                                    <input
+                                        id="contact-kvkkConsent"
+                                        type="checkbox"
+                                        name="kvkkConsent"
+                                        checked={formData.kvkkConsent}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setFormData(prev => ({ ...prev, kvkkConsent: checked }));
+                                            if (submitStatus === 'error') {
+                                                setSubmitStatus(null);
+                                                setStatusMessage('');
+                                            }
+                                        }}
+                                        required
+                                        className="kvkk-checkbox-native"
+                                    />
+                                    <span className={`kvkk-checkbox-visual ${formData.kvkkConsent ? 'checked' : ''}`} aria-hidden="true">
+                                        {formData.kvkkConsent && <FaCheck size={9} />}
+                                    </span>
+                                    <span className="kvkk-text-content">
+                                        Kişisel verilerimin,{' '}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                window.dispatchEvent(
+                                                    new CustomEvent('hastug_open_legal_modal', { detail: { tab: 'iletisim' } })
+                                                );
+                                            }}
+                                            className="kvkk-modal-trigger-btn"
+                                        >
+                                            İletişim Formu Aydınlatma Metni
+                                        </button>
+                                        {' '}kapsamında işlenmesini ve tarafımla iletişime geçilmesini kabul ediyorum. *
+                                    </span>
+                                </label>
                             </div>
 
                             {/* Geribildirim HUD Kartı */}
@@ -409,14 +454,20 @@ const Contact = () => {
 
                             {/* Koyu Mod Google Maps Bezel */}
                             <div className="map-embed-wrapper">
-                                <iframe
-                                    src={contactData.mapEmbedUrl}
-                                    title="Hastuğ İnşaat Merkez Ofis Haritası"
-                                    className="map-iframe"
-                                    allowFullScreen=""
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
-                                />
+                                {contactData.mapEmbedUrl ? (
+                                    <iframe
+                                        src={contactData.mapEmbedUrl}
+                                        title="Hastuğ İnşaat Merkez Ofis Haritası"
+                                        className="map-iframe"
+                                        allowFullScreen=""
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full min-h-[280px] flex items-center justify-center text-slate-500 text-xs font-mono tracking-wider">
+                                        HARİTA YÜKLENİYOR...
+                                    </div>
+                                )}
                                 <div className="map-glass-border" aria-hidden="true" />
                             </div>
                         </div>

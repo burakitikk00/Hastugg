@@ -92,7 +92,7 @@ const DashboardEmailSettings = ({ onSave, onCancel, isLoading }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="email_user" className="block text-sm font-medium text-gray-700 mb-1">
-              Gmail Adresi *
+              Gmail Adresi <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -108,7 +108,7 @@ const DashboardEmailSettings = ({ onSave, onCancel, isLoading }) => {
 
           <div>
             <label htmlFor="email_pass" className="block text-sm font-medium text-gray-700 mb-1">
-              App Password *
+              App Password <span className="text-red-500">*</span>
             </label>
             <input
               type="password"

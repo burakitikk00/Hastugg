@@ -62,6 +62,7 @@ export default {
         'sans': ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
         'display': ['Syne', 'Outfit', 'system-ui', 'sans-serif'],
         'mono': ['"JetBrains Mono"', 'Space Mono', 'monospace'],
+        'signature': ['Caveat', 'cursive'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

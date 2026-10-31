@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FiLock, FiUser, FiArrowRight } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
-import adminService from '../../services/adminService';
 import ForgotPasswordForm from './ForgotPasswordForm';
 
 const LoginForm = () => {
@@ -9,145 +9,144 @@ const LoginForm = () => {
     username: '',
     password: ''
   });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value
-    });
-    setError(''); // Hata mesajını temizle
+    const { name, value } = e.target;
+    setCredentials(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    setLoading(true);
 
     try {
-      const response = await adminService.login(credentials);
-      
-      if (response.token) {
-        login(response.token, { username: credentials.username });
-        // Başarılı giriş sonrası page-content sayfasına yönlendirme
-        navigate('/admin/page-content');
+      const result = await login(credentials);
+      if (result.success) {
+        navigate('/admin/dashboard');
       } else {
-        setError('Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
+        setError(result.error || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
       }
-    } catch (error) {
-      setError(error.message || 'Giriş yapılırken bir hata oluştu.');
+    } catch (err) {
+      setError(err.message || 'Giriş sırasında bir hata oluştu');
     } finally {
       setLoading(false);
     }
   };
 
-  // Şifre sıfırlama formunu göster
   if (showForgotPassword) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-[#07090e] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden select-none">
+        <div className="absolute w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <ForgotPasswordForm onBackToLogin={() => setShowForgotPassword(false)} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
-            <svg className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
+    <div className="min-h-screen flex items-center justify-center bg-[#07090e] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden select-none">
+      <div className="absolute w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative z-10 max-w-md w-full bg-[#0b101b] border border-slate-800 rounded-3xl p-8 sm:p-9 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        {/* Logo & Başlık */}
+        <div className="text-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center text-[#07090e] font-black text-2xl mx-auto shadow-[0_0_25px_rgba(229,169,60,0.35)] mb-4">
+            H
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Admin Girişi
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Yönetim paneline erişim için giriş yapın
+          <div className="flex items-center justify-center gap-1.5 mb-1">
+            <span className="font-bold text-white tracking-wider text-lg font-sans">HASTUĞ</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+          </div>
+          <p className="text-[11px] uppercase font-mono tracking-widest text-slate-400 font-semibold">
+            YÖNETİM KONTROL PANELİ
+          </p>
+          <p className="text-xs text-slate-500 mt-2">
+            Lütfen yetkili yönetici kimlik bilgilerinizle giriş yapın.
           </p>
         </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="username" className="sr-only">
-                Kullanıcı Adı
-              </label>
+
+        {/* Hata Bildirimi */}
+        {error && (
+          <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium text-center">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 font-mono">
+              Kullanıcı Adı
+            </label>
+            <div className="relative">
               <input
                 id="username"
                 name="username"
                 type="text"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Kullanıcı Adı"
                 value={credentials.username}
                 onChange={handleChange}
+                placeholder="Yönetici kullanıcı adı"
+                className="w-full pl-10 pr-4 py-3 bg-slate-900/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm transition-all"
               />
+              <FiUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Şifre
-              </label>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 font-mono">
+              Parola
+            </label>
+            <div className="relative">
               <input
                 id="password"
                 name="password"
                 type="password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Şifre"
                 value={credentials.password}
                 onChange={handleChange}
+                placeholder="••••••••"
+                className="w-full pl-10 pr-4 py-3 bg-slate-900/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-sm transition-all font-mono"
               />
+              <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
             </div>
           </div>
 
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div>
+          <div className="pt-2">
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-[0_0_20px_rgba(229,169,60,0.2)] hover:shadow-[0_0_25px_rgba(229,169,60,0.35)] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <>
+                  <div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
+                  <span>Doğrulanıyor...</span>
+                </>
               ) : (
-                <svg className="h-5 w-5 text-blue-500 group-hover:text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                </svg>
+                <>
+                  <span>Giriş Yap</span>
+                  <FiArrowRight size={16} />
+                </>
               )}
-              {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
             </button>
           </div>
 
-          {/* Şifremi Unuttum Linki */}
-          <div className="text-center">
+          <div className="text-center pt-2">
             <button
               type="button"
               onClick={() => setShowForgotPassword(true)}
-              className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+              className="text-xs text-slate-400 hover:text-amber-400 transition-colors"
             >
-              Şifremi Unuttum
+              Şifrenizi mi unuttunuz?
             </button>
           </div>
         </form>

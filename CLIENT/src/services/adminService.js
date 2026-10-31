@@ -33,9 +33,13 @@ class AdminService {
   // Token'ı header'lara ekle
   getHeaders() {
     const token = localStorage.getItem('adminToken');
+    const isValid = token && typeof token === 'string' && token !== '[object Object]' && token.split('.').length === 3;
+    if (token && !isValid) {
+      localStorage.removeItem('adminToken');
+    }
     return {
       'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : ''
+      'Authorization': isValid ? `Bearer ${token}` : ''
     };
   }
 
@@ -187,7 +191,87 @@ class AdminService {
     }
   }
 
-  // Services verilerini kaydet/güncelle
+  // Tek bir hizmeti getir
+  async getService(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/services/${id}`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Yeni hizmet oluştur
+  async createService(serviceData) {
+    try {
+      const response = await fetch(`${this.baseURL}/services`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(serviceData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Hizmet güncelle
+  async updateService(id, serviceData) {
+    try {
+      const response = await fetch(`${this.baseURL}/services/${id}`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(serviceData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Hizmet sil
+  async deleteService(id, force = false) {
+    try {
+      const response = await fetch(`${this.baseURL}/services/${id}${force ? '?force=true' : ''}`, {
+        method: 'DELETE',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Silme işlemi başarısız' }));
+        const error = new Error(errorData.message || 'Silme işlemi başarısız');
+        error.data = errorData;
+        throw error;
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Services verilerini kaydet/güncelle (Toplu uyumluluk)
   async saveServices(servicesData) {
     try {
       const response = await fetch(`${this.baseURL}/services`, {

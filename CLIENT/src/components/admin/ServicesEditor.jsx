@@ -105,118 +105,127 @@ const ServicesEditor = ({ servicesData = null, onSave, onCancel }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900">Services Section Düzenle</h3>
-        <p className="text-sm text-gray-600 mt-1">Hizmetler bölümünü özelleştirin</p>
+    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+      <div className="px-6 py-4.5 border-b border-slate-200/80 bg-slate-50/50 flex items-center justify-between">
+        <div>
+          <h3 className="text-base font-bold text-slate-900 tracking-tight">Hizmet Kalemleri Listesi</h3>
+          <p className="text-xs text-slate-500 mt-0.5">Faaliyet gösterilen mühendislik ve mimarlık alanlarını düzenleyin.</p>
+        </div>
+        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-800 border border-amber-500/30">
+          {formData.services.length} Hizmet
+        </span>
       </div>
       
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        {/* Hizmetler */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Hizmetler
-            </label>
-          </div>
-          
-          <div className="space-y-6">
-            {formData.services.map((service, serviceIndex) => (
-              <div key={service.id} className="p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-md font-medium text-gray-900">Hizmet {serviceIndex + 1}</h4>
-                  <button
-                    type="button"
-                    onClick={() => removeService(serviceIndex)}
-                    className="px-2 py-1 text-red-600 hover:text-red-800"
-                  >
-                    ✕ Sil
-                  </button>
+      <form onSubmit={handleSubmit} className="p-6 sm:p-7 space-y-6">
+        <div className="space-y-5">
+          {formData.services.map((service, serviceIndex) => (
+            <div
+              key={service.id}
+              className="p-5 sm:p-6 rounded-2xl border border-slate-200/90 bg-slate-50/40 hover:bg-white hover:border-slate-300 transition-all shadow-2xs space-y-4"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-700 font-mono font-bold text-xs flex items-center justify-center">
+                    {serviceIndex + 1}
+                  </span>
+                  <h4 className="text-sm font-bold text-slate-900">
+                    {service.service || `Hizmet ${serviceIndex + 1}`}
+                  </h4>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Hizmet Adı *
-                    </label>
-                    <input
-                      type="text"
-                      value={service.service}
-                      onChange={(e) => handleServiceChange(serviceIndex, 'service', e.target.value)}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Hizmet adı"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Görsel
-                    </label>
-                    <div className="space-y-2">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(serviceIndex, e.target.files[0])}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      {uploadingImages[serviceIndex] && (
-                        <div className="text-sm text-blue-600">Görsel yükleniyor...</div>
-                      )}
-                      {service.url && (
-                        <div className="flex items-center space-x-3">
-                          <div className="text-sm text-green-600">
-                            ✓ Görsel yüklendi
-                          </div>
-                          <div className="w-16 h-16 rounded-md border border-gray-200 overflow-hidden">
-                            <LoadingImage 
-                              src={publicService.getImageURL(service.url)} 
-                              alt="Service preview" 
-                              className="w-full h-full object-cover"
-                              blurWhileLoading={true}
-                              showLoadingSpinner={false}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Açıklama *
+                <button
+                  type="button"
+                  onClick={() => removeService(serviceIndex)}
+                  className="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+                >
+                  Sil
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-mono">
+                    Hizmet Başlığı <span className="text-red-500">*</span>
                   </label>
-                  <textarea
-                    value={service.description}
-                    onChange={(e) => handleServiceChange(serviceIndex, 'description', e.target.value)}
+                  <input
+                    type="text"
+                    value={service.service}
+                    onChange={(e) => handleServiceChange(serviceIndex, 'service', e.target.value)}
                     required
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Hizmet açıklaması"
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white"
+                    placeholder="Örn: Statik Proje & Analiz"
                   />
                 </div>
+                
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-mono">
+                    Hizmet Görseli
+                  </label>
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(serviceIndex, e.target.files[0])}
+                      className="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-800 hover:file:bg-amber-100 cursor-pointer"
+                    />
+                    {uploadingImages[serviceIndex] && (
+                      <div className="text-xs text-amber-600 font-medium flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                        Görsel yükleniyor...
+                      </div>
+                    )}
+                    {service.url && (
+                      <div className="flex items-center gap-3 pt-1">
+                        <div className="w-16 h-12 rounded-lg border border-slate-200 overflow-hidden shrink-0 shadow-2xs">
+                          <LoadingImage 
+                            src={publicService.getImageURL(service.url)} 
+                            alt="Service preview" 
+                            className="w-full h-full object-cover"
+                            blurWhileLoading={true}
+                            showLoadingSpinner={false}
+                          />
+                        </div>
+                        <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                          ✓ Görsel hazır
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-          
-          {/* Hizmet Ekleme Butonu - En Altta */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={addService}
-              className="w-full px-4 py-3 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-            >
-              + Yeni Hizmet Ekle
-            </button>
-          </div>
+              
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-mono">
+                  Hizmet Kapsamı & Açıklaması <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={service.description}
+                  onChange={(e) => handleServiceChange(serviceIndex, 'description', e.target.value)}
+                  required
+                  rows={3}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white leading-relaxed"
+                  placeholder="Hizmet detayları ve teknik kapsam..."
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Hizmet Ekleme Butonu */}
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={addService}
+            className="w-full py-3.5 px-4 rounded-xl border-2 border-dashed border-slate-300 hover:border-amber-400 text-slate-700 hover:text-amber-800 bg-slate-50/50 hover:bg-amber-50/30 text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+          >
+            <span>+ Yeni Hizmet Ekle</span>
+          </button>
         </div>
 
         {/* Form Buttons */}
         <FormButtons
           onSave={handleSubmit}
           onCancel={onCancel}
-          saveText="Kaydet"
+          saveText="Değişiklikleri Kaydet"
           isLoading={isLoading}
           isDisabled={Object.values(uploadingImages).some(uploading => uploading)}
         />

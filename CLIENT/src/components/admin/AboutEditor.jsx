@@ -113,17 +113,19 @@ const AboutEditor = ({ onSave, onCancel }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900">Hakkımızda Bölümü Düzenle</h3>
-        <p className="text-sm text-gray-600 mt-1">Hakkımızda vizyonunu ve mimari özellik kartlarını özelleştirin</p>
+    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+      <div className="px-6 py-4.5 border-b border-slate-200/80 bg-slate-50/50 flex items-center justify-between">
+        <div>
+          <h3 className="text-base font-bold text-slate-900 tracking-tight">Hakkımızda & Mimari Vizyon</h3>
+          <p className="text-xs text-slate-500 mt-0.5">Kurumsal felsefe, hikaye ve ziyaretçilere sunulan mimari güvenceleri düzenleyin.</p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="p-6 sm:p-7 space-y-6">
         {/* Ana Başlık */}
         <div>
-          <label htmlFor="mainTitle" className="block text-sm font-medium text-gray-700 mb-2">
-            Ana Başlık *
+          <label htmlFor="mainTitle" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-mono">
+            Bölüm Başlığı <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -132,15 +134,15 @@ const AboutEditor = ({ onSave, onCancel }) => {
             value={formData.mainTitle}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent font-medium"
-            placeholder="Ana başlık girin"
+            className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold text-slate-900 transition-all bg-white"
+            placeholder="Örn: Kusursuz Mühendislik, Zamansız Mimari"
           />
         </div>
 
         {/* Ana Açıklama */}
         <div>
-          <label htmlFor="mainDescription" className="block text-sm font-medium text-gray-700 mb-2">
-            Kurumsal Hikaye & Felsefe *
+          <label htmlFor="mainDescription" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-mono">
+            Kurumsal Hikaye & Felsefe <span className="text-red-500">*</span>
           </label>
           <textarea
             id="mainDescription"
@@ -148,25 +150,25 @@ const AboutEditor = ({ onSave, onCancel }) => {
             value={formData.mainDescription}
             onChange={handleChange}
             required
-            rows={6}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-            placeholder="Kurumsal vizyon ve açıklama metnini girin"
+            rows={5}
+            className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm text-slate-900 transition-all bg-white leading-relaxed"
+            placeholder="Kurumsal vizyon ve açıklama metnini girin..."
           />
         </div>
 
         {/* Özellik Kartları */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
+        <div className="pt-4 border-t border-slate-200 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h4 className="text-md font-medium text-gray-900">Öne Çıkan Mimari Nitelikler</h4>
-              <p className="text-xs text-gray-500">Ziyaretçilere gösterilen mimari ve mühendislik garantileri</p>
+              <h4 className="text-sm font-bold text-slate-900">Öne Çıkan Mimari Nitelikler</h4>
+              <p className="text-xs text-slate-500">Ziyaretçilere sunulan mimari taahhütler ve teknik güvence kartları</p>
             </div>
             <button
               type="button"
               onClick={addFeature}
-              className="px-3 py-1.5 text-sm bg-gray-900 text-amber-400 border border-gray-800 rounded-md hover:bg-black transition-colors font-medium flex items-center gap-1.5"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-xs transition-all active:scale-[0.98] self-start sm:self-auto"
             >
-              <span>+</span> Yeni Mimari Nitelik Ekle
+              <span>+ Yeni Nitelik Ekle</span>
             </button>
           </div>
 
@@ -174,36 +176,36 @@ const AboutEditor = ({ onSave, onCancel }) => {
             {formData.features.map((feature, index) => {
               const IconComponent = getArchitecturalIcon(feature.icon, feature.feature);
               return (
-                <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <div className="flex items-start space-x-3">
+                <div key={index} className="p-4 sm:p-5 rounded-2xl border border-slate-200/90 bg-slate-50/40 hover:bg-white hover:border-slate-300 transition-all shadow-2xs">
+                  <div className="flex items-start gap-4">
                     {/* Vektör Simge Seçici */}
-                    <div className="flex-shrink-0 text-center">
+                    <div className="shrink-0 text-center">
                       <button
                         type="button"
                         onClick={() => openIconPicker(index)}
-                        title="Özgün mimari vektör ikonu seçin"
-                        className="w-14 h-14 border-2 border-amber-300 rounded-lg bg-gray-900 text-amber-400 flex flex-col items-center justify-center hover:bg-black hover:border-amber-400 transition-all shadow-sm"
+                        title="Mimari vektör ikonu seçin"
+                        className="w-14 h-14 border border-slate-800 rounded-xl bg-[#0b101b] text-amber-400 hover:border-amber-400 hover:scale-105 flex flex-col items-center justify-center transition-all shadow-xs"
                       >
                         <IconComponent size={22} />
-                        <span className="text-[10px] mt-1 text-gray-300">Değiştir</span>
+                        <span className="text-[9px] mt-0.5 text-slate-400 font-mono">Değiştir</span>
                       </button>
                     </div>
 
                     {/* Kart İçeriği */}
-                    <div className="flex-1 space-y-3">
+                    <div className="flex-1 space-y-2.5">
                       <input
                         type="text"
                         value={feature.feature || ''}
                         onChange={(e) => handleFeatureChange(index, 'feature', e.target.value)}
                         placeholder="Nitelik başlığı (örn: Statik Güvenilirlik, Lüks Malzeme)"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent font-medium"
+                        className="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold text-slate-900 transition-all bg-white"
                       />
                       <textarea
                         value={feature.description || ''}
                         onChange={(e) => handleFeatureChange(index, 'description', e.target.value)}
-                        placeholder="Nitelik detay açıklaması"
+                        placeholder="Nitelik detay açıklaması..."
                         rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                        className="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-xs text-slate-800 transition-all bg-white leading-relaxed"
                       />
                     </div>
 
@@ -211,7 +213,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
                     <button
                       type="button"
                       onClick={() => removeFeature(index)}
-                      className="flex-shrink-0 px-3 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors text-sm font-medium"
+                      className="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
                     >
                       Sil
                     </button>
@@ -224,17 +226,17 @@ const AboutEditor = ({ onSave, onCancel }) => {
 
         {/* Özgün Vektör Simge Seçici Modal */}
         {showIconPicker && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+          <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 sm:p-7 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-slate-200">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">Özgün Mimari Vektör İkonu Seçin</h3>
-                  <p className="text-xs text-gray-500">Mühendislik ve mimari kimliğe uygun profesyonel vektör ikonlar</p>
+                  <h3 className="text-base font-bold text-slate-900">Mimari Vektör İkonu Seçin</h3>
+                  <p className="text-xs text-slate-500">Mühendislik ve mimari kimliğe uygun profesyonel semboller</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowIconPicker(false)}
-                  className="text-gray-400 hover:text-gray-600 text-xl font-bold p-1"
+                  className="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center font-bold text-lg"
                 >
                   ✕
                 </button>
@@ -248,25 +250,25 @@ const AboutEditor = ({ onSave, onCancel }) => {
                       key={item.id}
                       type="button"
                       onClick={() => selectIcon(item.id)}
-                      className="p-3 border border-gray-200 rounded-lg hover:border-amber-500 hover:bg-amber-50 flex items-center gap-3 text-left transition-all group"
+                      className="p-3 border border-slate-200 rounded-xl hover:border-amber-400 hover:bg-amber-50/50 flex items-center gap-3 text-left transition-all group"
                     >
-                      <div className="w-10 h-10 rounded-md bg-gray-900 text-amber-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                      <div className="w-10 h-10 rounded-lg bg-[#0b101b] text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                         <Icon size={18} />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold text-gray-900 truncate">{item.shortName}</div>
-                        <div className="text-[11px] text-gray-500 truncate">{item.title}</div>
+                        <div className="text-xs font-bold text-slate-900 truncate">{item.shortName}</div>
+                        <div className="text-[10px] text-slate-500 truncate">{item.title}</div>
                       </div>
                     </button>
                   );
                 })}
               </div>
 
-              <div className="mt-6 pt-3 border-t border-gray-200 text-right">
+              <div className="mt-6 pt-3 border-t border-slate-200 text-right">
                 <button
                   type="button"
                   onClick={() => setShowIconPicker(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors text-sm font-medium"
+                  className="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl transition-colors text-xs font-semibold"
                 >
                   Vazgeç
                 </button>
@@ -279,7 +281,7 @@ const AboutEditor = ({ onSave, onCancel }) => {
         <FormButtons
           onSave={handleSubmit}
           onCancel={onCancel}
-          saveText="Kaydet"
+          saveText="Hakkımızda Bilgilerini Kaydet"
           isLoading={isLoading}
         />
       </form>

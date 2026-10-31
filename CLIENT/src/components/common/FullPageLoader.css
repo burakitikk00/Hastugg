@@ -1,0 +1,436 @@
+/* ==========================================================================
+   HASTUĞ İNŞAAT - FULL PAGE BESPOKE ARCHITECTURAL LOADER
+   High-Craft Kinetic Sequence: Typography Reveal -> Implosion -> Logo Genesis
+   ========================================================================== */
+
+.fpl-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #050811;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+    cursor: wait;
+    perspective: 1200px;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Blueprint Drafting Grid & Ambient Light
+   -------------------------------------------------------------------------- */
+.fpl-grid-layer {
+    position: absolute;
+    inset: -100px;
+    background-image: 
+        linear-gradient(to right, rgba(197, 168, 128, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(197, 168, 128, 0.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 0) 80%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 0) 80%);
+    pointer-events: none;
+}
+
+.fpl-ambient-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(650px, 90vw);
+    height: min(650px, 90vw);
+    background: radial-gradient(
+        circle,
+        rgba(30, 64, 175, 0.22) 0%,
+        rgba(197, 168, 128, 0.08) 40%,
+        rgba(5, 8, 17, 0) 70%
+    );
+    filter: blur(40px);
+    pointer-events: none;
+    animation: fplPulseGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes fplPulseGlow {
+    0% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   Architectural Corner Framing & Technical HUD
+   -------------------------------------------------------------------------- */
+.fpl-hud-corner {
+    position: absolute;
+    color: rgba(197, 168, 128, 0.45);
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.fpl-hud-corner.top-left {
+    top: 28px;
+    left: 32px;
+}
+
+.fpl-hud-corner.top-right {
+    top: 28px;
+    right: 32px;
+}
+
+.fpl-hud-corner.bottom-left {
+    bottom: 28px;
+    left: 32px;
+}
+
+.fpl-hud-corner.bottom-right {
+    bottom: 28px;
+    right: 32px;
+}
+
+.fpl-crosshair {
+    width: 8px;
+    height: 8px;
+    position: relative;
+    display: inline-block;
+}
+
+.fpl-crosshair::before,
+.fpl-crosshair::after {
+    content: '';
+    position: absolute;
+    background-color: rgba(197, 168, 128, 0.6);
+}
+
+.fpl-crosshair::before {
+    top: 3.5px;
+    left: 0;
+    width: 8px;
+    height: 1px;
+}
+
+.fpl-crosshair::after {
+    left: 3.5px;
+    top: 0;
+    width: 1px;
+    height: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   Stage 1 & 2: Main Stage Focal Area
+   -------------------------------------------------------------------------- */
+.fpl-stage-container {
+    position: relative;
+    width: 100%;
+    max-width: 580px;
+    height: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 10;
+}
+
+/* Text Container */
+.fpl-text-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.fpl-brand-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 14px;
+    white-space: nowrap;
+}
+
+.fpl-brand-hastug {
+    font-size: clamp(2rem, 5.5vw, 3.25rem);
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-shadow: 0 0 35px rgba(255, 255, 255, 0.35);
+}
+
+.fpl-brand-insaat {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 500;
+    color: #c5a880;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(197, 168, 128, 0.4);
+}
+
+/* Blueprint Line under Text */
+.fpl-text-guideline {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        rgba(197, 168, 128, 0) 0%,
+        rgba(197, 168, 128, 0.8) 50%,
+        rgba(197, 168, 128, 0) 100%
+    );
+    margin-top: 14px;
+}
+
+.fpl-text-guideline::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    background-color: #c5a880;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #c5a880;
+}
+
+/* Sub-label under Text in Stage 1 */
+.fpl-sub-concept {
+    margin-top: 18px;
+    font-size: 0.72rem;
+    letter-spacing: 0.42em;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Stage 2: Converging Energy Core / Particles
+   -------------------------------------------------------------------------- */
+.fpl-singularity-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 
+        0 0 30px 10px rgba(255, 255, 255, 0.8),
+        0 0 60px 20px rgba(197, 168, 128, 0.7),
+        0 0 100px 40px rgba(37, 99, 235, 0.5);
+    z-index: 20;
+    pointer-events: none;
+}
+
+.fpl-converge-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px dashed rgba(197, 168, 128, 0.35);
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Stage 3: Logo Genesis / Formation
+   -------------------------------------------------------------------------- */
+.fpl-logo-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Outer Blueprint Radar Ring */
+.fpl-blueprint-compass {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    border: 1px dashed rgba(197, 168, 128, 0.22);
+    pointer-events: none;
+    animation: fplRotateCompass 20s linear infinite;
+}
+
+.fpl-blueprint-compass::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(59, 130, 246, 0.12);
+}
+
+@keyframes fplRotateCompass {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Logo Image Container with Shimmer Specular Beam */
+.fpl-logo-container {
+    position: relative;
+    width: 120px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    filter: drop-shadow(0 0 25px rgba(197, 168, 128, 0.45));
+}
+
+.fpl-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    image-rendering: -webkit-optimize-contrast;
+}
+
+/* Diagonal Specular Light Beam over Logo */
+.fpl-specular-shimmer {
+    position: absolute;
+    inset: -30%;
+    background: linear-gradient(
+        115deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.8) 50%,
+        transparent 70%
+    );
+    transform: translateX(-150%);
+    animation: fplSweepShimmer 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    pointer-events: none;
+}
+
+@keyframes fplSweepShimmer {
+    0% { transform: translateX(-150%) rotate(15deg); }
+    50%, 100% { transform: translateX(150%) rotate(15deg); }
+}
+
+/* Brand Title & Tagline below Logo */
+.fpl-formed-caption {
+    margin-top: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.fpl-formed-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+.fpl-formed-title span {
+    color: #c5a880;
+    font-weight: 500;
+}
+
+.fpl-formed-sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.45em;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Architectural Progress Bar & Status
+   -------------------------------------------------------------------------- */
+.fpl-progress-block {
+    margin-top: 24px;
+    width: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.fpl-progress-track {
+    width: 100%;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+    border-radius: 1px;
+}
+
+.fpl-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6 0%, #c5a880 100%);
+    box-shadow: 0 0 10px rgba(197, 168, 128, 0.8);
+    transition: width 0.35s ease-out;
+}
+
+.fpl-status-text {
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    font-weight: 500;
+    color: rgba(197, 168, 128, 0.7);
+    text-transform: uppercase;
+    font-family: monospace;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Adaptations
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .fpl-brand-row {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .fpl-brand-hastug {
+        font-size: 2rem;
+        letter-spacing: 0.2em;
+    }
+
+    .fpl-brand-insaat {
+        font-size: 1.6rem;
+        letter-spacing: 0.24em;
+    }
+
+    .fpl-hud-corner.top-left,
+    .fpl-hud-corner.bottom-left {
+        left: 18px;
+    }
+
+    .fpl-hud-corner.top-right,
+    .fpl-hud-corner.bottom-right {
+        right: 18px;
+    }
+
+    .fpl-hud-corner {
+        font-size: 0.58rem;
+    }
+
+    .fpl-logo-container {
+        width: 95px;
+        height: 126px;
+    }
+
+    .fpl-blueprint-compass {
+        width: 190px;
+        height: 190px;
+    }
+
+    .fpl-formed-title {
+        font-size: 1rem;
+        letter-spacing: 0.25em;
+    }
+}

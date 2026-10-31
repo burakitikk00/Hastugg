@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FaBars, FaTimes } from 'react-icons/fa'
@@ -9,6 +9,16 @@ const Header = ({ activeSection, onSectionChange }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const navigate = useNavigate()
     const location = useLocation()
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 1070 && isMenuOpen) {
+                setIsMenuOpen(false)
+            }
+        }
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [isMenuOpen])
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
@@ -56,6 +66,17 @@ const Header = ({ activeSection, onSectionChange }) => {
         }
     }
 
+    const handleLogoClick = () => {
+        setIsMenuOpen(false)
+        if (location.pathname !== '/') {
+            navigate('/')
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            if (onSectionChange) onSectionChange('home')
+        }
+    }
+
     const navigationItems = [
         { id: 'home', label: 'ANASAYFA' },
         { id: 'about', label: 'KURUMSAL' },
@@ -74,6 +95,16 @@ const Header = ({ activeSection, onSectionChange }) => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="logo-container"
+                        onClick={handleLogoClick}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault()
+                                handleLogoClick()
+                            }
+                        }}
+                        aria-label="Hastuğ İnşaat Ana Sayfa"
                     >
                         <img
                             src={hastugLogo}
@@ -101,7 +132,7 @@ const Header = ({ activeSection, onSectionChange }) => {
                         onClick={() => scrollToSection('contact')}
                         className="header-cta-button"
                     >
-                        PROJE BAŞLAT
+                        TEKLİF AL
                     </button>
 
                     {/* Mobile Menu Button */}
@@ -160,7 +191,7 @@ const Header = ({ activeSection, onSectionChange }) => {
                             onClick={() => scrollToSection('contact')}
                             className="mobile-cta-button"
                         >
-                            PROJE BAŞLAT
+                            TEKLİF AL
                         </button>
                     </div>
                 </motion.div>

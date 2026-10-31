@@ -6,30 +6,6 @@ import logger from '../../utils/logger';
 import { getTeamDisciplines } from '../../config/teamRoles';
 import './Team.css';
 
-// Varsayılan / Anında Yüklenen Mimari Ekip Verileri (Sıfır bekleme garantisi)
-const DEFAULT_TEAM = [
-    {
-        id: 1,
-        namesurname: 'Burak İtik',
-        position: 'İnşaat Mühendisi & Kurucu Ortak',
-        url: 'https://ancyfbusyllkwekachls.supabase.co/storage/v1/object/public/images/team/image-1768458387867-242550971.webp',
-        LinkedIn: 'https://linkedin.com'
-    },
-    {
-        id: 2,
-        namesurname: 'Selin Yılmaz',
-        position: 'Baş Mimar & Tasarım Direktörü',
-        url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80',
-        LinkedIn: 'https://linkedin.com'
-    },
-    {
-        id: 3,
-        namesurname: 'Mert Aksoy',
-        position: 'Proje & Şantiye Koordinatörü',
-        url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80',
-        LinkedIn: 'https://linkedin.com'
-    }
-];
 
 // İsimleri Türkçe kurallarına göre Baş Harfi Büyük yapma yardımcısı
 const formatName = (name) => {
@@ -117,13 +93,12 @@ const TeamTiltCard = ({ member, index }) => {
             {/* Portre Görsel Alanı */}
             <div className="team-card-visual">
                 <img
-                    src={member.url}
+                    src={member.url || undefined}
                     alt={formattedName}
                     className="team-member-img"
                     loading="lazy"
                     onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = DEFAULT_TEAM[0].url;
+                        e.target.style.display = 'none';
                     }}
                 />
                 <div className="team-visual-gradient" aria-hidden="true" />
@@ -176,7 +151,7 @@ const TeamTiltCard = ({ member, index }) => {
 };
 
 const Team = () => {
-    const [teamMembers, setTeamMembers] = useState(DEFAULT_TEAM);
+    const [teamMembers, setTeamMembers] = useState([]);
 
     useEffect(() => {
         let isMounted = true;
@@ -185,20 +160,18 @@ const Team = () => {
             try {
                 const data = await publicService.getTeam();
                 if (isMounted && Array.isArray(data) && data.length > 0) {
-                    const resolved = data.map((item, idx) => {
-                        const fallbackUrl = DEFAULT_TEAM[idx % DEFAULT_TEAM.length].url;
-                        const mainUrl = item.url ? publicService.getImageURL(item.url) : fallbackUrl;
-                        const validUrl = (mainUrl && !mainUrl.includes('placeholder')) ? mainUrl : fallbackUrl;
+                    const resolved = data.map((item) => {
+                        const mainUrl = item.url ? publicService.getImageURL(item.url) : '';
 
                         return {
                             ...item,
-                            url: validUrl
+                            url: mainUrl
                         };
                     });
                     setTeamMembers(resolved);
                 }
             } catch (err) {
-                logger.warn('Ekip bilgileri yüklenirken varsayılan içerikler devrede:', err?.message);
+                logger.warn('Ekip bilgileri yüklenirken hata:', err?.message);
             }
         };
 

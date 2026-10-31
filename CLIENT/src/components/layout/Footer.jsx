@@ -15,30 +15,20 @@ import publicService from '../../services/publicService';
 import logger from '../../utils/logger';
 import './Footer.css';
 
-// Varsayılan / Anında Yüklenen Mimari Hizmetler (Sıfır bekleme garantisi)
-const DEFAULT_FOOTER_SERVICES = [
-    { id: 1, service: 'Lüks Konut & Rezidans Projeleri' },
-    { id: 2, service: 'Kentsel Dönüşüm & Yapısal Yenileme' },
-    { id: 3, service: 'Statik Projelendirme & Deprem Güvenliği' },
-    { id: 4, service: 'Tarihi Eser Restorasyonu & Güçlendirme' }
-];
-
-const DEFAULT_FOOTER_CONTACT = {
-    address: 'İstanbul, Türkiye',
-    phone: '+90 545 555 55 55',
-    email: 'info@hastug.com',
-    instagram: 'https://instagram.com/hastug',
-    facebook: 'https://facebook.com/hastug',
-    twitter: 'https://twitter.com/hastug',
-    linkedin: 'https://linkedin.com/company/hastug'
-};
-
 const Footer = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [contact, setContact] = useState(DEFAULT_FOOTER_CONTACT);
-    const [services, setServices] = useState(DEFAULT_FOOTER_SERVICES);
+    const [contact, setContact] = useState({
+        address: '',
+        phone: '',
+        email: '',
+        instagram: '',
+        facebook: '',
+        twitter: '',
+        linkedin: ''
+    });
+    const [services, setServices] = useState([]);
 
     useEffect(() => {
         let isMounted = true;
@@ -49,16 +39,15 @@ const Footer = () => {
                 const contactData = await publicService.getContact();
                 if (isMounted && Array.isArray(contactData) && contactData.length > 0) {
                     const c = contactData[0];
-                    setContact(prev => ({
-                        ...prev,
-                        address: c.address || prev.address,
-                        phone: c.phone || prev.phone,
-                        email: c.email || prev.email,
-                        instagram: c.instagram || prev.instagram,
-                        facebook: c.facebook || prev.facebook,
-                        twitter: c.twitter || prev.twitter,
-                        linkedin: c.linkedin || prev.linkedin
-                    }));
+                    setContact({
+                        address: c.address || '',
+                        phone: c.phone || '',
+                        email: c.email || '',
+                        instagram: c.instagram || '',
+                        facebook: c.facebook || '',
+                        twitter: c.twitter || '',
+                        linkedin: c.linkedin || ''
+                    });
                 }
 
                 // Hizmetleri yükle
@@ -67,7 +56,7 @@ const Footer = () => {
                     setServices(servicesData);
                 }
             } catch (error) {
-                logger.warn('Footer verileri yüklenirken varsayılan içerikler devrede:', error?.message);
+                logger.warn('Footer verileri yüklenirken hata:', error?.message);
             }
         };
 
@@ -254,10 +243,49 @@ const Footer = () => {
 
                 {/* Alt Künye & Başa Dön Çubuğu */}
                 <div className="footer-bottom-bar">
-                    <p className="footer-copyright-text">
-                        &copy; {new Date().getFullYear()} Hastuğ İnşaat & Mimarlık. Tüm hakları saklıdır.
-                    </p>
+                    <div className="footer-copyright-group">
+                        <p className="footer-copyright-text">
+                            &copy; {new Date().getFullYear()} Hastuğ İnşaat & Mimarlık. Tüm hakları saklıdır.
+                        </p>
+                        <a
+                            href="https://burakitik.com.tr/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="footer-dev-credit group"
+                            title="Burak İtik - Dijital Çözüm Ortağı & Web Geliştirme"
+                        >
+                            <span className="footer-dev-label">Dijital Çözüm Ortağı:</span>
+                            <span className="footer-dev-sig font-signature text-xl sm:text-3xl font-semibold tracking-wide text-[#94a3b8] hover:opacity-75 transition-opacity whitespace-nowrap">
+                                burak itik
+                            </span>
+                        </a>
+                    </div>
 
+                    <div className="footer-legal-links" aria-label="Yasal Bildirimler">
+                        <button
+                            type="button"
+                            onClick={() => window.dispatchEvent(new CustomEvent('hastug_open_legal_modal', { detail: { tab: 'kvkk' } }))}
+                            className="footer-legal-link"
+                        >
+                            KVKK Aydınlatma
+                        </button>
+                        <span className="footer-legal-separator" aria-hidden="true">•</span>
+                        <button
+                            type="button"
+                            onClick={() => window.dispatchEvent(new CustomEvent('hastug_open_legal_modal', { detail: { tab: 'cerez' } }))}
+                            className="footer-legal-link"
+                        >
+                            Gizlilik & Çerez Politikası
+                        </button>
+                        <span className="footer-legal-separator" aria-hidden="true">•</span>
+                        <button
+                            type="button"
+                            onClick={() => window.dispatchEvent(new CustomEvent('hastug_open_cookie_consent'))}
+                            className="footer-legal-link"
+                        >
+                            Çerez Tercihleri
+                        </button>
+                    </div>
 
                     <button
                         type="button"

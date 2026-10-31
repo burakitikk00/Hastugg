@@ -47,7 +47,7 @@ const ProjectForm = ({ project = null, onSave, onCancel }) => {
         {/* Proje Adı */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-            Proje Adı *
+            Proje Adı <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -64,7 +64,7 @@ const ProjectForm = ({ project = null, onSave, onCancel }) => {
         {/* Açıklama */}
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-            Açıklama *
+            Açıklama <span className="text-red-500">*</span>
           </label>
           <textarea
             id="description"
@@ -81,7 +81,7 @@ const ProjectForm = ({ project = null, onSave, onCancel }) => {
         {/* Kategori */}
         <div>
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-            Kategori *
+            Kategori <span className="text-red-500">*</span>
           </label>
           <select
             id="category"

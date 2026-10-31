@@ -1,27 +1,42 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/admin/ProtectedRoute';
-import AdminLogin from './pages/admin/AdminLogin';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import DashboardPage from './pages/admin/DashboardPage';
-import ServicesPage from './pages/admin/ServicesPage';
-import TeamPage from './pages/admin/TeamPage';
-import ContactPage from './pages/admin/ContactPage';
-import ContactMessagesPage from './pages/admin/ContactMessagesPage';
-import ProjectsPage from './pages/admin/ProjectsPage';
-import EmailSettingsPage from './pages/admin/EmailSettingsPage';
-import AnalyticsPage from './pages/admin/AnalyticsPage';
-import ChangePasswordPage from './pages/admin/ChangePasswordPage';
-import ServiceDetailPage from './pages/ServiceDetailPage';
-import ProjectDetailPage from './pages/ProjectDetailPage';
 import MainApp from './MainApp';
+import CookieConsent from './components/common/CookieConsent';
+import LegalModal from './components/common/LegalModal';
 import './App.css';
+
+// Admin Sayfalarını Code-Splitting ile Tembel (Lazy) Yükleme
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
+const ServicesPage = lazy(() => import('./pages/admin/ServicesPage'));
+const TeamPage = lazy(() => import('./pages/admin/TeamPage'));
+const ContactPage = lazy(() => import('./pages/admin/ContactPage'));
+const ContactMessagesPage = lazy(() => import('./pages/admin/ContactMessagesPage'));
+const ProjectsPage = lazy(() => import('./pages/admin/ProjectsPage'));
+const EmailSettingsPage = lazy(() => import('./pages/admin/EmailSettingsPage'));
+const AnalyticsPage = lazy(() => import('./pages/admin/AnalyticsPage'));
+const ChangePasswordPage = lazy(() => import('./pages/admin/ChangePasswordPage'));
+
+// Detay Sayfalarını Lazy Yükleme
+const ServiceDetailPage = lazy(() => import('./pages/ServiceDetailPage'));
+const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
+
+// Hafif Yükleme Yer Tutucusu
+const PageFallback = () => (
+  <div className="min-h-screen bg-[#050811] flex items-center justify-center text-[#c5a880] text-xs font-mono tracking-[0.25em]">
+    YÜKLENİYOR...
+  </div>
+);
 
 function App() {
   return (
     <AuthProvider>
       <Router future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
-        <Routes>
+        <Suspense fallback={<PageFallback />}>
+          <Routes>
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route
@@ -115,6 +130,9 @@ function App() {
           {/* Main App Route */}
           <Route path="/*" element={<MainApp />} />
         </Routes>
+        </Suspense>
+        <CookieConsent />
+        <LegalModal />
       </Router>
     </AuthProvider>
   );

@@ -11,10 +11,27 @@ router.get('/hero', async (req, res) => {
             return res.status(503).json({ error: 'Veritabanı bağlantısı yok' });
         }
         const result = await pool.query('SELECT * FROM "Hero" ORDER BY id LIMIT 1');
+        
+        // HeroMetrics tablosundaki mimari metrikleri de getir
+        let metrics = [];
+        try {
+            const metricsResult = await pool.query('SELECT id, value, label, order_index FROM "HeroMetrics" ORDER BY order_index ASC, id ASC');
+            metrics = metricsResult.rows;
+        } catch (metricsErr) {
+            logger.warn('HeroMetrics getirilemedi:', metricsErr.message);
+        }
+
         if (result.rows.length > 0) {
-            res.status(200).json(result.rows[0]);
+            res.status(200).json({
+                ...result.rows[0],
+                metrics
+            });
         } else {
-            res.status(404).json({ message: 'Hero verisi bulunamadı' });
+            res.status(200).json({
+                mainTitle: '',
+                subheading: '',
+                metrics
+            });
         }
     } catch (error) {
         logger.error('Hero getirme hatası:', error);
@@ -119,7 +136,9 @@ router.get('/services', async (req, res) => {
             logger.error('Veritabanı bağlantısı yok');
             return res.status(503).json({ error: 'Veritabanı bağlantısı yok' });
         }
-        const result = await pool.query('SELECT id, service, description, url FROM "Services" ORDER BY id');
+        const result = await pool.query(
+            'SELECT * FROM "Services" WHERE is_active = TRUE ORDER BY display_order ASC, id ASC'
+        );
         res.status(200).json(result.rows);
     } catch (error) {
         logger.error('Services getirme hatası:', error);
@@ -152,7 +171,7 @@ router.get('/services/:id', async (req, res) => {
 
         const { id } = req.params;
         const result = await pool.query(
-            'SELECT id, service, description, url FROM "Services" WHERE id = $1',
+            'SELECT * FROM "Services" WHERE id = $1',
             [id]
         );
 
@@ -191,9 +210,33 @@ router.get('/projects/:id', async (req, res) => {
 
         // Proje görsellerini getir
         const imagesResult = await pool.query(
-            'SELECT "imageURL" FROM "Images" WHERE projectid = $1',
+            'SELECT "imageURL" FROM "Images" WHERE projectid = $1 ORDER BY id ASC',
             [id]
         );
+
+        // Öne Çıkan Özellikleri getir
+        let highlights = [];
+        try {
+            const highlightsResult = await pool.query(
+                'SELECT id, title, description, icon, sort_order FROM "ProjectHighlights" WHERE project_id = $1 ORDER BY sort_order ASC, id ASC',
+                [id]
+            );
+            highlights = highlightsResult.rows;
+        } catch (hErr) {
+            logger.warn('ProjectHighlights tablosu okunamadı:', hErr.message);
+        }
+
+        // Konum ve Ulaşım Noktalarını getir
+        let transportation = [];
+        try {
+            const transpResult = await pool.query(
+                'SELECT id, title, description, icon, sort_order FROM "ProjectTransportation" WHERE project_id = $1 ORDER BY sort_order ASC, id ASC',
+                [id]
+            );
+            transportation = transpResult.rows;
+        } catch (tErr) {
+            logger.warn('ProjectTransportation tablosu okunamadı:', tErr.message);
+        }
 
         // Service bilgilerini getir
         let services = [];
@@ -219,6 +262,8 @@ router.get('/projects/:id', async (req, res) => {
         res.status(200).json({
             ...project,
             images: imagesResult.rows.map(img => img.imageurl || img.imageURL),
+            highlights,
+            transportation,
             services,
             service_ids: serviceIds
         });

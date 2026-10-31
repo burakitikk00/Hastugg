@@ -9,7 +9,23 @@ const { upload, uploadMultipleImagesToSupabase, deleteImage, deleteMultipleImage
 router.post('/add-project', verifyToken, upload.array('images', 10), async (req, res) => {
     const client = await pool.connect();
     try {
-        const { title, description, status, service_ids } = req.body;
+        const { 
+            title, 
+            description, 
+            status, 
+            service_ids,
+            category,
+            total_area,
+            delivery_date,
+            location,
+            client: projectClient,
+            land_area,
+            project_year,
+            map_embed_url,
+            map_address,
+            highlights,
+            transportation
+        } = req.body;
         const files = req.files || [];
 
         if (!title || !description || !status || !service_ids) {
@@ -21,12 +37,26 @@ router.post('/add-project', verifyToken, upload.array('images', 10), async (req,
 
         let serviceIdsArray;
         try {
-            serviceIdsArray = JSON.parse(service_ids);
+            serviceIdsArray = typeof service_ids === 'string' ? JSON.parse(service_ids) : service_ids;
             if (!Array.isArray(serviceIdsArray) || serviceIdsArray.length === 0) {
                 return res.status(400).json({ message: 'En az bir geçerli service_id gerekli' });
             }
         } catch (err) {
             return res.status(400).json({ message: 'service_ids JSON formatında olmalıdır' });
+        }
+
+        let highlightsArray = [];
+        if (highlights) {
+            try {
+                highlightsArray = typeof highlights === 'string' ? JSON.parse(highlights) : highlights;
+            } catch (_) { highlightsArray = []; }
+        }
+
+        let transportationArray = [];
+        if (transportation) {
+            try {
+                transportationArray = typeof transportation === 'string' ? JSON.parse(transportation) : transportation;
+            } catch (_) { transportationArray = []; }
         }
 
         await client.query('BEGIN');
@@ -40,10 +70,53 @@ router.post('/add-project', verifyToken, upload.array('images', 10), async (req,
         }
 
         const projectResult = await client.query(
-            'INSERT INTO "Projects" (title, description, status, service_ids) VALUES ($1, $2, $3, $4) RETURNING id',
-            [title, description, status, JSON.stringify(serviceIdsArray)]
+            `INSERT INTO "Projects" 
+            (title, description, status, service_ids, category, total_area, delivery_date, location, client, land_area, project_year, map_embed_url, map_address) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
+            RETURNING id`,
+            [
+                title, 
+                description, 
+                status, 
+                JSON.stringify(serviceIdsArray),
+                category || 'Karma Proje',
+                total_area || null,
+                delivery_date || null,
+                location || null,
+                projectClient || null,
+                land_area || null,
+                project_year || null,
+                map_embed_url || null,
+                map_address || null
+            ]
         );
         const projectId = projectResult.rows[0].id;
+
+        // Öne Çıkan Özellikleri kaydet
+        if (Array.isArray(highlightsArray) && highlightsArray.length > 0) {
+            for (let i = 0; i < highlightsArray.length; i++) {
+                const h = highlightsArray[i];
+                if (h && h.title && h.description) {
+                    await client.query(
+                        'INSERT INTO "ProjectHighlights" (project_id, title, description, icon, sort_order) VALUES ($1, $2, $3, $4, $5)',
+                        [projectId, h.title.trim(), h.description.trim(), h.icon || 'sun', i]
+                    );
+                }
+            }
+        }
+
+        // Konum ve Ulaşım Noktalarını kaydet
+        if (Array.isArray(transportationArray) && transportationArray.length > 0) {
+            for (let i = 0; i < transportationArray.length; i++) {
+                const t = transportationArray[i];
+                if (t && t.title && t.description) {
+                    await client.query(
+                        'INSERT INTO "ProjectTransportation" (project_id, title, description, icon, sort_order) VALUES ($1, $2, $3, $4, $5)',
+                        [projectId, t.title.trim(), t.description.trim(), t.icon || 'subway', i]
+                    );
+                }
+            }
+        }
 
         // Görselleri Supabase Storage'a yükle (hata durumunda rollback yapılacak)
         let imageURLs = [];
@@ -66,7 +139,6 @@ router.post('/add-project', verifyToken, upload.array('images', 10), async (req,
         // Veritabanına görsel URL'lerini kaydet
         try {
             for (const imageURL of imageURLs) {
-                // URL'in tam Supabase URL'i olduğundan emin ol
                 const cleanUrl = imageURL.trim();
                 if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
                     logger.error(`❌ Geçersiz URL formatı: ${cleanUrl}`);
@@ -86,10 +158,8 @@ router.post('/add-project', verifyToken, upload.array('images', 10), async (req,
                 logger.log(`✅ Proje ana görseli güncellendi: ${cleanFirstUrl}`);
             }
         } catch (dbError) {
-            // Veritabanı hatası durumunda Supabase Storage'dan görselleri sil
             await client.query('ROLLBACK');
             logger.error('Veritabanı kayıt hatası:', dbError);
-            // Yüklenen görselleri temizle
             try {
                 const { deleteMultipleImages } = require('../../upload');
                 await deleteMultipleImages(imageURLs);
@@ -120,7 +190,23 @@ router.post('/add-project', verifyToken, upload.array('images', 10), async (req,
 // Proje bilgilerini güncelle
 router.put('/projects/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
-    const { title, description, status, service_ids } = req.body;
+    const { 
+        title, 
+        description, 
+        status, 
+        service_ids,
+        category,
+        total_area,
+        delivery_date,
+        location,
+        client: projectClient,
+        land_area,
+        project_year,
+        map_embed_url,
+        map_address,
+        highlights,
+        transportation
+    } = req.body;
 
     if (!title || !description || !status || !service_ids) {
         return res.status(400).json({ message: 'title, description, status ve service_ids zorunludur.' });
@@ -128,7 +214,7 @@ router.put('/projects/:id', verifyToken, async (req, res) => {
 
     let serviceIdsArray;
     try {
-        serviceIdsArray = JSON.parse(service_ids);
+        serviceIdsArray = typeof service_ids === 'string' ? JSON.parse(service_ids) : service_ids;
         if (!Array.isArray(serviceIdsArray) || serviceIdsArray.length === 0) {
             return res.status(400).json({ message: 'En az bir service_id gerekli' });
         }
@@ -136,15 +222,84 @@ router.put('/projects/:id', verifyToken, async (req, res) => {
         return res.status(400).json({ message: 'service_ids JSON formatında olmalıdır' });
     }
 
+    let highlightsArray = [];
+    if (highlights) {
+        try {
+            highlightsArray = typeof highlights === 'string' ? JSON.parse(highlights) : highlights;
+        } catch (_) { highlightsArray = []; }
+    }
+
+    let transportationArray = [];
+    if (transportation) {
+        try {
+            transportationArray = typeof transportation === 'string' ? JSON.parse(transportation) : transportation;
+        } catch (_) { transportationArray = []; }
+    }
+
+    const client = await pool.connect();
     try {
-        await pool.query(
-            'UPDATE "Projects" SET title = $1, description = $2, status = $3, service_ids = $4 WHERE id = $5',
-            [title, description, status, JSON.stringify(serviceIdsArray), id]
+        await client.query('BEGIN');
+
+        await client.query(
+            `UPDATE "Projects" 
+            SET title = $1, description = $2, status = $3, service_ids = $4,
+                category = $5, total_area = $6, delivery_date = $7, location = $8,
+                client = $9, land_area = $10, project_year = $11, map_embed_url = $12, map_address = $13
+            WHERE id = $14`,
+            [
+                title, 
+                description, 
+                status, 
+                JSON.stringify(serviceIdsArray),
+                category || 'Karma Proje',
+                total_area || null,
+                delivery_date || null,
+                location || null,
+                projectClient || null,
+                land_area || null,
+                project_year || null,
+                map_embed_url || null,
+                map_address || null,
+                id
+            ]
         );
+
+        // Highlights güncelle (Öncekileri sil, yenileri ekle)
+        await client.query('DELETE FROM "ProjectHighlights" WHERE project_id = $1', [id]);
+        if (Array.isArray(highlightsArray) && highlightsArray.length > 0) {
+            for (let i = 0; i < highlightsArray.length; i++) {
+                const h = highlightsArray[i];
+                if (h && h.title && h.description) {
+                    await client.query(
+                        'INSERT INTO "ProjectHighlights" (project_id, title, description, icon, sort_order) VALUES ($1, $2, $3, $4, $5)',
+                        [id, h.title.trim(), h.description.trim(), h.icon || 'sun', i]
+                    );
+                }
+            }
+        }
+
+        // Transportation güncelle (Öncekileri sil, yenileri ekle)
+        await client.query('DELETE FROM "ProjectTransportation" WHERE project_id = $1', [id]);
+        if (Array.isArray(transportationArray) && transportationArray.length > 0) {
+            for (let i = 0; i < transportationArray.length; i++) {
+                const t = transportationArray[i];
+                if (t && t.title && t.description) {
+                    await client.query(
+                        'INSERT INTO "ProjectTransportation" (project_id, title, description, icon, sort_order) VALUES ($1, $2, $3, $4, $5)',
+                        [id, t.title.trim(), t.description.trim(), t.icon || 'subway', i]
+                    );
+                }
+            }
+        }
+
+        await client.query('COMMIT');
         res.status(200).json({ message: 'Proje bilgileri güncellendi' });
     } catch (error) {
+        await client.query('ROLLBACK');
         logger.error('Proje güncelleme hatası:', error);
         res.status(500).send('Sunucu hatası');
+    } finally {
+        client.release();
     }
 });
 
@@ -152,7 +307,7 @@ router.put('/projects/:id', verifyToken, async (req, res) => {
 router.get('/projects', verifyToken, async (_req, res) => {
     try {
         const result = await pool.query(
-            "SELECT id, title, description, url, status, COALESCE(service_ids, '[]') AS service_ids FROM \"Projects\" ORDER BY id DESC"
+            "SELECT id, title, description, url, status, category, total_area, delivery_date, location, COALESCE(service_ids, '[]') AS service_ids FROM \"Projects\" ORDER BY id DESC"
         );
         res.status(200).json(result.rows);
     } catch (error) {
@@ -166,7 +321,7 @@ router.get('/projects/:id', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
         const projectResult = await pool.query(
-            "SELECT id, title, description, url, status, COALESCE(service_ids, '[]') AS service_ids FROM \"Projects\" WHERE id = $1",
+            "SELECT * FROM \"Projects\" WHERE id = $1",
             [id]
         );
         if (projectResult.rowCount === 0) {
@@ -178,8 +333,20 @@ router.get('/projects/:id', verifyToken, async (req, res) => {
             [id]
         );
 
+        const highlightsResult = await pool.query(
+            'SELECT id, title, description, icon, sort_order FROM "ProjectHighlights" WHERE project_id = $1 ORDER BY sort_order ASC, id ASC',
+            [id]
+        );
+
+        const transpResult = await pool.query(
+            'SELECT id, title, description, icon, sort_order FROM "ProjectTransportation" WHERE project_id = $1 ORDER BY sort_order ASC, id ASC',
+            [id]
+        );
+
         const project = projectResult.rows[0];
         project.images = imagesResult.rows.map(img => img.imageURL);
+        project.highlights = highlightsResult.rows;
+        project.transportation = transpResult.rows;
         res.status(200).json(project);
     } catch (error) {
         logger.error('Proje detay hatası:', error);

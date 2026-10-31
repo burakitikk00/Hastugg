@@ -20,6 +20,8 @@ import {
 import adminService from '../../services/adminService';
 import publicService from '../../services/publicService';
 import logger from '../../utils/logger';
+import AdminPageHeader from './AdminPageHeader';
+import AdminLoadingState from './AdminLoadingState';
 import {
   ROLE_CATEGORIES,
   detectRoleCategory,
@@ -263,34 +265,38 @@ const TeamEditor = () => {
   const activeCategory = ROLE_CATEGORIES.find((c) => c.id === selectedCategory) || ROLE_CATEGORIES[0];
   const activeSkills = getTeamDisciplines(formData.position);
 
+  if (loading && teamMembers.length === 0) {
+    return (
+      <div className="space-y-6">
+        <AdminPageHeader
+          title="Ekip Kadrosu & Uzmanlıklar"
+          subtitle="Mimari, mühendislik ve saha kadrosunu yönetin. Seçtiğiniz unvana göre uzmanlık becerileri otomatik eşleşir."
+          badge="Kadro Yönetimi"
+        />
+        <AdminLoadingState type="cards" message="Ekip üyeleri yükleniyor..." />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Üst Yönetim Barı */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-              Ekip Kadrosu & Uzmanlıklar
-            </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 border border-amber-500/30">
-              {teamMembers.length} Aktif Üye
-            </span>
-          </div>
-          <p className="text-sm text-slate-500 mt-1">
-            Mimari, mühendislik ve saha kadrosunu yönetin. Seçtiğiniz unvana göre uzmanlık becerileri otomatik eşleşir.
-          </p>
-        </div>
-
-        {!isAddingNew && !editingMember && (
-          <button
-            onClick={handleAddNew}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
-          >
-            <FiPlus size={16} />
-            <span>Yeni Üye Ekle</span>
-          </button>
-        )}
-      </div>
+      <AdminPageHeader
+        title="Ekip Kadrosu & Uzmanlıklar"
+        subtitle="Mimari, mühendislik ve saha kadrosunu yönetin. Seçtiğiniz unvana göre uzmanlık becerileri otomatik eşleşir."
+        badge={`${teamMembers.length} Aktif Üye`}
+        actions={
+          !isAddingNew && !editingMember && (
+            <button
+              onClick={handleAddNew}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-xs hover:shadow transition-all active:scale-[0.98]"
+            >
+              <FiPlus size={16} />
+              <span>Yeni Üye Ekle</span>
+            </button>
+          )
+        }
+      />
 
       {/* Bildirim / Hata Mesajları */}
       {error && (
@@ -348,7 +354,7 @@ const TeamEditor = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                  Ad Soyad *
+                  Ad Soyad <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -464,7 +470,7 @@ const TeamEditor = () => {
               {/* Unvan Manuel Yazma / Düzenleme Alanı */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  Pozisyon / Unvan Metni *
+                  Pozisyon / Unvan Metni <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
