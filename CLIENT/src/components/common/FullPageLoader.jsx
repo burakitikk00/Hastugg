@@ -11,10 +11,13 @@ import './FullPageLoader.css';
  * 3. Merkezden Hastuğ mimari logosu filizlenir, hatları oluşur ve ışık taramasıyla netleşir.
  * 4. Veritabanı hazır olduğunda pürüzsüzce ana sayfaya geçilir.
  */
-const FullPageLoader = ({ isDataReady = false, onComplete }) => {
+const FullPageLoader = ({ isHeroReady = false, isDataReady = false, onComplete }) => {
+    // isReady: Hero verileri ve görselleri tam olarak hazır olduğunda true olur
+    const isReady = isHeroReady || isDataReady;
+
     // Aşamalar: 'typing' | 'converging' | 'logo' | 'exiting'
     const [stage, setStage] = useState('typing');
-    const [progress, setProgress] = useState(15);
+    const [progress, setProgress] = useState(18);
     const [statusLabel, setStatusLabel] = useState('MİMARİ PROJE HAZIRLANIYOR');
 
     // Sayfa arkasında kaydırmayı kitle
@@ -26,21 +29,21 @@ const FullPageLoader = ({ isDataReady = false, onComplete }) => {
         };
     }, []);
 
-    // 1. Aşama geçiş zamanlayıcıları
+    // 1. Akıllı Aşama Geçişleri: Tipografi -> Odak -> Logo Genesis
     useEffect(() => {
-        // 1.1 sn sonra yazıyı merkeze çekme (converging) aşamasına geç
+        // Tipografiden merkeze odaklanma aşamasına geçiş
         const t1 = setTimeout(() => {
             setStage('converging');
-            setProgress(45);
+            setProgress(prev => Math.max(prev, 45));
             setStatusLabel('ODAK HİZALANIYOR');
-        }, 1100);
+        }, 1000);
 
-        // 1.9 sn sonra logo oluşma (logo) aşamasına geç
+        // Odaktan mimari logo filizlenme aşamasına geçiş
         const t2 = setTimeout(() => {
             setStage('logo');
-            setProgress(75);
+            setProgress(prev => Math.max(prev, 72));
             setStatusLabel('STATİK SİSTEMLER YÜKLENİYOR');
-        }, 1900);
+        }, 1750);
 
         return () => {
             clearTimeout(t1);
@@ -48,29 +51,64 @@ const FullPageLoader = ({ isDataReady = false, onComplete }) => {
         };
     }, []);
 
-    // 2. Veri hazır olduğunda ve logo oluştuktan sonra zarif çıkış kontrolü
+    // 2. Akıllı Mekanizma: Hero hazır olana kadar bekle, hazır olduğunda kusursuz açılış yap
     useEffect(() => {
-        if (stage === 'logo' && isDataReady) {
+        // Eğer logo aşamasına ulaşıldıysa ve Hero hazırsa -> Kapanışı başlat
+        if (stage === 'logo' && isReady) {
             setProgress(100);
-            setStatusLabel('SİSTEM HAZIR');
+            setStatusLabel('MİMARİ VİZYON AKTİF • SİSTEM HAZIR');
 
-            // Logo tam oluştuktan ve ışık vurduktan sonra çıkışı başlat
+            // Logo tam ışıltısını verdikten sonra pürüzsüz çıkış
             const exitTimer = setTimeout(() => {
                 setStage('exiting');
                 setTimeout(() => {
                     if (onComplete) onComplete();
-                }, 600);
-            }, 550);
+                }, 550);
+            }, 450);
 
             return () => clearTimeout(exitTimer);
-        } else if (stage === 'logo' && !isDataReady) {
-            // Veri beklenirken tatlı bir ilerleme hissi ver
-            const slowProgress = setInterval(() => {
-                setProgress(prev => (prev < 92 ? prev + 3 : prev));
-            }, 400);
-            return () => clearInterval(slowProgress);
         }
-    }, [stage, isDataReady, onComplete]);
+
+        // Eğer logo aşamasındayız ama Hero verileri henüz gelmediyse:
+        // Asla rastgele kapatma! Canlı mimari durum güncellemeleriyle ekranı diri tut.
+        if (stage === 'logo' && !isReady) {
+            const statusSteps = [
+                { p: 78, label: 'HERO VE METRİKLER EŞİTLENİYOR' },
+                { p: 84, label: 'GÖRSEL SİSTEMLER HAZIRLANIYOR' },
+                { p: 89, label: 'SON STATİK KONTROLLER YAPILIYOR' }
+            ];
+            let stepIdx = 0;
+
+            const interval = setInterval(() => {
+                if (stepIdx < statusSteps.length) {
+                    setProgress(statusSteps[stepIdx].p);
+                    setStatusLabel(statusSteps[stepIdx].label);
+                    stepIdx++;
+                } else {
+                    // Hafif nefes alma ilerlemesi (maksimum %92'de bekler)
+                    setProgress(prev => (prev < 92 ? prev + 1 : prev));
+                }
+            }, 600);
+
+            return () => clearInterval(interval);
+        }
+    }, [stage, isReady, onComplete]);
+
+    // 3. Failsafe (Güvenlik Koruması): Sunucu veya ağ aşırı gecikirse (8.5 sn) kullanıcıyı kilitleme
+    useEffect(() => {
+        const failsafe = setTimeout(() => {
+            if (stage !== 'exiting') {
+                setProgress(100);
+                setStatusLabel('SİSTEM HAZIR');
+                setStage('exiting');
+                setTimeout(() => {
+                    if (onComplete) onComplete();
+                }, 550);
+            }
+        }, 8500);
+
+        return () => clearTimeout(failsafe);
+    }, [stage, onComplete]);
 
     // Kelime parçaları
     const hastugLetters = 'HASTUĞ'.split('');

@@ -16,11 +16,30 @@ const Footer = lazy(() => import('./components/layout/Footer'));
 
 const SPLASH_SESSION_KEY = 'hastug_splash_shown';
 
+const HERO_BG_IMAGE = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2160&q=85';
+
+// Hero mimari arka plan görselini tarayıcı önbelleğine önceden çek
+const preloadHeroImage = (src) => {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') return resolve();
+    const img = new Image();
+    img.src = src;
+    if (img.complete) {
+      resolve();
+    } else {
+      img.onload = () => resolve();
+      img.onerror = () => resolve(); // Hata durumunda bile süreci tıkamaz
+    }
+  });
+};
+
 function MainApp() {
   const hasSeenSplash = typeof window !== 'undefined' && sessionStorage.getItem(SPLASH_SESSION_KEY) === 'true';
 
   const [activeSection, setActiveSection] = useState('home');
-  const [isDataReady, setIsDataReady] = useState(hasSeenSplash);
+  const [heroData, setHeroData] = useState(() => publicService.getCache('hero'));
+  const [contactData, setContactData] = useState(() => publicService.getCache('contact'));
+  const [isHeroReady, setIsHeroReady] = useState(false);
   const [showLoader, setShowLoader] = useState(!hasSeenSplash);
   const [loadRemainingSections, setLoadRemainingSections] = useState(hasSeenSplash);
   const { trackEvent, trackPageView, analyticsSettings, consentStatus } = useGoogleAnalytics();
@@ -33,42 +52,56 @@ function MainApp() {
       console.warn('SessionStorage yazma hatası:', e);
     }
     setShowLoader(false);
+    setLoadRemainingSections(true);
   };
 
-  // 1. Kritik Yol: Yalnızca ilk görünen Hero & Contact verisini bekle
-  // 2. Kademeli Arka Plan Yüklemesi: Sayfa açılırken diğer bölümleri sırayla çek
+  const handleHeroReady = () => {
+    setIsHeroReady(true);
+  };
+
+  // 1. Akıllı Kritik Yol: Hero verisi + İletişim HUD + Mimari Görsel birlikte hazır olmadan loader kalkmaz
+  // 2. Kademeli Arka Plan Yüklemesi: Hero hazır olduğu an diğer bölümleri sırayla çek
   useEffect(() => {
     let isMounted = true;
 
-    const loadCriticalPathAndSequence = async () => {
+    const loadCriticalViewport = async () => {
       try {
-        // İlk olarak yalnızca ilk viewport için zorunlu olan Hero ve İletişim HUD'ı çek
-        await Promise.allSettled([
+        const [heroRes, contactRes] = await Promise.allSettled([
           publicService.getHero(),
-          publicService.getContact()
+          publicService.getContact(),
+          preloadHeroImage(HERO_BG_IMAGE)
         ]);
+
+        if (isMounted) {
+          if (heroRes.status === 'fulfilled' && heroRes.value) {
+            setHeroData(heroRes.value);
+          }
+          if (contactRes.status === 'fulfilled' && contactRes.value) {
+            setContactData(contactRes.value);
+          }
+        }
       } catch (err) {
         console.warn('Hero verisi yükleme uyarısı:', err);
       } finally {
         if (isMounted) {
-          // Hero hazır olduğu an loader'ın sayfayı açmasına izin ver
-          setIsDataReady(true);
+          // Hero verileri ve görseli çözümlendi -> Loader'a hazır sinyali ver
+          setIsHeroReady(true);
         }
       }
 
-      // Hero açılmaya başladığı an alt bölümleri arka planda sırayla çekmeye başla
+      // Hero hazırlandığı an alt bölümleri arka planda sırayla çekmeye başla
       if (isMounted) {
         setLoadRemainingSections(true);
       }
 
       try {
-        // 1. Sırada: Hemen altındaki Hakkımızda
+        // 1. Sırada: Hakkımızda
         await publicService.getAbout();
 
         // 2. Sırada: Hizmetlerimiz
         await publicService.getServices();
 
-        // 3. Sırada: Projeler Portföyü (Görselleri ve detayları)
+        // 3. Sırada: Projeler Portföyü
         await publicService.getProjects();
 
         // 4. Sırada: Uzman Ekip
@@ -78,15 +111,15 @@ function MainApp() {
       }
     };
 
-    loadCriticalPathAndSequence();
+    loadCriticalViewport();
 
-    // Güvenlik zaman aşımı: Backend yavaş kalsa bile kullanıcıyı asla sonsuz bekletme (maks 4.5 sn)
+    // Güvenlik koruması: Sunucu aşırı gecikse dahi ekranın sonsuza kadar donmasını önler (7.5 sn)
     const safetyTimer = setTimeout(() => {
       if (isMounted) {
-        setIsDataReady(true);
+        setIsHeroReady(true);
         setLoadRemainingSections(true);
       }
-    }, 4500);
+    }, 7500);
 
     return () => {
       isMounted = false;
@@ -187,7 +220,7 @@ function MainApp() {
     <div className="app">
       {showLoader && (
         <FullPageLoader
-          isDataReady={isDataReady}
+          isHeroReady={isHeroReady}
           onComplete={handleLoaderComplete}
         />
       )}
@@ -195,7 +228,11 @@ function MainApp() {
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
       />
-      <Hero />
+      <Hero
+        initialHero={heroData}
+        initialContact={contactData}
+        onReady={handleHeroReady}
+      />
       {loadRemainingSections && (
         <Suspense fallback={null}>
           <About />

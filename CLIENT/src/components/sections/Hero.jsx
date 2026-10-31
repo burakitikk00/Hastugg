@@ -5,17 +5,108 @@ import publicService from '../../services/publicService';
 import logger from '../../utils/logger';
 import './Hero.css';
 
-const Hero = () => {
-    const [heroData, setHeroData] = useState({
-        mainTitle: '',
-        subheading: ''
-    });
-    const [contactData, setContactData] = useState({
-        address: '',
-        phone: '',
-        email: ''
-    });
-    const [metrics, setMetrics] = useState([]);
+const DEFAULT_HERO_DATA = {
+    mainTitle: 'Hastuğ İnşaat',
+    subheading: 'Kaliteli ve güvenilir inşaat hizmetleri ile hayallerinizdeki projeleri gerçeğe dönüştürüyoruz'
+};
+
+const DEFAULT_CONTACT_DATA = {
+    address: 'İstanbul, Türkiye',
+    phone: '+90 545 555 55 55',
+    email: 'info@hastug.com'
+};
+
+const DEFAULT_METRICS = [
+    { id: 1, value: '150+', label: 'Tamamlanan Prestij Projesi', order_index: 1 },
+    { id: 2, value: '%100', label: 'Statik & Deprem Güvencesi', order_index: 2 },
+    { id: 3, value: '15+', label: 'Yıllık Mimari Deneyim', order_index: 3 },
+    { id: 4, value: 'A+', label: 'Enerji & Malzeme Kalitesi', order_index: 4 }
+];
+
+const getInitialHeroData = (propHero) => {
+    if (propHero && (propHero.mainTitle || propHero.maintitle)) {
+        return {
+            mainTitle: propHero.mainTitle || propHero.maintitle,
+            subheading: propHero.subheading || DEFAULT_HERO_DATA.subheading
+        };
+    }
+    const cached = publicService.getCache('hero');
+    if (cached && (cached.mainTitle || cached.maintitle)) {
+        return {
+            mainTitle: cached.mainTitle || cached.maintitle,
+            subheading: cached.subheading || DEFAULT_HERO_DATA.subheading
+        };
+    }
+    return DEFAULT_HERO_DATA;
+};
+
+const getInitialMetrics = (propHero, propMetrics) => {
+    if (Array.isArray(propMetrics) && propMetrics.length > 0) return propMetrics;
+    if (propHero && Array.isArray(propHero.metrics) && propHero.metrics.length > 0) return propHero.metrics;
+    const cached = publicService.getCache('hero');
+    if (cached && Array.isArray(cached.metrics) && cached.metrics.length > 0) return cached.metrics;
+    return DEFAULT_METRICS;
+};
+
+const getInitialContactData = (propContact) => {
+    if (propContact) {
+        const c = Array.isArray(propContact) ? propContact[0] : propContact;
+        if (c && (c.address || c.phone || c.email)) {
+            return {
+                address: c.address || DEFAULT_CONTACT_DATA.address,
+                phone: c.phone || DEFAULT_CONTACT_DATA.phone,
+                email: c.email || DEFAULT_CONTACT_DATA.email
+            };
+        }
+    }
+    const cached = publicService.getCache('contact');
+    if (cached && cached.length > 0) {
+        const c = cached[0];
+        return {
+            address: c.address || DEFAULT_CONTACT_DATA.address,
+            phone: c.phone || DEFAULT_CONTACT_DATA.phone,
+            email: c.email || DEFAULT_CONTACT_DATA.email
+        };
+    }
+    return DEFAULT_CONTACT_DATA;
+};
+
+const Hero = ({ initialHero, initialContact, initialMetrics, onReady }) => {
+    const [heroData, setHeroData] = useState(() => getInitialHeroData(initialHero));
+    const [contactData, setContactData] = useState(() => getInitialContactData(initialContact));
+    const [metrics, setMetrics] = useState(() => getInitialMetrics(initialHero, initialMetrics));
+
+    // Prop'lardan gelen veriler güncellendiğinde senkronize et
+    useEffect(() => {
+        if (initialHero && (initialHero.mainTitle || initialHero.maintitle)) {
+            setHeroData({
+                mainTitle: initialHero.mainTitle || initialHero.maintitle,
+                subheading: initialHero.subheading || DEFAULT_HERO_DATA.subheading
+            });
+            if (Array.isArray(initialHero.metrics) && initialHero.metrics.length > 0) {
+                setMetrics(initialHero.metrics);
+            }
+        }
+    }, [initialHero]);
+
+    useEffect(() => {
+        if (initialContact) {
+            const c = Array.isArray(initialContact) ? initialContact[0] : initialContact;
+            if (c) {
+                setContactData({
+                    address: c.address || DEFAULT_CONTACT_DATA.address,
+                    phone: c.phone || DEFAULT_CONTACT_DATA.phone,
+                    email: c.email || DEFAULT_CONTACT_DATA.email
+                });
+            }
+        }
+    }, [initialContact]);
+
+    useEffect(() => {
+        if (Array.isArray(initialMetrics) && initialMetrics.length > 0) {
+            setMetrics(initialMetrics);
+        }
+    }, [initialMetrics]);
 
     useEffect(() => {
         let isMounted = true;
@@ -25,15 +116,15 @@ const Hero = () => {
                 // 1. Değişebilir Hero Verilerini ve Metrikleri Getir
                 const heroResponse = await publicService.getHero();
                 if (isMounted && heroResponse) {
-                    const fetchedTitle = heroResponse.mainTitle || heroResponse.maintitle || '';
-                    const fetchedSubheading = heroResponse.subheading || '';
+                    const fetchedTitle = heroResponse.mainTitle || heroResponse.maintitle || DEFAULT_HERO_DATA.mainTitle;
+                    const fetchedSubheading = heroResponse.subheading || DEFAULT_HERO_DATA.subheading;
 
                     setHeroData({
                         mainTitle: fetchedTitle,
                         subheading: fetchedSubheading
                     });
 
-                    if (Array.isArray(heroResponse.metrics)) {
+                    if (Array.isArray(heroResponse.metrics) && heroResponse.metrics.length > 0) {
                         setMetrics(heroResponse.metrics);
                     }
                 }
@@ -43,13 +134,17 @@ const Hero = () => {
                 if (isMounted && contactResponse && contactResponse.length > 0) {
                     const contact = contactResponse[0];
                     setContactData({
-                        address: contact.address || '',
-                        phone: contact.phone || '',
-                        email: contact.email || ''
+                        address: contact.address || DEFAULT_CONTACT_DATA.address,
+                        phone: contact.phone || DEFAULT_CONTACT_DATA.phone,
+                        email: contact.email || DEFAULT_CONTACT_DATA.email
                     });
                 }
             } catch (error) {
                 logger.warn('Hero verisi yüklenirken hata:', error?.message);
+            } finally {
+                if (isMounted && onReady) {
+                    onReady();
+                }
             }
         };
 
@@ -58,7 +153,7 @@ const Hero = () => {
         return () => {
             isMounted = false;
         };
-    }, []);
+    }, [onReady]);
 
     const scrollToSection = (sectionId) => {
         const element = document.getElementById(sectionId);
